@@ -36,12 +36,9 @@ int kmain()
 
     // set_log_level(LOG_LEVEL_DEBUG);
 
-    Tid tid1 = svc_create(1, &firstUserTask);
+    Tid tid1 = svc_create(4, &firstUserTask);
     TaskDescriptor *task1 = get_task(tid1);
     enter_usermode(task1->switch_frame);
-    for (;;)
-    {
-    }
 
     return 0;
 }

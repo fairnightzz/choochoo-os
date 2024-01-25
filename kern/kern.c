@@ -32,6 +32,21 @@ uint32_t svc_create(uint32_t priority, void (*entrypoint)())
   return new_tid;
 }
 
+void svc_yield(TaskDescriptor *curr_task) {
+  uint32_t next_tid = scheduler_next_task();
+
+  if (next_tid == 0)
+  {
+    LOG_ERROR("[SYSCALL - Yield]: No tasks left");
+    return;
+  }
+
+  LOG_DEBUG("[SYSCALL - Yield]: Context Switch [%d -> %d]", curr_task->tid, next_tid);
+  set_current_task(next_tid);
+
+  enter_usermode(get_task(next_tid)->switch_frame);
+}
+
 void handle_svc()
 {
   TaskDescriptor *curr_task = get_current_task();
@@ -43,7 +58,12 @@ void handle_svc()
   {
   case (CREATE):
   {
+    uint32_t new_priority = curr_task->switch_frame->x0;
     curr_task->switch_frame->x0 = svc_create(curr_task->switch_frame->x0, (void (*)())curr_task->switch_frame->x1);
+    if (new_priority < curr_task->pri) {
+      svc_yield(curr_task);
+      break;
+    }
     enter_usermode(curr_task->switch_frame);
     break;
   }
@@ -63,18 +83,7 @@ void handle_svc()
   }
   case (YIELD):
   {
-    uint32_t next_tid = scheduler_next_task();
-
-    if (next_tid == 0)
-    {
-      LOG_ERROR("[SYSCALL - Yield]: No tasks left");
-      return;
-    }
-
-    LOG_DEBUG("[SYSCALL - Yield]: Context Switch [%d -> %d]", curr_task->tid, next_tid);
-    set_current_task(next_tid);
-
-    enter_usermode(get_task(next_tid)->switch_frame);
+    svc_yield(curr_task);
     break;
   }
   case (EXIT):
