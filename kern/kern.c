@@ -60,25 +60,21 @@ void handle_svc()
   {
     uint32_t new_priority = curr_task->switch_frame->x0;
     curr_task->switch_frame->x0 = svc_create(curr_task->switch_frame->x0, (void (*)())curr_task->switch_frame->x1);
-    if (new_priority < curr_task->pri) {
-      svc_yield(curr_task);
-      break;
-    }
-    enter_usermode(curr_task->switch_frame);
+    svc_yield(curr_task);
     break;
   }
   case (MY_TID):
   {
     LOG_DEBUG("[SYSCALL - MyTid]: MyTid %d", get_current_task_id());
     curr_task->switch_frame->x0 = get_current_task_id();
-    enter_usermode(curr_task->switch_frame);
+    svc_yield(curr_task);
     break;
   }
   case (MY_PARENT_TID):
   {
     LOG_DEBUG("[SYSCALL - MyParentTid]: MyParentTid %d", curr_task->pTid);
     curr_task->switch_frame->x0 = curr_task->pTid;
-    enter_usermode(curr_task->switch_frame);
+    svc_yield(curr_task);
     break;
   }
   case (YIELD):
@@ -109,7 +105,7 @@ void handle_svc()
   default:
   {
     LOG_WARN("[SYSCALL - ERROR]: Uncaught System Call [OpCode %x]", opCode);
-    enter_usermode(curr_task->switch_frame);
+    svc_yield(curr_task);
     break;
   }
   }
