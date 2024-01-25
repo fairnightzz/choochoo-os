@@ -1,0 +1,1 @@
+bash /u/cs452/public/tools/upload.sh k1.img D8:3A:DD:1B:36:7D

@@ -2,6 +2,7 @@
 #define __KERN_H__ 1
 
 #include <stdint.h>
+#include "task_descriptor.h"
 
 typedef enum
 {
@@ -12,7 +13,7 @@ typedef enum
     EXIT = 4
 } opcode;
 
-void init_kernel();
+void kernel_init();
 
 uint32_t svc_create(uint32_t priority, void (*entrypoint)());
 void handle_svc();

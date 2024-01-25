@@ -3,5 +3,6 @@
 
 #include "byte_queue.h"
 #include "logger.h"
+#include "syscall.h"
 
 #endif // __STDLIB_H__
