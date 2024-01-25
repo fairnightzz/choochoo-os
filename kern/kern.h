@@ -14,8 +14,8 @@ typedef enum
 
 void init_kernel();
 
-void handle_svc();
 uint32_t svc_create(uint32_t priority, void (*entrypoint)());
+void handle_svc();
 
 extern void vector_table_initialize();
 

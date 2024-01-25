@@ -54,7 +54,7 @@ curr_el_spx_serror:      // The exception handler for a System Error
 lower_el_aarch64_sync:   // The exception handler for a synchronous 
                          // exception from a lower EL (AArch64).
                          // Enter kernel mode here
-  b asm_enter_kernelmode
+  b enter_kernelmode
 
 .balign 0x80
 lower_el_aarch64_irq:    // The exception handler for an IRQ from a lower EL

@@ -1,8 +1,8 @@
 .text
 .align 2
-.global	asm_enter_kernelmode
-.type asm_enter_kernelmode, %function
-asm_enter_kernelmode:
+.global	enter_kernelmode
+.type enter_kernelmode, %function
+enter_kernelmode:
 
 # ESR_EL1 holds exception code and N
 # ELR_EL1 holds return address (next PC after svc)
@@ -66,9 +66,9 @@ str x1, [x0, #264]
 
 b handle_svc
 
-.global	asm_enter_usermode
-.type asm_enter_usermode, %function
-asm_enter_usermode:
+.global	enter_usermode
+.type enter_usermode, %function
+enter_usermode:
 
     # load return address
     ldr x1, [x0, #248]
