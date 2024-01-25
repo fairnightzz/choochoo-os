@@ -3,7 +3,8 @@
 
 #include "addrspace.h"
 
-typedef struct {
+typedef struct
+{
     uint64_t x0;
     uint64_t x1;
     uint64_t x2;
@@ -35,13 +36,13 @@ typedef struct {
     uint64_t x28;
     uint64_t x30;
 
-    uint64_t sp_el0;
     uint64_t elr_el1;
     uint64_t spsr_el1;
+    uint64_t sp_el0;
 } SwitchFrame;
 
-void switchframe_init(void);
+void switchframe_init();
 SwitchFrame switchframe_new(address sp, void (*entrypoint)());
-extern void enter_usermode(SwitchFrame* sf);
+extern void enter_usermode(SwitchFrame *sf);
 
 #endif // __SWITCHFRAME_H__

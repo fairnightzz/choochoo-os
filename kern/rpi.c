@@ -266,9 +266,10 @@ void uart_blocking_puts(size_t line, const char *buf)
 }
 
 // printf-style printing, with limited format support
-void uart_format_print (size_t line, char *fmt, va_list va ) {
-	char bf[12];
-	char ch;
+void uart_format_print(size_t line, char *fmt, va_list va)
+{
+  char bf[12];
+  char ch;
 
   while ((ch = *(fmt++)))
   {

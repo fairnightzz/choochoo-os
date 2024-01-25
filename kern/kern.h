@@ -3,7 +3,8 @@
 
 #include <stdint.h>
 
-typedef enum {
+typedef enum
+{
     CREATE = 0,
     MY_TID = 1,
     MY_PARENT_TID = 2,
@@ -11,12 +12,11 @@ typedef enum {
     EXIT = 4
 } opcode;
 
-void init_kernel(void);
+void init_kernel();
 
-void handle_svc(void);
+void handle_svc();
 uint32_t svc_create(uint32_t priority, void (*entrypoint)());
 
-extern void vector_table_initialize(void);
-
+extern void vector_table_initialize();
 
 #endif // __KERN_H__

@@ -21,7 +21,7 @@ void uart_putl(size_t line, const char *buf, size_t blen);
 void uart_puts(size_t line, const char *buf);
 void uart_printf(size_t line, char *fmt, ...);
 void uart_blocking_printf(size_t line, char *fmt, ...);
-void uart_format_print (size_t line, char *fmt, va_list va );
+void uart_format_print(size_t line, char *fmt, va_list va);
 uint64_t get_systime();
 
 #endif /* rpi.h */

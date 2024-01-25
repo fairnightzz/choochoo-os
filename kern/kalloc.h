@@ -3,17 +3,17 @@
 
 #include <stddef.h>
 
-typedef enum {
+typedef enum
+{
   TASK = 0,
   SWITCH_FRAME = 1,
   SCHEDULER_NODE = 2,
   COUNT = 3,
 } AllocationType;
 
-
-void slab_init(void);
-void* slab_alloc(AllocationType at);
-void slab_free(void* ptr, AllocationType at);
+void slab_init();
+void *slab_alloc(AllocationType at);
+void slab_free(void *ptr, AllocationType at);
 void slab_set_block_size(AllocationType at, size_t block_size);
 
 #endif // __KALLOC_H__
