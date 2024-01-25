@@ -1,11 +1,8 @@
-#include "rpi.h"
-
-extern void vector_table_initialize();
+#include "kern.h"
 
 int kmain()
 {
-    gpio_init();
-    vector_table_initialize();
+    init_kernel();
 
     return 0;
 }
