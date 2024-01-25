@@ -12,7 +12,6 @@ void firstUserTask()
     PRINT("Created: %d", t1);
     Tid t2 = Create(5, &secondUserTask);
     PRINT("Created: %d", t2);
-
     Tid t3 = Create(3, &secondUserTask);
     PRINT("Created: %d", t3);
     Tid t4 = Create(3, &secondUserTask);
@@ -35,11 +34,14 @@ int kmain()
 
     kernel_init();
 
-    set_log_level(LOG_LEVEL_DEBUG);
+    // set_log_level(LOG_LEVEL_DEBUG);
 
-    Tid tid1 = svc_create(4, &firstUserTask);
+    Tid tid1 = svc_create(1, &firstUserTask);
     TaskDescriptor *task1 = get_task(tid1);
     enter_usermode(task1->switch_frame);
+    for (;;)
+    {
+    }
 
     return 0;
 }

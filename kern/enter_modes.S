@@ -15,9 +15,12 @@ enter_kernelmode:
 # call handle svc
 
 # save registers
-sub sp, sp, #8
+sub sp, sp, #32
 str x0, [sp, #0]
-str x30, [sp, #8]
+str x1, [sp, #8]
+str x2, [sp, #16]
+str x3, [sp, #24]
+str x30, [sp, #32]
 
 # returns Task struct
 bl get_current_task
@@ -31,8 +34,11 @@ ldr x1, [sp, #0]
 str x1, [x0, #0]
 
 # load the other register in
-ldr x30, [sp, #8]
-add sp, sp, #8
+ldr x1, [sp, #8]
+ldr x2, [sp, #16]
+ldr x3, [sp, #24]
+ldr x30, [sp, #32]
+add sp, sp, #32
 
 # add general purpose registers into switch frame
 str x1, [x0, #8]
@@ -83,7 +89,6 @@ enter_usermode:
     msr SPSR_EL1, x1
 
     # load registers back from switch frame
-    ldr x1, [x0, #8]
     ldp x2, x3, [x0, #16]
     ldp x4, x5, [x0, #32]
     ldp x6, x7, [x0, #48]
@@ -101,6 +106,6 @@ enter_usermode:
     ldr x30, [x0, #240]
 
     # load 0 back in
-    ldr x0, [x0, #0]
+    ldp x0, x1, [x0, #0]
 
     eret

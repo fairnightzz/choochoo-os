@@ -34,6 +34,7 @@ typedef struct
     uint64_t x26;
     uint64_t x27;
     uint64_t x28;
+    uint64_t x29;
     uint64_t x30;
 
     uint64_t elr_el1;
@@ -44,5 +45,6 @@ typedef struct
 void switchframe_init();
 SwitchFrame switchframe_new(address sp, void (*entrypoint)());
 extern void enter_usermode(SwitchFrame *sf);
+void switchframe_debug(SwitchFrame *sf);
 
 #endif // __SWITCHFRAME_H__

@@ -12,7 +12,10 @@ void kernel_init()
   gpio_init();
   uart_config_and_enable(CONSOLE);
   slab_init();
+  switchframe_init();
   pagetable_init();
+  task_init();
+  scheduler_init();
 }
 
 uint32_t svc_create(uint32_t priority, void (*entrypoint)())
@@ -90,6 +93,7 @@ void handle_svc()
     LOG_DEBUG("[SYSCALL - Exit]: Context Switch [%d -> %d]", curr_task->tid, next_tid);
 
     set_current_task(next_tid);
+    LOG_DEBUG("Done setting current task");
     enter_usermode(get_task(next_tid)->switch_frame);
     break;
   }

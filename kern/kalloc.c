@@ -3,7 +3,7 @@
 #include "kalloc.h"
 #include "stdlib.h"
 
-#define SLAB_ALLOCATOR_SIZE 1024
+#define SLAB_ALLOCATOR_SIZE 2048
 
 typedef struct SlabPartition SlabPartition;
 typedef struct SlabAllocator SlabAllocator;
@@ -49,14 +49,14 @@ void *slab_alloc(AllocationType at)
     return 0;
   }
 
-  SlabPartition sb = salloc.slabs[at];
+  SlabPartition *sb = &salloc.slabs[at];
 
-  for (int i = 0; i < SLAB_ALLOCATOR_SIZE; i += sb.block_size)
+  for (int i = 0; i < SLAB_ALLOCATOR_SIZE; i += sb->block_size)
   {
-    if (sb.in_use[i] == 0)
+    if (sb->in_use[i] == 0 && i + sb->block_size < SLAB_ALLOCATOR_SIZE)
     {
-      sb.in_use[i] = 1;
-      void *ptr = sb.buf + i;
+      sb->in_use[i] = 1;
+      void *ptr = sb->buf + i;
       return ptr;
     }
   }
@@ -69,9 +69,10 @@ void slab_free(void *ptr, AllocationType at)
 {
   unsigned char *p = (unsigned char *)ptr; // Cast to (unsigned char*) for pointer arithmetic.
   size_t offset = p - salloc.slabs[at].buf;
-  if (offset < SLAB_ALLOCATOR_SIZE && salloc.slabs[at].in_use[offset])
+  if (offset < SLAB_ALLOCATOR_SIZE && salloc.slabs[at].in_use[offset] == 1)
   {
     salloc.slabs[at].in_use[offset] = 0;
+    return;
   }
   LOG_WARN("Attempt to free an unallocated or out-of-bounds slot");
 }

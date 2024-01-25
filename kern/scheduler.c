@@ -15,7 +15,7 @@ void scheduler_init()
 
 int scheduler_add_task(uint32_t tid, uint8_t priority)
 {
-  LOG_WARN("inserting task id %d, with priority %d", tid, priority);
+  LOG_DEBUG("inserting task id %d, with priority %d", tid, priority);
 
   if (priority >= NUM_PRIORITY_LEVELS)
   {
@@ -47,25 +47,40 @@ int scheduler_add_task(uint32_t tid, uint8_t priority)
   return 0;
 }
 
+void
+do_scheduler_insert(uint32_t tid, uint8_t priority)
+{
+    SchedulerNode* node = slab_alloc(SCHEDULER_NODE);
+    node->tid = tid;
+    node-> priority = priority;
+    node->next = 0;
+
+    // Reach the end of the linked list and insert the task there
+    if (mlfq[priority] == 0) {
+        mlfq[priority] = node;
+    }
+    else {
+        SchedulerNode* current = mlfq[priority];
+        for (;;) {
+            if (current->next == 0) {
+                current->next = node;
+                break;
+            }
+            current = current->next;
+        }
+    }
+}
+
 uint32_t scheduler_next_task(void)
 {
   for (uint8_t i = 0; i < NUM_PRIORITY_LEVELS; i++)
   {
     if (mlfq[i] != 0)
     {
-      SchedulerNode *next_task = mlfq[i];
-      mlfq[i] = mlfq[i]->next;
-      // Add task to the end
-
-      // Add task to end of priority queue
-      SchedulerNode *current = mlfq[i];
-      while (current->next != 0)
-      {
-        current = current->next;
-      }
-      current->next = next_task;
-
-      return next_task->tid;
+        SchedulerNode* queue_top = mlfq[i];
+        mlfq[i] = mlfq[i]->next;
+        do_scheduler_insert(queue_top->tid, queue_top->priority);
+        return queue_top->tid;
     }
   }
   LOG_WARN("no next task because scheduler is empty");

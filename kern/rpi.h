@@ -3,25 +3,26 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <stdbool.h>
 #include <stdarg.h>
 
 // Serial line 1 on the RPi hat is used for the console; 2 for Marklin
 #define CONSOLE 1
 #define MARKLIN 2
 
+// Timer
+uint64_t timer_get();
+
 void gpio_init();
 void uart_config_and_enable(size_t line);
 unsigned char uart_getc(size_t line);
-bool uart_non_blocking_getc(size_t line, unsigned char *ch);
-void uart_gets(size_t line, char *bf);
+// Non blocking get c
+int uart_getcnow(size_t line, unsigned char *data);
 void uart_putc(size_t line, unsigned char c);
-bool uart_non_blocking_putc(size_t line, unsigned char c);
+// None blocking putc
+int uart_try_putc(size_t line, unsigned char c);
 void uart_putl(size_t line, const char *buf, size_t blen);
 void uart_puts(size_t line, const char *buf);
 void uart_printf(size_t line, char *fmt, ...);
-void uart_blocking_printf(size_t line, char *fmt, ...);
 void uart_format_print(size_t line, char *fmt, va_list va);
-uint64_t get_systime();
 
 #endif /* rpi.h */

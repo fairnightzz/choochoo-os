@@ -20,21 +20,19 @@ void task_init()
 uint32_t create_task(uint32_t priority, void (*entrypoint)())
 {
     addrspace addrspace = pagetable_createpage();
+    SwitchFrame *sf = slab_alloc(SWITCH_FRAME);
+    TaskDescriptor *new_task = slab_alloc(TASK);
 
     uint32_t new_task_id = (task_list.next_tid)++;
 
-    TaskDescriptor *new_task = slab_alloc(TASK);
-    SwitchFrame *sf = slab_alloc(SWITCH_FRAME);
     *sf = switchframe_new(addrspace.stackbase, entrypoint);
-
     *new_task = (TaskDescriptor){
         .tid = new_task_id,
-        .pTid = 0,
+        .pTid = current_task,
         .status = READY,
         .pri = priority,
         .addrspace = addrspace,
         .switch_frame = sf};
-
     task_list.tasks[new_task_id] = new_task;
 
     return new_task_id;
@@ -49,7 +47,9 @@ TaskDescriptor *get_task(uint32_t tid)
 
 void set_current_task(uint32_t tid)
 {
-    get_task(current_task)->status = READY;
+    if (task_list.tasks[current_task] != 0) {
+        get_task(current_task)->status = READY;
+    }
 
     get_task(tid)->status = RUNNING;
     current_task = tid;

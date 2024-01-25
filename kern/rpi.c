@@ -1,18 +1,33 @@
 #include "rpi.h"
 #include "util.h"
 #include <stdarg.h>
-#include <stdbool.h>
-#include "stdlib.h"
 
 static char *const MMIO_BASE = (char *)0xFE000000;
+
+// Timer
+
+static const char *TIMER_BASE = (char *)(MMIO_BASE + 0x00003000);
+
+// Timer offsets
+static const uint32_t TIMER_CS = 0x00;  // status
+static const uint32_t TIMER_CLO = 0x04; // counter low
+static const uint32_t TIMER_CHI = 0x08; // counter high
+
+#define TIMER_REG(type) (*(volatile uint32_t *)(TIMER_BASE + type))
+
+uint64_t timer_get()
+{
+  uint64_t time;
+  time = TIMER_REG(TIMER_CLO);
+  time |= (uint64_t)TIMER_REG(TIMER_CHI) << 32;
+  return time;
+}
 
 /*********** GPIO CONFIGURATION ********************************/
 
 static char *const GPIO_BASE = (char *)(MMIO_BASE + 0x200000);
 static const uint32_t GPFSEL_OFFSETS[6] = {0x00, 0x04, 0x08, 0x0c, 0x10, 0x14};
 static const uint32_t GPIO_PUP_PDN_CNTRL_OFFSETS[4] = {0xe4, 0xe8, 0xec, 0xf0};
-static BQueue CHAR_OUT_Q_MARKLIN;
-static BQueue CHAR_OUT_Q_CONSOLE;
 
 #define GPFSEL_REG(reg) (*(uint32_t *)(GPIO_BASE + GPFSEL_OFFSETS[reg]))
 #define GPIO_PUP_PDN_CNTRL_REG(reg) (*(uint32_t *)(GPIO_BASE + GPIO_PUP_PDN_CNTRL_OFFSETS[reg]))
@@ -91,7 +106,6 @@ static const uint32_t UART_LCRH_STP2 = 0x8;
 static const uint32_t UART_LCRH_FEN = 0x10;
 static const uint32_t UART_LCRH_WLEN_LOW = 0x20;
 static const uint32_t UART_LCRH_WLEN_HIGH = 0x40;
-static const unsigned char UART_BLOCKING = 0xF0;
 
 // GPIO initialization, to be called before UART functions.
 // GPIO pins 14 & 15 already configured by boot loader, but redo for clarity.
@@ -112,8 +126,7 @@ void uart_config_and_enable(size_t line)
 {
 
   uint32_t baud_ival, baud_fval;
-  CHAR_OUT_Q_CONSOLE = new_byte_queue();
-  CHAR_OUT_Q_MARKLIN = new_byte_queue();
+
   switch (line)
   {
   // setting baudrate to approx. 115246.09844 (best we can do)
@@ -137,6 +150,7 @@ void uart_config_and_enable(size_t line)
   // set the baud rate
   UART_REG(line, UART_IBRD) = baud_ival;
   UART_REG(line, UART_FBRD) = baud_fval;
+  // set the line control registers: 8 bit, no parity, 1 stop bit, FIFOs enabled
   switch (line)
   {
   case CONSOLE:
@@ -147,7 +161,19 @@ void uart_config_and_enable(size_t line)
     break;
   }
 
+  // re-enable the UART; enable both transmit and receive regardless of previous state
   UART_REG(line, UART_CR) = cr_state | UART_CR_UARTEN | UART_CR_TXE | UART_CR_RXE;
+}
+
+int uart_getcnow(size_t line, unsigned char *data)
+{
+
+  // return immediately if no data
+  if (UART_REG(line, UART_FR) & UART_FR_RXFE)
+    return (0);
+
+  *data = UART_REG(line, UART_DR);
+  return (1);
 }
 
 unsigned char uart_getc(size_t line)
@@ -160,69 +186,7 @@ unsigned char uart_getc(size_t line)
   return (ch);
 }
 
-bool uart_non_blocking_getc(size_t line, unsigned char *ch)
-{
-  if (UART_REG(line, UART_FR) & UART_FR_RXFE)
-  {
-    return false;
-  }
-  *ch = UART_REG(line, UART_DR);
-  return true;
-}
-
-unsigned char uart_nb_getc(size_t line)
-{
-  unsigned char ch;
-  if (UART_REG(line, UART_FR) & UART_FR_RXFE)
-  {
-    return UART_BLOCKING;
-  }
-  ch = UART_REG(line, UART_DR);
-  return (ch);
-}
-
-void try_uart_out(void)
-{
-  while (length(&CHAR_OUT_Q_CONSOLE) > 0)
-  {
-    if (UART_REG(CONSOLE, UART_FR) & UART_FR_TXFF)
-    {
-      break;
-    }
-    else
-    {
-      UART_REG(CONSOLE, UART_DR) = pop(&CHAR_OUT_Q_CONSOLE);
-    }
-  }
-
-  while (length(&CHAR_OUT_Q_MARKLIN) > 0)
-  {
-    if (UART_REG(MARKLIN, UART_FR) & UART_FR_TXFF)
-    {
-      break;
-    }
-    else
-    {
-      UART_REG(MARKLIN, UART_DR) = pop(&CHAR_OUT_Q_MARKLIN);
-    }
-  }
-}
-
 void uart_putc(size_t line, unsigned char c)
-{
-  switch (line)
-  {
-  case CONSOLE:
-    push(&CHAR_OUT_Q_CONSOLE, c);
-    break;
-  case MARKLIN:
-    push(&CHAR_OUT_Q_MARKLIN, c);
-    break;
-  };
-  try_uart_out();
-}
-
-void uart_blocking_putc(size_t line, unsigned char c)
 {
   // make sure there is room to write more data
   while (UART_REG(line, UART_FR) & UART_FR_TXFF)
@@ -230,12 +194,12 @@ void uart_blocking_putc(size_t line, unsigned char c)
   UART_REG(line, UART_DR) = c;
 }
 
-bool uart_non_blocking_putc(size_t line, unsigned char c)
+int uart_try_putc(size_t line, unsigned char c)
 {
   if (UART_REG(line, UART_FR) & UART_FR_TXFF)
-    return false;
+    return (0);
   UART_REG(line, UART_DR) = c;
-  return true;
+  return (1);
 }
 
 void uart_putl(size_t line, const char *buf, size_t blen)
@@ -252,15 +216,6 @@ void uart_puts(size_t line, const char *buf)
   while (*buf)
   {
     uart_putc(line, *buf);
-    buf++;
-  }
-}
-
-void uart_blocking_puts(size_t line, const char *buf)
-{
-  while (*buf)
-  {
-    uart_blocking_putc(line, *buf);
     buf++;
   }
 }
@@ -305,79 +260,10 @@ void uart_format_print(size_t line, char *fmt, va_list va)
   }
 }
 
-static void uart_format_blocking_print(size_t line, char *fmt, va_list va)
-{
-  char bf[12];
-  char ch;
-
-  while ((ch = *(fmt++)))
-  {
-    if (ch != '%')
-      uart_blocking_putc(line, ch);
-    else
-    {
-      ch = *(fmt++);
-      switch (ch)
-      {
-      case 'u':
-        ui2a(va_arg(va, unsigned int), 10, bf);
-        uart_blocking_puts(line, bf);
-        break;
-      case 'd':
-        i2a(va_arg(va, int), bf);
-        uart_blocking_puts(line, bf);
-        break;
-      case 'x':
-        ui2a(va_arg(va, unsigned int), 16, bf);
-        uart_blocking_puts(line, bf);
-        break;
-      case 's':
-        uart_blocking_puts(line, va_arg(va, char *));
-        break;
-      case '%':
-        uart_blocking_putc(line, ch);
-        break;
-      case '\0':
-        return;
-      }
-    }
-  }
-}
-
 void uart_printf(size_t line, char *fmt, ...)
 {
   va_list va;
   va_start(va, fmt);
   uart_format_print(line, fmt, va);
   va_end(va);
-}
-
-void uart_blocking_printf(size_t line, char *fmt, ...)
-{
-  va_list va;
-  va_start(va, fmt);
-  uart_format_blocking_print(line, fmt, va);
-  va_end(va);
-}
-
-/*********** SYSTEM TIMER CONFIGURATION ********************************/
-
-static char *const SYS_TIME_BASE = (char *)(MMIO_BASE + 0x00003000);
-// UART register offsets
-static const uint32_t SYS_TIME_CS = 0x00;
-static const uint32_t SYS_TIME_CLO = 0x04;
-static const uint32_t SYS_TIME_CHI = 0x08;
-static const uint32_t SYS_TIME_C0 = 0x0c;
-static const uint32_t SYS_TIME_C1 = 0x10;
-static const uint32_t SYS_TIME_C2 = 0x14;
-static const uint32_t SYS_TIME_C3 = 0x18;
-
-#define SYS_TIME_REG(offset) (*(volatile uint32_t *)(SYS_TIME_BASE + offset))
-
-uint64_t get_systime()
-{
-  uint64_t time;
-  time = SYS_TIME_REG(SYS_TIME_CLO);
-  time |= (uint64_t)SYS_TIME_REG(SYS_TIME_CHI) << 32;
-  return time;
 }
