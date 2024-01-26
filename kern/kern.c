@@ -58,7 +58,6 @@ void handle_svc()
   {
   case (CREATE):
   {
-    uint32_t new_priority = curr_task->switch_frame->x0;
     curr_task->switch_frame->x0 = svc_create(curr_task->switch_frame->x0, (void (*)())curr_task->switch_frame->x1);
     svc_yield(curr_task);
     break;
