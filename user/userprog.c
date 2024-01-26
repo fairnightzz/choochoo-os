@@ -3,6 +3,8 @@
 
 typedef uint32_t Tid;
 
+void secondUserTask();
+
 void firstUserTask()
 {
     Tid t1 = Create(5, &secondUserTask);
