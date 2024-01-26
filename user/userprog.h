@@ -1,7 +1,7 @@
 #ifndef __USERPROG_H__
-#define __USERPROGL_H__
+#define __USERPROG_H__
 
-void firstUserTask();
-void secondUserTask();
+void OtherTask();
+void FirstUserTask();
 
 #endif // __USERPROG_H__

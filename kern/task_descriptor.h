@@ -16,8 +16,8 @@ typedef enum
 typedef struct
 {
   SwitchFrame *switch_frame;
-  uint32_t tid;
-  uint32_t pTid;
+  int tid;
+  int pTid;
   TaskStatus status;
   uint32_t pri;
   addrspace addrspace;
@@ -27,17 +27,17 @@ typedef struct
 
 struct TaskList
 {
-  uint32_t next_tid;
+  int next_tid;
   TaskDescriptor *tasks[128]; // Max Task Count
 };
 
 void task_init();
-uint32_t create_task(uint32_t pri, void (*entrypoint)());
-TaskDescriptor *get_task(uint32_t tid);
+int create_task(uint32_t pri, void (*entrypoint)());
+TaskDescriptor *get_task(int tid);
 
-void set_current_task(uint32_t tid);
-uint32_t get_current_task_id();
+void set_current_task(int tid);
+int get_current_task_id();
 TaskDescriptor *get_current_task();
-void delete_task(uint32_t tid);
+void delete_task(int tid);
 
 #endif

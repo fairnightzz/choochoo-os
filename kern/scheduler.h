@@ -9,15 +9,14 @@ typedef struct SchedulerNode SchedulerNode;
 
 struct SchedulerNode
 {
-  uint32_t tid;
+  int tid;
   uint8_t priority;
   SchedulerNode *next;
 };
 
 void scheduler_init();
-uint32_t scheduler_count();
-int scheduler_add_task(uint32_t tid, uint8_t priority); // Returns -1 if the priority is invalid
-uint32_t scheduler_next_task();
-void scheduler_delete_task(uint32_t tid);
+int scheduler_add_task(int tid, uint8_t priority); // Returns -1 if the priority is invalid
+int scheduler_next_task();
+void scheduler_delete_task(int tid);
 
 #endif // __SCHEDULER_H__

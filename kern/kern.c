@@ -18,22 +18,24 @@ void kernel_init()
   scheduler_init();
 }
 
-uint32_t svc_create(uint32_t priority, void (*entrypoint)())
+int svc_create(uint32_t priority, void (*entrypoint)())
 {
-  uint32_t new_tid = create_task(priority, entrypoint);
-
-  TaskDescriptor *td = get_current_task();
-  td->pTid = (new_tid == 1) ? 0 : td->tid;
+  int new_tid = (priority < NUM_PRIORITY_LEVELS) ? create_task(priority, entrypoint) : -1;
 
   LOG_DEBUG("[SYSCALL - Create]: Task #%d", new_tid);
 
-  scheduler_add_task(new_tid, priority);
+  // Only add if tid is valid
+  if (new_tid > 0)
+  {
+    scheduler_add_task(new_tid, priority);
+  }
 
   return new_tid;
 }
 
-void svc_yield(TaskDescriptor *curr_task) {
-  uint32_t next_tid = scheduler_next_task();
+void svc_yield(TaskDescriptor *curr_task)
+{
+  int next_tid = scheduler_next_task();
 
   if (next_tid == 0)
   {
@@ -86,7 +88,7 @@ void handle_svc()
     scheduler_delete_task(curr_task->tid);
     delete_task(curr_task->tid);
 
-    uint32_t next_tid = scheduler_next_task();
+    int next_tid = scheduler_next_task();
     if (next_tid == 0)
     {
       LOG_DEBUG("[SYSCALL - Exit]: no more tasks");

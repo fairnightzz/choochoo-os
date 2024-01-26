@@ -30,7 +30,6 @@ SwitchFrame switchframe_new(address sp, void (*entrypoint)())
       .x16 = 0,
       .x17 = 0,
       .x18 = 0,
-
       .x19 = 0,
       .x20 = 0,
       .x21 = 0,
