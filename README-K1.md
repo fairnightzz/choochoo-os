@@ -78,6 +78,7 @@ At max memory usage of our address space we use 1.2 MB for user address spaces o
 One last thing is based on our task descriptor we can only do tasks up to 128. Meaning if there have already been 128 created tasks up to this point, creating a new task will result in -2. 
 
 ### 3.22 Task Descriptor & Storage (`kern/task_descriptor.h`)
+
 The task descriptor used to define each task contains the following fields:
 
 - `tid`: uniquely indentify tasks
@@ -90,14 +91,27 @@ See: `kern/task_descriptor.h` for details.
 
 Task Descriptor metadata is stored in a hash table, which is implemented as an array of 128 task descriptor pointers. Note this is a caveat that does not allow us to make more than 128 tasks over the lifetime of this kernel. To fix this we can implement a hashmap like approach. To do in future assignments.
 
+
 ### 3.23 Task Scheduler (`kern/scheduler.h`)
 
+The task scheduler is implemented using 32 priority levels, where 0 is the highest priority level and 31 is the lowest priority level. As per the kernel specification, since we can have more than one task at any priority, the scheduler is implemented as an array that is 32 long, and each value in the array has a linked list. Hence, it is a list of linked list nodes. It is implemented with round robin scheduling so the task at the head of the list will run first, and the 
+task at the tail of the list will run last. When there are no tasks running, 0 as tid gets returned and the kernel stalls.
+
 ### 3.24 Heap Memory & Allocation (`kern/kalloc.h`)
+
 Created an allocator using direct addressing and pointer arithmetic to assign blocks of data for switch_frames, task descriptors, and scheduling nodes. This uses the slab allocation algorithm to assign one block of memory for each type of struct of memory we are allocating. It is worth noting that currently we are using equal blocks of memory for each partition of structs with each block being 10 KB.
 
 In future assignments, we might want to change this allocator to have more memory and to have different block sizes per struct allocated.
 
-### 3.25 Context Switch (`kern/switchframe.h` / `kern/enter_modes.S`)
+### 3.25 Context Switch (`kern/switchframe.h` / `kern/enter_modes.S` / `exception_table.S`)
+
+Initialized vector exception table in the start.
+When a syscall gets called, we call the function `enter_kernelmode` which first get the switchframe struct in the task descriptor and we save all the registers onto the switchframe.
+We call `handle_svc()` to handle the syscall.
+
+Once the svc has been handled, we call `enter_usermode`. This restores the registers back to what they were before and we return from the exception.
+
+todo: figure out how to optimize more (save less registers)
 
 # 4 Program Output
 

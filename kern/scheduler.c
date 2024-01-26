@@ -15,11 +15,11 @@ void scheduler_init()
 
 int scheduler_add_task(int tid, uint8_t priority)
 {
-  LOG_DEBUG("inserting task id %d, with priority %d", tid, priority);
+  LOG_DEBUG("Add Task: %d, with priority %d", tid, priority);
 
   if (priority >= NUM_PRIORITY_LEVELS)
   {
-    LOG_ERROR("invalid priority");
+    LOG_ERROR("Invalid priority, should never reach this stage");
     return -1;
   }
 
@@ -47,52 +47,49 @@ int scheduler_add_task(int tid, uint8_t priority)
   return 0;
 }
 
-void do_scheduler_insert(int tid, uint8_t priority)
-{
-  SchedulerNode *node = slab_alloc(SCHEDULER_NODE);
-  node->tid = tid;
-  node->priority = priority;
-  node->next = 0;
-
-  // Reach the end of the linked list and insert the task there
-  if (mlfq[priority] == 0)
-  {
-    mlfq[priority] = node;
-  }
-  else
-  {
-    SchedulerNode *current = mlfq[priority];
-    for (;;)
-    {
-      if (current->next == 0)
-      {
-        current->next = node;
-        break;
-      }
-      current = current->next;
-    }
-  }
-}
-
 int scheduler_next_task()
 {
   for (uint8_t i = 0; i < NUM_PRIORITY_LEVELS; i++)
   {
     if (mlfq[i] != 0)
     {
-      SchedulerNode *queue_top = mlfq[i];
+      SchedulerNode *nextTask = mlfq[i];
+
+      // Move next task forward
       mlfq[i] = mlfq[i]->next;
-      do_scheduler_insert(queue_top->tid, queue_top->priority);
-      return queue_top->tid;
+
+      // Add the next task to the end of the priority list
+      // Reach the end of the linked list and insert the task there
+      if (mlfq[i] == 0)
+      {
+        mlfq[i] = nextTask;
+      }
+      else
+      {
+        SchedulerNode *current = mlfq[i];
+        for (;;)
+        {
+          if (current->next == 0)
+          {
+            current->next = nextTask;
+            break;
+          }
+          current = current->next;
+        }
+      }
+      // Set the linked list tail
+      nextTask->next = 0;
+
+      return nextTask->tid;
     }
   }
-  LOG_WARN("no next task because scheduler is empty");
+  LOG_WARN("No next task");
   return 0;
 }
 
 void scheduler_delete_task(int tid)
 {
-  LOG_DEBUG("removing task id %d", tid);
+  LOG_DEBUG("Removing Task: %d", tid);
 
   for (uint8_t i = 0; i < NUM_PRIORITY_LEVELS; i++)
   {
@@ -118,5 +115,5 @@ void scheduler_delete_task(int tid)
     }
   }
 
-  LOG_DEBUG("could not find task id %d in scheduler", tid);
+  LOG_DEBUG("Could not find task %d in scheduler", tid);
 }
