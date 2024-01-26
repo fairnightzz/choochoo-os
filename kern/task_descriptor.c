@@ -19,6 +19,10 @@ void task_init()
 
 int create_task(uint32_t priority, void (*entrypoint)())
 {
+    if (task_list.next_tid == 128) {
+      return -2;
+    }
+    
     addrspace addrspace = pagetable_createpage();
 
     if (addrspace.base == 0 && addrspace.stackbase == 0)

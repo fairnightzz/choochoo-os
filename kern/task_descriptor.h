@@ -21,8 +21,6 @@ typedef struct
   TaskStatus status;
   uint32_t pri;
   addrspace addrspace;
-  address saved_sp;
-  address saved_x30;
 } TaskDescriptor;
 
 struct TaskList

@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <stdbool.h>
 
 #include "addrspace.h"
 #include "rpi.h"
@@ -10,7 +11,7 @@ static PageTable pagetable;
 
 struct PageTable
 {
-    uint16_t entries[1024];
+    bool in_use[1024]; // tells each page if in use
 };
 
 addrspace
@@ -25,19 +26,18 @@ addrspace_new(address base)
 void pagetable_init()
 {
     pagetable = (PageTable){
-        .entries = {0}};
+        .in_use = {0}};
 }
 
 addrspace pagetable_createpage()
 {
     for (unsigned int i = 0; i < 1024; ++i)
     {
-        if ((pagetable.entries[i] & PTE_ALLOCATED) == 0)
+        if (pagetable.in_use[i] == 0)
         {
-            pagetable.entries[i] |= PTE_ALLOCATED;
+            pagetable.in_use[i] = true;
 
             address base = USER_BASE + USER_ADDRSPACE_SIZE * i;
-            LOG_DEBUG("base %x", (unsigned char *)base);
             return addrspace_new(base);
         }
     }
@@ -52,5 +52,5 @@ addrspace pagetable_createpage()
 void pagetable_deletepage(addrspace *addrspace)
 {
     size_t index = ((uint64_t)addrspace->base - (uint64_t)&pagetable) / USER_ADDRSPACE_SIZE;
-    pagetable.entries[index] &= (~PTE_ALLOCATED);
+    pagetable.in_use[index] = false;
 }

@@ -66,20 +66,37 @@ The first of which is the function which our `kern/main.c` file uses to execute 
 
 ### 3.21 Memory Management (`kern/addrspace.h`)
 
-We allocate 2MB for the kernel stack, and each task gets a 1MB page to use as a stack.
-The maximum amount of tasks is 1024 so that we take up at most 1GB (+ 2MB for the kernel) of memory.
+We allocate 128KB for the kernel stack, and each task gets an address space of 4KB (+ extra allocated for switch frame, task descriptor, and scheduler in kernel ~ 400B) page to use as a stack.
+The maximum amount of tasks is 300 so our kernel does not exceed 128 KB in size.
 
-Thus, we can only create 1024 tasks over the lifespan of the kernel.
+Thus, we can only create 300 active tasks in the kernel.
 If this limit is reached, the kernel prevents the creation of new tasks.
+Tasks after exiting will have their space recycled.
 
-We currently have a fake heap allocator implemented, which is actually 2048 bytes of static memory.
-This will be improved into an actual heap allocator at a later point in time.
-Unfortunately, this means that we run out of memory on the sixth task created.
-Fortunately, the assignment only requires five.
+At max memory usage of our address space we use 1.2 MB for user address spaces over all 300 tasks + 128 KB kernel space. We can increase this to a lot more, but it is important to note that we currently have a heap memory allocator which holds 30 KB of static memory used for switchframes, task descriptors, and scheduler nodes. This allocator currently limits us to onlu ~33 active tasks. However, for this assignment that is good enough since the request needs only 5 active tasks.
+
+One last thing is based on our task descriptor we can only do tasks up to 128. Meaning if there have already been 128 created tasks up to this point, creating a new task will result in -2. 
 
 ### 3.22 Task Descriptor & Storage (`kern/task_descriptor.h`)
+The task descriptor used to define each task contains the following fields:
+
+- `tid`: uniquely indentify tasks
+- `pTid`: id of parent task
+- `switch_frame`: snapshot of registers on kernel side
+- `status`: status of the task
+- `pri`: the task priority
+- `addrspace`: task's address space in usermode
+See: `kern/task_descriptor.h` for details.
+
+Task Descriptor metadata is stored in a hash table, which is implemented as an array of 128 task descriptor pointers. Note this is a caveat that does not allow us to make more than 128 tasks over the lifetime of this kernel. To fix this we can implement a hashmap like approach. To do in future assignments.
+
 ### 3.23 Task Scheduler (`kern/scheduler.h`)
+
 ### 3.24 Heap Memory & Allocation (`kern/kalloc.h`)
+Created an allocator using direct addressing and pointer arithmetic to assign blocks of data for switch_frames, task descriptors, and scheduling nodes. This uses the slab allocation algorithm to assign one block of memory for each type of struct of memory we are allocating. It is worth noting that currently we are using equal blocks of memory for each partition of structs with each block being 10 KB.
+
+In future assignments, we might want to change this allocator to have more memory and to have different block sizes per struct allocated.
+
 ### 3.25 Context Switch (`kern/switchframe.h` / `kern/enter_modes.S`)
 
 # 4 Program Output
