@@ -105,7 +105,7 @@ enter_usermode:
     ldp x28, x29, [x0, #224]
     ldr x30, [x0, #240]
 
-    # load 0 back in
+    # load 0 and 1 back in
     ldp x0, x1, [x0, #0]
 
     eret
