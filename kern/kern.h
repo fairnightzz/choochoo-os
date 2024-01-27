@@ -17,6 +17,7 @@ void kernel_init();
 
 int svc_create(uint32_t priority, void (*entrypoint)());
 void handle_svc();
+void svc_yield_first();
 
 extern void vector_table_initialize();
 

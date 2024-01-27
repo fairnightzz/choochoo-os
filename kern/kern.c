@@ -49,12 +49,36 @@ void svc_yield(TaskDescriptor *curr_task)
   enter_usermode(get_task(next_tid)->switch_frame);
 }
 
+void svc_yield_first()
+{
+  int next_tid = scheduler_next_task();
+
+  if (next_tid == 0)
+  {
+    LOG_ERROR("[SYSCALL - Yield]: No tasks left");
+    return;
+  }
+
+  LOG_DEBUG("[SYSCALL - Initial Yield]: Context Switch [%d -> %d]", 0, next_tid);
+  set_current_task(next_tid);
+
+  enter_usermode(get_task(next_tid)->switch_frame);
+}
+
 void handle_svc()
 {
-  TaskDescriptor *curr_task = get_current_task();
 
   uint32_t opCode = get_esr_el1() & 0x1ffffff;
   LOG_DEBUG("[SYSCALL - Handle SVC]: Vector Table Handler OpCode #%x", opCode);
+
+  // If kernel just started
+  // if (get_current_task_id() == 0)
+  // {
+  //   LOG_DEBUG("YIELD ON FIRST CALL", opCode);
+  //   svc_yield_first();
+  // }
+
+  TaskDescriptor *curr_task = get_current_task();
 
   switch (opCode)
   {
