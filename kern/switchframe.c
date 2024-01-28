@@ -41,7 +41,7 @@ SwitchFrame switchframe_new(address sp, void (*entrypoint)())
       .x27 = 0,
       .x28 = 0,
       .x29 = 0,
-      .x30 = (uint64_t)entrypoint,
+      .x30 = (uint64_t)&USER_TASK_EXIT,
 
       .elr_el1 = (uint64_t)entrypoint,
       .spsr_el1 = 0,

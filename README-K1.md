@@ -111,7 +111,7 @@ We call `handle_svc()` to handle the syscall.
 
 Once the svc has been handled, we call `enter_usermode`. This restores the registers back to what they were before and we return from the exception.
 
-todo: figure out how to optimize more (save less registers)
+Switchframe contains the entrypoint (user task function), the stack pointer of the user task, and also the `USER_TASK_EXIT` which will get called when the function returns. This is useful because if the user forgets to add an `Exit()` syscall, we will call it.
 
 # 4 Program Output
 
@@ -131,7 +131,7 @@ MyTid = 2, MyParentTid = 1
 MyTid = 3, MyParentTid = 1
 MyTid = 2, MyParentTid = 1
 MyTid = 3, MyParentTid = 1
-[WARN] no next task because scheduler is empty
+[WARN] no next task
 ```
 
 Here is the detailed explanation for the above output:

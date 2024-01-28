@@ -18,6 +18,10 @@ void kernel_init()
   scheduler_init();
 }
 
+static int next_tid = 0;
+static uint32_t opCode = 0;
+static TaskDescriptor *curr_task = 0;
+
 int svc_create(uint32_t priority, void (*entrypoint)())
 {
   int new_tid = (priority < NUM_PRIORITY_LEVELS) ? create_task(priority, entrypoint) : -1;
@@ -35,7 +39,7 @@ int svc_create(uint32_t priority, void (*entrypoint)())
 
 void svc_yield(TaskDescriptor *curr_task)
 {
-  int next_tid = scheduler_next_task();
+  next_tid = scheduler_next_task();
 
   if (next_tid == 0)
   {
@@ -51,7 +55,7 @@ void svc_yield(TaskDescriptor *curr_task)
 
 void svc_yield_first()
 {
-  int next_tid = scheduler_next_task();
+  next_tid = scheduler_next_task();
 
   if (next_tid == 0)
   {
@@ -68,7 +72,7 @@ void svc_yield_first()
 void handle_svc()
 {
 
-  uint32_t opCode = get_esr_el1() & 0x1ffffff;
+  opCode = get_esr_el1() & 0x1ffffff;
   LOG_DEBUG("[SYSCALL - Handle SVC]: Vector Table Handler OpCode #%x", opCode);
 
   // If kernel just started
@@ -78,7 +82,7 @@ void handle_svc()
   //   svc_yield_first();
   // }
 
-  TaskDescriptor *curr_task = get_current_task();
+  curr_task = get_current_task();
 
   switch (opCode)
   {
@@ -112,7 +116,7 @@ void handle_svc()
     scheduler_delete_task(curr_task->tid);
     delete_task(curr_task->tid);
 
-    int next_tid = scheduler_next_task();
+    next_tid = scheduler_next_task();
     if (next_tid == 0)
     {
       LOG_DEBUG("[SYSCALL - Exit]: no more tasks");
