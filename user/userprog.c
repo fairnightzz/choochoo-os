@@ -1,5 +1,10 @@
-#include "stdlib.h"
 #include <stdint.h>
+#include "stdlib.h"
+
+void USER_TASK_WRAPPER(void (*entrypoint)()) {
+  (*entrypoint)();
+  Exit();
+}
 
 void OtherTask()
 {
@@ -19,6 +24,13 @@ void FirstUserTask()
     PRINT("Created: %d", t3);
     int t4 = Create(3, &OtherTask);
     PRINT("Created: %d", t4);
+
+    for (int i = 0; i < 150; i++) {
+      int t6 = Create(0, &OtherTask);
+      PRINT("Created: %d", t6);
+    }
+
+    
 
     PRINT("FirstUserTask: exiting");
     Exit();

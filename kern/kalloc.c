@@ -3,7 +3,7 @@
 #include "kalloc.h"
 #include "stdlib.h"
 
-#define SLAB_ALLOCATOR_SIZE 10240
+#define SLAB_ALLOCATOR_SIZE 60240
 
 typedef struct SlabPartition SlabPartition;
 typedef struct SlabAllocator SlabAllocator;

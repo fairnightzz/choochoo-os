@@ -1,1 +1,1 @@
-bash /u/cs452/public/tools/upload.sh k1.img D8:3A:DD:1B:37:D9
+bash /u/cs452/public/tools/upload.sh k1.img d8-3a-dd-1b-36-7d
