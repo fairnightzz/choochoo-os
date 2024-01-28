@@ -19,7 +19,7 @@ git <insert>
 make
 ```
 
-The above works on machine <insert>.
+The above has been tested on machine `ubuntu2204-010`.
 
 # 3 Kernel Features & Structure
 ## 3.1 Kernel Features
