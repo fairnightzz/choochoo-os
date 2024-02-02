@@ -174,6 +174,43 @@ void svc_receive(int *tid, char* msg, int msg_len, TaskDescriptor *curr_task) {
   }
 }
 
+int svc_reply(int tid, const char* reply, int rplen) {
+  // Sender must be waiting
+  TaskDescriptor* senderTask = get_task(tid);
+
+  if (senderTask == 0) {
+    return -1;
+  }
+
+  // Look up sender (sanity check for reply wait)
+  if (senderTask->status != REPLY_WAIT) {
+    return -2;
+  }
+
+  // Make sure that the sender send state is initialized
+  if (senderTask->send_state == 0) {
+    LOG_ERROR("Sender task send state not initialized");
+  }
+
+  // unblock sender, set to ready
+  set_task_status(senderTask, READY);
+
+  // kernel copies data
+  int copylen = min(rplen, senderTask->send_state->reply_buffer_len); 
+  memcpy(senderTask->send_state->reply_buffer, reply, copylen);
+
+  // Free senderTask send state
+  slab_free(senderTask->send_state, SEND_STATE);
+  senderTask->send_state = 0;
+
+  // Return value
+  senderTask->switch_frame->x0 = copylen;
+
+  return copylen;
+}
+
+
+
 void handle_svc()
 {
 
@@ -264,6 +301,14 @@ void handle_svc()
   }
   case (REPLY):
   {
+    LOG_DEBUG("[SYSCALL - Reply]");
+
+    curr_task->switch_frame->x0 = svc_reply(
+      (int)curr_task->switch_frame->x0, 
+      (const char*)curr_task->switch_frame->x1,
+      curr_task->switch_frame->x2
+    );
+    svc_yield(curr_task);
     break;
   }
   default:
