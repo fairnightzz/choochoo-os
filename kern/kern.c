@@ -23,7 +23,6 @@ static int next_tid = 0;
 static uint32_t opCode = 0;
 static TaskDescriptor *curr_task = 0;
 
-
 void handle_svc()
 {
 
@@ -108,7 +107,7 @@ void handle_svc()
   case (RECEIVE):
   {
     LOG_DEBUG("[SYSCALL - Receive]");
-    svc_receive((int*)curr_task->switch_frame->x0, (char *)curr_task->switch_frame->x1, curr_task->switch_frame->x2, curr_task);
+    svc_receive((int *)curr_task->switch_frame->x0, (char *)curr_task->switch_frame->x1, curr_task->switch_frame->x2, curr_task);
     svc_yield(curr_task);
     break;
   }
@@ -117,10 +116,9 @@ void handle_svc()
     LOG_DEBUG("[SYSCALL - Reply]");
 
     curr_task->switch_frame->x0 = svc_reply(
-      (int)curr_task->switch_frame->x0, 
-      (const char*)curr_task->switch_frame->x1,
-      curr_task->switch_frame->x2
-    );
+        (int)curr_task->switch_frame->x0,
+        (const char *)curr_task->switch_frame->x1,
+        curr_task->switch_frame->x2);
     svc_yield(curr_task);
     break;
   }
