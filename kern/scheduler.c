@@ -79,8 +79,9 @@ int scheduler_next_task()
       }
       // Set the linked list tail
       nextTask->next = 0;
-
-      return nextTask->tid;
+      TaskStatus task_status = get_task(nextTask->tid)->status;
+      if (task_status == READY || task_status == RUNNING)
+        return nextTask->tid;
     }
   }
   LOG_WARN("No next task");
