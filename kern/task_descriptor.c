@@ -15,8 +15,8 @@ void task_init()
         .next_tid = 1,
         .tasks = {0}};
     slab_set_block_size(TASK, sizeof(TaskDescriptor));
-    slab_set_block_size(SEND_BUFFER, sizeof(SendBuffer));
-    slab_set_block_size(RECEIVE_BUFFER, sizeof(ReceiveBuffer));
+    slab_set_block_size(SEND_BUFFER, sizeof(SendState));
+    slab_set_block_size(RECEIVE_BUFFER, sizeof(ReceiveState));
 }
 
 int create_task(uint32_t priority, void (*entrypoint)())

@@ -24,14 +24,14 @@ typedef struct {
 
   char *send_buffer;
   size_t send_buffer_len;
-} SendBuffer;
+} SendState;
 
 typedef struct {
   char *receive_buffer;
   size_t receive_buffer_len;
 
   int *sender_tid;
-} ReceiveBuffer;
+} ReceiveState;
 
 typedef struct
 {
@@ -43,8 +43,8 @@ typedef struct
   addrspace addrspace;
 
   BQueue *send_listeners_queue;
-  SendBuffer *send_buffer;
-  ReceiveBuffer *receive_buffer;
+  SendState *send_state;
+  ReceiveState *receive_state;
 
 } TaskDescriptor;
 

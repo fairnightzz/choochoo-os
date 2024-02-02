@@ -8,8 +8,8 @@ typedef enum
   TASK = 0,
   SWITCH_FRAME = 1,
   SCHEDULER_NODE = 2,
-  SEND_BUFFER = 3,
-  RECEIVE_BUFFER = 4,
+  SEND_STATE = 3,
+  RECEIVE_STATE = 4,
   COUNT = 5,
 } AllocationType;
 
