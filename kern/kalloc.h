@@ -10,7 +10,10 @@ typedef enum
   SCHEDULER_NODE = 2,
   SEND_STATE = 3,
   RECEIVE_STATE = 4,
-  COUNT = 5,
+  LLIST = 5,
+  LLIST_NODE = 6,
+  LLIST_ITERATOR = 7,
+  COUNT = 8,
 } AllocationType;
 
 void slab_init();

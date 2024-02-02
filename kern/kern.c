@@ -5,6 +5,7 @@
 #include "kalloc.h"
 #include "scheduler.h"
 #include "svc_helpers.h"
+#include "util.h"
 
 void kernel_init()
 {
