@@ -66,7 +66,10 @@ int create_task(uint32_t priority, void (*entrypoint)())
 TaskDescriptor *get_task(int tid)
 {
     if (0 < tid && tid < TASK_SIZE && task_list.tasks[tid] == 0)
+    {
         LOG_WARN("getting invalid tid %d", tid);
+        return 0;
+    }
     return task_list.tasks[tid];
 }
 
@@ -100,4 +103,8 @@ void delete_task(int tid)
     pagetable_deletepage(&task->addrspace);
     slab_free(task, TASK);
     task_list.tasks[tid] = 0;
+}
+
+void set_task_status(TaskDescriptor *task, TaskStatus status) {
+  task->status = status;
 }

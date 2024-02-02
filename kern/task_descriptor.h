@@ -59,7 +59,7 @@ struct TaskList
 void task_init();
 int create_task(uint32_t pri, void (*entrypoint)());
 TaskDescriptor *get_task(int tid);
-
+void set_task_status(TaskDescriptor *task, TaskStatus status);
 void set_current_task(int tid);
 int get_current_task_id();
 TaskDescriptor *get_current_task();
