@@ -134,9 +134,44 @@ int svc_send(int tid, const char *msg, int msglen, char *reply, int rplen, TaskD
     // set sender tid for receive task
     *(receive_task->receive_state->sender_tid) = curr_task->tid;
 
+    slab_free(receive_task->receive_state, RECEIVE_STATE);
+    receive_task->receive_state = 0;
   }
 
   return 0;
+}
+
+void svc_receive(int *tid, char* msg, int msg_len, TaskDescriptor *curr_task) {
+  /// Scenario 1: Send First
+  if (length(curr_task->send_listeners_queue) != 0) {
+    uint8_t sender_tid = pop(curr_task->send_listeners_queue);
+    TaskDescriptor *sender_task = get_task(sender_tid);
+    // Sanity Check
+    if (sender_task->status != SEND_WAIT) {
+      LOG_WARN("[SYSCALL ERROR] - sender task %d not in Send Wait as expected", sender_tid);
+    }
+
+    // Set state of sender from SendWait -> ReplyWait
+    set_task_status(sender_task, REPLY_WAIT);
+
+    // copy over data
+    int copylen = min(sender_task->send_state->send_buffer_len, msg_len); 
+    memcpy(msg, sender_task->send_state->send_buffer, copylen);
+
+    curr_task->switch_frame->x0 = copylen;
+
+    *tid = sender_tid; // update sender on receiver side
+  } else { // Scenario 2: Receive First
+    set_task_status(curr_task, RECEIVE_WAIT);
+    ReceiveState *receive_state = slab_alloc(RECEIVE_STATE);
+    *receive_state = (ReceiveState) {
+      .receive_buffer = msg,
+      .receive_buffer_len = msg_len,
+      .sender_tid = tid
+    };
+    curr_task->receive_state = receive_state;
+    LOG_DEBUG("[SYSCALL - Receive]: empty receive queue blocking on TID %d", curr_task->tid);
+  }
 }
 
 void handle_svc()
@@ -222,6 +257,9 @@ void handle_svc()
   }
   case (RECEIVE):
   {
+    LOG_DEBUG("[SYSCALL - Receive]");
+    svc_receive((int*)curr_task->switch_frame->x0, (char *)curr_task->switch_frame->x1, curr_task->switch_frame->x2, curr_task);
+    svc_yield(curr_task);
     break;
   }
   case (REPLY):
