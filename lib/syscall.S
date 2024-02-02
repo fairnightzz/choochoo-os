@@ -30,3 +30,21 @@ Yield:
 Exit:
   svc 0x4
   ret
+
+.global Send
+.type Send, %function
+Send:
+    svc 0x5
+    ret
+
+.global Receive
+.type Receive, %function
+Receive:
+    svc 0x6
+    ret
+
+.global Reply
+.type Reply, %function
+Reply:
+    svc 0x7
+    ret

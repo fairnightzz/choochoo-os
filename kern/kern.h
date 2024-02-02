@@ -10,7 +10,10 @@ typedef enum
     MY_TID = 1,
     MY_PARENT_TID = 2,
     YIELD = 3,
-    EXIT = 4
+    EXIT = 4,
+    SEND = 5,
+    RECEIVE = 6,
+    REPLY = 7
 } opcode;
 
 void kernel_init();

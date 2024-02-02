@@ -69,6 +69,32 @@ void svc_yield_first()
   enter_usermode(get_task(next_tid)->switch_frame);
 }
 
+int svc_send(int tid, const char* msg, int msglen, char* reply, int rplen, TaskDescriptor *curr_task)
+{
+  if (curr_task->sending_buffer != 0) { // ensure that task is not already sending
+    return -2;
+  }
+
+  SendBuffer *sbuf = slab_alloc(SEND_BUFFER);
+  *send_buf = (SendBuffer) {
+    .reply_buf = reply,
+    .reply_buf_len = rplen,
+    .send_buf = 0,
+    .send_buf_len = 0,
+  }
+  curr_task->sending_buffer = 
+
+  LOG_DEBUG("[SYSCALL - Create]: Task #%d", new_tid);
+
+  // Only add if tid is valid
+  if (new_tid > 0)
+  {
+    scheduler_add_task(new_tid, priority);
+  }
+
+  return new_tid;
+}
+
 void handle_svc()
 {
 
@@ -130,6 +156,26 @@ void handle_svc()
     LOG_DEBUG("Done setting current task");
     enter_usermode(get_task(next_tid)->switch_frame);
     break;
+  }
+  case (SEND): 
+  {
+    LOG_DEBUG("[SYSCALL - Send]");
+    int ret = svc_send(
+      curr_task->switch_frame->x0, (const char *)curr_task->switch_frame->x1,
+      (char *)curr_task->switch_frame->x3, curr_task->switch_frame->x4, curr_task
+    );
+    if (ret < 0) {
+      curr_task->switch_frame->x0 = ret;
+    }
+    svc_yield(curr_task);
+  }
+  case (RECEIVE):
+  {
+
+  }
+  case (REPLY):
+  {
+
   }
   default:
   {
