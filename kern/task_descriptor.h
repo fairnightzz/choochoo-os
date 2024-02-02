@@ -2,8 +2,10 @@
 #define __TASK_DESCRIPTOR_H__ 1
 
 #include <stdint.h>
+#include <stddef.h>
 #include "addrspace.h"
 #include "switchframe.h"
+#include "stdlib.h"
 
 #define TASK_SIZE 128
 
@@ -20,7 +22,8 @@ typedef enum
 
 // SRR Buffers
 
-typedef struct {
+typedef struct
+{
   char *reply_buffer;
   size_t reply_buffer_len;
 
@@ -28,7 +31,8 @@ typedef struct {
   size_t send_buffer_len;
 } SendState;
 
-typedef struct {
+typedef struct
+{
   char *receive_buffer;
   size_t receive_buffer_len;
 

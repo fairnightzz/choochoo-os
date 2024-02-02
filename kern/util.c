@@ -88,3 +88,8 @@ void format_clock(unsigned int time, char *buffer)
     buffer[0] = '0' + clamp;
   }
 }
+
+int min(int a, int b)
+{
+  return (a <= b) ? a : b;
+}

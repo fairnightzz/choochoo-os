@@ -19,4 +19,6 @@ void format_clock(unsigned int time, char *buffer);
 
 extern uint32_t get_esr_el1(void);
 
+int min(int a, int b);
+
 #endif /* util.h */

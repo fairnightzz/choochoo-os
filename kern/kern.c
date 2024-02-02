@@ -69,30 +69,74 @@ void svc_yield_first()
   enter_usermode(get_task(next_tid)->switch_frame);
 }
 
-int svc_send(int tid, const char* msg, int msglen, char* reply, int rplen, TaskDescriptor *curr_task)
+int svc_send(int tid, const char *msg, int msglen, char *reply, int rplen, TaskDescriptor *curr_task)
 {
-  if (curr_task->sending_buffer != 0) { // ensure that task is not already sending
+  // Task that is receiving
+  TaskDescriptor* receive_task = get_task(tid);
+
+  if (receive_task == 0) {
+    return -1;
+  }
+
+  if (curr_task->send_state != 0)
+  { // ensure that task is not already sending
     return -2;
   }
 
-  SendBuffer *sbuf = slab_alloc(SEND_BUFFER);
-  *send_buf = (SendBuffer) {
-    .reply_buf = reply,
-    .reply_buf_len = rplen,
-    .send_buf = 0,
-    .send_buf_len = 0,
+  SendState *sendState = slab_alloc(SEND_STATE);
+
+  // Define the pointer to reply and reply's max length
+  // Store send message and length in here if receive is not called
+  *sendState = (SendState){
+      .reply_buffer = reply,
+      .reply_buffer_len = rplen,
+      .send_buffer = 0,
+      .send_buffer_len = 0,
+  };
+  curr_task->send_state = sendState;
+
+  // Scenario 1: Send first
+  // Look up receiver, make sure it's not in receive wait
+  if (receive_task->status != RECEIVE_WAIT) {
+    // Sender blocks
+    LOG_DEBUG("Sending message to task %d, not in RECEIVE_WAIT", tid);
+    set_task_status(curr_task, SEND_WAIT);
+    // Add it to the queue
+    push(receive_task->send_listeners_queue, (uint8_t)curr_task->tid);
+
+    // Save message state
+    curr_task->send_state->send_buffer = (char*)msg;
+    curr_task->send_state->send_buffer_len = msglen;
   }
-  curr_task->sending_buffer = 
+  // Scenario 2: Receiver first
+  else{
+    if (receive_task->receive_state == 0) {
+      slab_free(sendState, SEND_STATE);
+      curr_task->send_state = 0;
+      LOG_ERROR("Receiving task does not have receive state intialized");
+      return -2;
+    }
 
-  LOG_DEBUG("[SYSCALL - Create]: Task #%d", new_tid);
+    // Unblock receiver
+    set_task_status(receive_task, READY);
 
-  // Only add if tid is valid
-  if (new_tid > 0)
-  {
-    scheduler_add_task(new_tid, priority);
+    // Block Sender
+    set_task_status(curr_task, REPLY_WAIT);
+
+    // Kernel copies data
+    int copylen = min(msglen, receive_task->receive_state->receive_buffer_len); 
+    memcpy(receive_task->receive_state->receive_buffer, msg, copylen);
+
+    // Return
+    // set the return value for receive task
+    receive_task->switch_frame->x0 = copylen;
+
+    // set sender tid for receive task
+    *(receive_task->receive_state->sender_tid) = curr_task->tid;
+
   }
 
-  return new_tid;
+  return 0;
 }
 
 void handle_svc()
@@ -157,25 +201,32 @@ void handle_svc()
     enter_usermode(get_task(next_tid)->switch_frame);
     break;
   }
-  case (SEND): 
+  case (SEND):
   {
     LOG_DEBUG("[SYSCALL - Send]");
+
+    // tid, msg, msglen, reply, rplen
     int ret = svc_send(
-      curr_task->switch_frame->x0, (const char *)curr_task->switch_frame->x1,
-      (char *)curr_task->switch_frame->x3, curr_task->switch_frame->x4, curr_task
-    );
-    if (ret < 0) {
+        curr_task->switch_frame->x0, (const char *)curr_task->switch_frame->x1, curr_task->switch_frame->x2,
+        (char *)curr_task->switch_frame->x3, curr_task->switch_frame->x4, curr_task);
+
+    // If we get an error
+    // TODO: make the return in sender perhaps? have to think about it
+    if (ret < 0)
+    {
       curr_task->switch_frame->x0 = ret;
     }
+
     svc_yield(curr_task);
+    break;
   }
   case (RECEIVE):
   {
-
+    break;
   }
   case (REPLY):
   {
-
+    break;
   }
   default:
   {
