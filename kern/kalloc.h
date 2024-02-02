@@ -8,7 +8,9 @@ typedef enum
   TASK = 0,
   SWITCH_FRAME = 1,
   SCHEDULER_NODE = 2,
-  COUNT = 3,
+  SEND_BUFFER = 3,
+  RECEIVE_BUFFER = 4,
+  COUNT = 5,
 } AllocationType;
 
 void slab_init();

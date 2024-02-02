@@ -1,7 +1,7 @@
 #ifndef __BYTE_QUEUE_H__
 #define __BYTE_QUEUE_H__ 1
 
-#define MAX_QUEUE_LENGTH 4096
+#define MAX_QUEUE_LENGTH 1024
 
 #include <stdint.h>
 #include <stdbool.h>

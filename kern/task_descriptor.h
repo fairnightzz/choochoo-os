@@ -10,8 +10,28 @@ typedef enum
   RUNNING,
   READY,
   FINISHED,
-  ERROR
+  ERROR,
+  SEND_BLOCKING,
+  RECEIVE_BLOCKING,
+  REPLY_BLOCKING,
 } TaskStatus;
+
+// SRR Buffers
+
+typedef struct {
+  char *reply_buffer;
+  size_t reply_buffer_len;
+
+  char *send_buffer;
+  size_t send_buffer_len;
+} SendBuffer;
+
+typedef struct {
+  char *receive_buffer;
+  size_t receive_buffer_len;
+
+  int *sender_tid;
+} ReceiveBuffer;
 
 typedef struct
 {
@@ -21,6 +41,11 @@ typedef struct
   TaskStatus status;
   uint32_t pri;
   addrspace addrspace;
+
+  BQueue *send_listeners_queue;
+  SendBuffer *send_buffer;
+  ReceiveBuffer *receive_buffer;
+
 } TaskDescriptor;
 
 struct TaskList
