@@ -5,15 +5,17 @@
 #include "addrspace.h"
 #include "switchframe.h"
 
+#define TASK_SIZE 128
+
 typedef enum
 {
   RUNNING,
   READY,
   FINISHED,
   ERROR,
-  SEND_BLOCKING,
-  RECEIVE_BLOCKING,
-  REPLY_BLOCKING,
+  SEND_WAIT,
+  RECEIVE_WAIT,
+  REPLY_WAIT,
 } TaskStatus;
 
 // SRR Buffers
