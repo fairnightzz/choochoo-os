@@ -6,9 +6,11 @@
 int kmain()
 {
 
-    kernel_init();
+    set_log_level(LOG_LEVEL_DEBUG);
 
-    // set_log_level(LOG_LEVEL_DEBUG);
+    LOG_DEBUG("start kernel init");
+    kernel_init();
+    LOG_DEBUG("end kernel init");
 
     // K1
     /*
@@ -17,6 +19,7 @@ int kmain()
     */
 
     // K2
+    LOG_DEBUG("start k2 task");
     svc_create(10, &startK2Task);
     svc_yield_first();
 

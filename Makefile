@@ -28,18 +28,18 @@ SOURCES := $(wildcard $(KERNDIR)/*.[cS]) $(wildcard $(USERDIR)/*.[cS]) $(wildcar
 OBJECTS := $(patsubst %.c, %.o, $(patsubst %.S, %.o, $(SOURCES)))
 DEPENDS := $(patsubst %.c, %.d, $(patsubst %.S, %.d, $(SOURCES)))
 
-# The first rule is the default, ie. "make", "make all" and "make k1.img" mean the same
-all: k1.img
+# The first rule is the default, ie. "make", "make all" and "make k2.img" mean the same
+all: k2.img
 
 clean:
-	rm -f $(OBJECTS) $(DEPENDS) k1.elf k1.img
+	rm -f $(OBJECTS) $(DEPENDS) k2.elf k2.img
 
-k1.img: k1.elf
+k2.img: k2.elf
 	$(OBJCOPY) $< -O binary $@
 
-k1.elf: $(OBJECTS) linker.ld
+k2.elf: $(OBJECTS) linker.ld
 	$(CC) $(CFLAGS) $(filter-out %.ld, $^) -o $@ $(LDFLAGS)
-	@$(OBJDUMP) -d k1.elf | grep -Fq q0 && printf "\n***** WARNING: SIMD INSTRUCTIONS DETECTED! *****\n\n" || true
+	@$(OBJDUMP) -d k2.elf | grep -Fq q0 && printf "\n***** WARNING: SIMD INSTRUCTIONS DETECTED! *****\n\n" || true
 
 %.o: %.c Makefile
 	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
