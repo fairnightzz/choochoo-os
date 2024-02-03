@@ -30,7 +30,7 @@ void rps_signup(int *waitingTid, int senderTid, HashMap *player_games, RPSRespon
 
   LOG_DEBUG("[RPS Signup]: Player Tid %d joined. Player Tid %d already here. Starting...", *waitingTid, senderTid);
 
-  RPSGameState* game = alloc(RPS_GAME_STATE);
+  RPSGameState *game = alloc(RPS_GAME_STATE);
   game->gameComplete = false;
   game->p1 = *waitingTid;
   game->p2 = senderTid;
@@ -115,7 +115,8 @@ void rps_quit(int senderTid, RPSResponse *resp, HashMap *player_games)
   }
   else
   {
-    if (game_state->gameComplete == true) {
+    if (game_state->gameComplete == true)
+    {
       free(game_state, RPS_GAME_STATE);
     }
     game_state->gameComplete = true;
@@ -151,26 +152,26 @@ void RPSServer()
 
     switch (request.type)
     {
-      case RPS_SIGNUP:
-      {
-        rps_signup(&waitingTid, senderTid, player_games, &response);
-        break;
-      }
-      case RPS_PLAY:
-      {
-        rps_play(senderTid, request, &response, player_games);
-        break;
-      }
-      case RPS_QUIT:
-      {
-        rps_quit(senderTid, &response, player_games);
-        break;
-      }
-      default:
-      {
-        LOG_WARN("[RPS ERROR - Invalid Request Type]: %d", request.type);
-        break;
-      }
+    case RPS_SIGNUP:
+    {
+      rps_signup(&waitingTid, senderTid, player_games, &response);
+      break;
+    }
+    case RPS_PLAY:
+    {
+      rps_play(senderTid, request, &response, player_games);
+      break;
+    }
+    case RPS_QUIT:
+    {
+      rps_quit(senderTid, &response, player_games);
+      break;
+    }
+    default:
+    {
+      LOG_WARN("[RPS ERROR - Invalid Request Type]: %d", request.type);
+      break;
+    }
     }
   }
 }

@@ -76,10 +76,10 @@ TaskDescriptor *get_task(int tid)
 
 void set_current_task(int tid)
 {
-  if (task_list.tasks[current_task] != 0)
-  {
-    set_task_status(get_task(current_task), READY);
-  }
+  // if (task_list.tasks[current_task] != 0)
+  // {
+  //   set_task_status(get_task(current_task), READY);
+  // }
 
   set_task_status(get_task(tid), RUNNING);
   current_task = tid;

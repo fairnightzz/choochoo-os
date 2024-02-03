@@ -13,6 +13,7 @@ void string_init();
 // Standard string functions (wrapping helps char* to not destructure)
 String *make_string(char *charString);
 int str_len(String *str);
+void string_copy(char *dest, char *src);
 void string_concat(String *dest, String *src);
 void string_add_char(String *dest, char ch);
 void string_pop_char(String *dest);

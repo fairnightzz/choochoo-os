@@ -86,7 +86,7 @@ void NameServerTask()
       // Don't need to worry about string destructuring as long as the user task doesn't destructure
       // TODO: copy the string
       char *name = message.data.register_as.name;
-      hashmap_insert(nameserver_map, name, (void*)(uintptr_t)sender_tid);
+      hashmap_insert(nameserver_map, name, (void *)(uintptr_t)sender_tid);
 
       // Reply back success
       reply = (NameServerResponse){
@@ -113,7 +113,7 @@ void NameServerTask()
 
       if (success == false)
       {
-        PRINT("[NAMESERVER]: Could not find name to tid");
+        PRINT("[NAMESERVER]: Could not find name: %s to tid", name);
       }
       else
       {

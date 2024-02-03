@@ -7,7 +7,7 @@
 
 typedef struct HashMapNode
 {
-    String *key;
+    char key[20];
     value_t value;
 } HashMapNode;
 
@@ -30,8 +30,8 @@ unsigned int hash(key_t key)
 
 void hashmap_init()
 {
-    alloc_init(HASH_MAP, sizeof(HASH_MAP));
-    alloc_init(HASH_MAP_NODE, sizeof(HASH_MAP_NODE));
+    alloc_init(HASH_MAP, sizeof(HashMap));
+    alloc_init(HASH_MAP_NODE, sizeof(HashMapNode));
     alloc_init(HASH_MAP_BUCKETS, HM_BUCKETS * sizeof(LList *));
 }
 
@@ -39,7 +39,9 @@ HashMap *hashmap_new()
 {
     HashMap *hm = (HashMap *)alloc(HASH_MAP);
     if (!hm)
+    {
         return NULL;
+    }
 
     hm->size = 0;
     hm->buckets = (LList **)alloc(HASH_MAP_BUCKETS);
@@ -75,7 +77,6 @@ void hashmap_delete(HashMap *hm)
         HashMapNode *node;
         while ((node = (HashMapNode *)llist_next(it)) != NULL)
         {
-            free(node->key, USER_STRING); // Assuming keys are dynamically allocated
             free(node, HASH_MAP_NODE);    // Free the node itself
         }
         llist_delete(it);
@@ -87,8 +88,6 @@ void hashmap_delete(HashMap *hm)
 
 int hashmap_insert(HashMap *hm, key_t key, value_t value)
 {
-    String *keyString = make_string(key);
-
     unsigned int bucket_index = hash(key);
     LList *bucket = hm->buckets[bucket_index];
     LListIter *it = llist_iter(bucket);
@@ -96,7 +95,7 @@ int hashmap_insert(HashMap *hm, key_t key, value_t value)
     HashMapNode *node;
     while ((node = (HashMapNode *)llist_next(it)) != NULL)
     {
-        if (strcmp(node->key->string, key) == 0)
+        if (strcmp(node->key, key) == 0)
         {
             // Key already exists, update the value
             node->value = value;
@@ -108,11 +107,12 @@ int hashmap_insert(HashMap *hm, key_t key, value_t value)
 
     // Key does not exist, create a new node and add it to the bucket
     HashMapNode *new_node = (HashMapNode *)alloc(HASH_MAP_NODE);
-    if (!new_node)
+    if (!new_node) {
         return -1; // Allocation failed
+    }
 
     // Assuming the key is a string that should be copied (deep copy)
-    new_node->key = keyString;
+    string_copy(new_node->key, key);
     new_node->value = value;
     llist_append(bucket, new_node);
     hm->size++;
@@ -128,7 +128,7 @@ bool hashmap_contains(HashMap *hm, key_t key)
     HashMapNode *node;
     while ((node = (HashMapNode *)llist_next(it)) != NULL)
     {
-        if (strcmp(node->key->string, key) == 0)
+        if (strcmp(node->key, key) == 0)
         {
             llist_delete(it);
             return true;
@@ -147,11 +147,10 @@ bool hashmap_remove(HashMap *hm, key_t key)
     HashMapNode *node;
     while ((node = (HashMapNode *)llist_next(it)) != NULL)
     {
-        if (strcmp(node->key->string, key) == 0)
+        if (strcmp(node->key, key) == 0)
         {
             // Found the key, remove the node from the list
             llist_remove_item(bucket, node);
-            free(node->key, USER_STRING); // Free the string in node
             free(node, HASH_MAP_NODE);    // Free the node itself
             llist_delete(it);
             hm->size--;
@@ -176,7 +175,7 @@ value_t hashmap_get(HashMap *hm, key_t key, bool *success)
     HashMapNode *node;
     while ((node = (HashMapNode *)llist_next(it)) != NULL)
     {
-        if (strcmp(node->key->string, key) == 0)
+        if (strcmp(node->key, key) == 0)
         {
             // Key found
             if (success)
