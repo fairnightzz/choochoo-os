@@ -1,5 +1,6 @@
 #include "server.h"
 #include "stdlib.h"
+#include "user/nameserver.h"
 
 RPSResult result(RPSMove p1, RPSMove p2)
 {
@@ -18,7 +19,7 @@ RPSResult result(RPSMove p1, RPSMove p2)
   return (p1 > p2) ? RESULT_WIN : RESULT_LOSE;
 }
 
-void rps_signup(int *waitingTid, int senderTid, RPSRequest request, RPSGameState *game, HashMap *player_games, RPSResponse *resp)
+void rps_signup(int *waitingTid, int senderTid, HashMap *player_games, RPSResponse *resp)
 {
   if (waitingTid == 0)
   { // no other player waiting to join
@@ -29,6 +30,7 @@ void rps_signup(int *waitingTid, int senderTid, RPSRequest request, RPSGameState
 
   LOG_DEBUG("[RPS Signup]: Player Tid %d joined. Player Tid %d already here. Starting...", *waitingTid, senderTid);
 
+  RPSGameState* game = alloc(RPS_GAME_STATE);
   game->gameComplete = false;
   game->p1 = *waitingTid;
   game->p2 = senderTid;
@@ -56,7 +58,7 @@ void rps_error(int senderTid, RPSResponse *resp, RPSMessageType type)
   Reply(senderTid, (char *)resp, sizeof(RPSResponse));
 }
 
-void rps_play(int senderTid, RPSRequest req, RPSResponse *resp)
+void rps_play(int senderTid, RPSRequest req, RPSResponse *resp, HashMap *player_games)
 {
   LOG_DEBUG("[RPS Play] Player %d played move: %s", senderTid, MOVE_STRING[req.move]);
 
@@ -98,7 +100,7 @@ void rps_play(int senderTid, RPSRequest req, RPSResponse *resp)
   }
 }
 
-void rps_quit(int senderTid, RPSRequest req, RPSResponse *resp)
+void rps_quit(int senderTid, RPSResponse *resp, HashMap *player_games)
 {
   LOG_DEBUG("[RPS Quit] Player %d has quit", senderTid);
   bool success;
@@ -113,6 +115,9 @@ void rps_quit(int senderTid, RPSRequest req, RPSResponse *resp)
   }
   else
   {
+    if (game_state->gameComplete == true) {
+      free(game_state, RPS_GAME_STATE);
+    }
     game_state->gameComplete = true;
     hashmap_remove(player_games, mapKey);
     resp->type = RPS_QUIT;
@@ -123,7 +128,8 @@ void rps_quit(int senderTid, RPSRequest req, RPSResponse *resp)
 
 void RPSServer()
 {
-  HashMap *game_state = hashmap_new();
+  alloc_init(RPS_GAME_STATE, sizeof(RPSGameState));
+  HashMap *player_games = hashmap_new();
   RPSRequest request;
   RPSResponse response;
 
@@ -145,26 +151,26 @@ void RPSServer()
 
     switch (request.type)
     {
-    case RPS_SIGNUP:
-    {
-      rps_signup(&waitingTid, senderTid, request, &response);
-      break;
-    }
-    case RPS_PLAY:
-    {
-      rps_play();
-      break;
-    }
-    case RPS_QUIT:
-    {
-      rps_quit();
-      break;
-    }
-    default:
-    {
-      LOG_WARN("[RPS ERROR - Invalid Request Type]: %d".request.type);
-      break;
-    }
+      case RPS_SIGNUP:
+      {
+        rps_signup(&waitingTid, senderTid, player_games, &response);
+        break;
+      }
+      case RPS_PLAY:
+      {
+        rps_play(senderTid, request, &response, player_games);
+        break;
+      }
+      case RPS_QUIT:
+      {
+        rps_quit(senderTid, &response, player_games);
+        break;
+      }
+      default:
+      {
+        LOG_WARN("[RPS ERROR - Invalid Request Type]: %d", request.type);
+        break;
+      }
     }
   }
 }

@@ -8,5 +8,6 @@
 #include "linked_list.h"
 #include "hashmap.h"
 #include "util.h"
+#include "alloc.h"
 
 #endif // __STDLIB_H__
