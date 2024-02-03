@@ -86,7 +86,7 @@ void NameServerTask()
       // Don't need to worry about string destructuring as long as the user task doesn't destructure
       // TODO: copy the string
       char *name = message.data.register_as.name;
-      hashmap_insert(nameserver_map, name, sender_tid);
+      hashmap_insert(nameserver_map, name, (void*)(uintptr_t)sender_tid);
 
       // Reply back success
       reply = (NameServerResponse){
@@ -101,8 +101,8 @@ void NameServerTask()
     else if (message.type == NS_WHO_IS)
     {
       char *name = message.data.who_is.name;
-      int success;
-      int req_tid = hashmap_get(nameserver_map, name, &success);
+      bool success;
+      int req_tid = (int)(uintptr_t)hashmap_get(nameserver_map, name, &success);
 
       reply = (NameServerResponse){
           .type = NS_WHO_IS,
