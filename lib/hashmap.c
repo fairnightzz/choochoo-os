@@ -13,11 +13,10 @@ typedef struct HashMapNode
 struct HashMap
 {
     LList **buckets;
-    size_t bucket_count;
     size_t size;
 };
 
-unsigned int hash(key_t key, size_t bucket_count)
+unsigned int hash(key_t key)
 {
     // A simple hash function using prime 31
     unsigned int hash = 0;
@@ -25,7 +24,7 @@ unsigned int hash(key_t key, size_t bucket_count)
     {
         hash = 31 * hash + key[i];
     }
-    return hash % bucket_count;
+    return hash % HM_BUCKETS;
 }
 
 void hashmap_init()
@@ -68,7 +67,7 @@ HashMap *hashmap_new()
 
 void hashmap_delete(HashMap *hm)
 {
-    for (size_t i = 0; i < hm->bucket_count; i++)
+    for (size_t i = 0; i < HM_BUCKETS; i++)
     {
         LList *list = hm->buckets[i];
         LListIter *it = llist_iter(list);
@@ -87,7 +86,7 @@ void hashmap_delete(HashMap *hm)
 
 int hashmap_insert(HashMap *hm, key_t key, value_t value)
 {
-    unsigned int bucket_index = hash(key, hm->bucket_count);
+    unsigned int bucket_index = hash(key);
     LList *bucket = hm->buckets[bucket_index];
     LListIter *it = llist_iter(bucket);
 
@@ -119,7 +118,7 @@ int hashmap_insert(HashMap *hm, key_t key, value_t value)
 
 bool hashmap_contains(HashMap *hm, key_t key)
 {
-    unsigned int bucket_index = hash(key, hm->bucket_count);
+    unsigned int bucket_index = hash(key);
     LList *bucket = hm->buckets[bucket_index];
     LListIter *it = llist_iter(bucket);
 
@@ -138,7 +137,7 @@ bool hashmap_contains(HashMap *hm, key_t key)
 
 bool hashmap_remove(HashMap *hm, key_t key)
 {
-    unsigned int bucket_index = hash(key, hm->bucket_count);
+    unsigned int bucket_index = hash(key);
     LList *bucket = hm->buckets[bucket_index];
     LListIter *it = llist_iter(bucket);
 
@@ -166,7 +165,7 @@ value_t hashmap_get(HashMap *hm, key_t key, bool *success)
         *success = false; // Default to false, will set to true if key is found
     }
 
-    unsigned int bucket_index = hash(key, hm->bucket_count);
+    unsigned int bucket_index = hash(key);
     LList *bucket = hm->buckets[bucket_index];
     LListIter *it = llist_iter(bucket);
 
