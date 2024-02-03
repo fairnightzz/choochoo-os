@@ -84,10 +84,12 @@ int svc_send(int tid, const char *msg, int msglen, char *reply, int rplen, TaskD
   if (receive_task->status != RECEIVE_WAIT)
   {
     // Sender blocks
-    LOG_DEBUG("Sending message to task %d, not in RECEIVE_WAIT", tid);
+    LOG_DEBUG("Sending message to task %d from %d, not in RECEIVE_WAIT", tid, curr_task->tid);
     set_task_status(curr_task, SEND_WAIT);
+    LOG_DEBUG("Task %d in SEND WAIT?: %d", curr_task->tid, curr_task->status);
+
     // Add it to the queue
-    push(receive_task->send_listeners_queue, (uint8_t)curr_task->tid);
+    push(&receive_task->send_listeners_queue, (uint8_t)curr_task->tid);
 
     // Save message state
     curr_task->send_state->send_buffer = (char *)msg;
@@ -131,11 +133,13 @@ int svc_send(int tid, const char *msg, int msglen, char *reply, int rplen, TaskD
 void svc_receive(int *tid, char *msg, int msg_len, TaskDescriptor *curr_task)
 {
   /// Scenario 1: Send First
-  if (length(curr_task->send_listeners_queue) != 0)
+  
+  if (length(&curr_task->send_listeners_queue) != 0)
   {
-    uint8_t sender_tid = pop(curr_task->send_listeners_queue);
+    uint8_t sender_tid = pop(&curr_task->send_listeners_queue);
     TaskDescriptor *sender_task = get_task(sender_tid);
     // Sanity Check
+    LOG_DEBUG("SENDER TASK STATUS? in receive %d tid", sender_task->status);
     if (sender_task->status != SEND_WAIT)
     {
       LOG_WARN("[SYSCALL ERROR] - sender task %d not in Send Wait as expected", sender_tid);

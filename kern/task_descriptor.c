@@ -57,6 +57,7 @@ int create_task(uint32_t priority, void (*entrypoint)())
       .status = READY,
       .pri = priority,
       .addrspace = addrspace,
+      .send_listeners_queue = new_byte_queue(),
       .switch_frame = sf};
   task_list.tasks[new_task_id] = new_task;
 
@@ -77,10 +78,10 @@ void set_current_task(int tid)
 {
   if (task_list.tasks[current_task] != 0)
   {
-    get_task(current_task)->status = READY;
+    set_task_status(get_task(current_task), READY);
   }
 
-  get_task(tid)->status = RUNNING;
+  set_task_status(get_task(tid), RUNNING);
   current_task = tid;
 }
 
@@ -97,7 +98,7 @@ TaskDescriptor *get_current_task()
 void delete_task(int tid)
 {
   TaskDescriptor *task = get_task(tid);
-  task->status = FINISHED;
+  set_task_status(task, FINISHED);
 
   slab_free(task->switch_frame, SWITCH_FRAME);
   pagetable_deletepage(&task->addrspace);
@@ -107,5 +108,6 @@ void delete_task(int tid)
 
 void set_task_status(TaskDescriptor *task, TaskStatus status)
 {
+  LOG_DEBUG("SETTING TASK %d STATUS: %d", task->tid, status);
   task->status = status;
 }

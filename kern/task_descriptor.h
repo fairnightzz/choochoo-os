@@ -11,13 +11,13 @@
 
 typedef enum
 {
-  RUNNING,
-  READY,
-  FINISHED,
-  ERROR,
-  SEND_WAIT,
-  RECEIVE_WAIT,
-  REPLY_WAIT,
+  RUNNING = 0,
+  READY = 1,
+  FINISHED = 2,
+  ERROR = 3,
+  SEND_WAIT = 4,
+  RECEIVE_WAIT = 5,
+  REPLY_WAIT= 6,
 } TaskStatus;
 
 // SRR Buffers
@@ -48,7 +48,7 @@ typedef struct
   uint32_t pri;
   addrspace addrspace;
 
-  BQueue *send_listeners_queue;
+  BQueue send_listeners_queue;
   SendState *send_state;
   ReceiveState *receive_state;
 
