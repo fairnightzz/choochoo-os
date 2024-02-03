@@ -17,6 +17,8 @@ void kernel_init()
   pagetable_init();
   task_init();
   scheduler_init();
+  llist_init();
+  hashmap_init();
 }
 
 static int next_tid = 0;

@@ -62,20 +62,77 @@ void NameServerTask()
 {
   nameserver_tid = MyTid();
 
+  // While loop
   for (;;)
   {
-    // do shit
+    NameServerMessage message;
+    NameServerResponse reply;
+    int sender_tid;
+
+    int msg_len = Receive(
+        &sender_tid,
+        (char *)&message,
+        sizeof(NameServerMessage));
+
+    if (msg_len < 0)
+    {
+      PRINT("Namespace: Error receiving");
+      continue;
+    }
+
+    if (message.type == NS_REGISTER_AS)
+    {
+      // Register the name to the tid.
+      // Don't need to worry about string destructuring as long as the user task doesn't destructure
+      // TODO: copy the string
+      char *name = message.data.register_as.name;
+      hashmap_insert(nameserver_map, name, sender_tid);
+
+      // Reply back success
+      reply = (NameServerResponse){
+          .type = NS_REGISTER_AS,
+          .data = {
+              .register_as = {
+                  .registered = true,
+              }}};
+
+      Reply(sender_tid, (char *)&reply, sizeof(NameServerResponse));
+    }
+    else if (message.type == NS_WHO_IS)
+    {
+      char *name = message.data.who_is.name;
+      int success;
+      int req_tid = hashmap_get(nameserver_map, name, &success);
+
+      reply = (NameServerResponse){
+          .type = NS_WHO_IS,
+          .data = {
+              .who_is = {
+                  .tid = -1,
+              }}};
+
+      if (success == false)
+      {
+        PRINT("[NAMESERVER]: Could not find name to tid");
+      }
+      else
+      {
+        reply.data.who_is.tid = req_tid;
+      }
+
+      Reply(sender_tid, (char *)&reply, sizeof(NameServerResponse));
+    }
   }
 }
 
 void NameServerTaskInit()
 {
-  nameserver_map = hashmap_init();
+  nameserver_map = hashmap_new();
 
   int tid = Create(2, &NameServerTask);
 
   if (tid < 0)
   {
-    LOG_ERROR("Name server task creation did not work");
+    PRINT("Name server task creation did not work");
   }
 }
