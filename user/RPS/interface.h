@@ -1,3 +1,7 @@
+#ifndef __RPS_INTERFACE_H__
+#define __RPS_INTERFACE_H__
+#include <stdbool.h>
+
 typedef enum
 {
   RPS_SIGNUP,
@@ -43,6 +47,20 @@ typedef struct
   RPSMove p2Move;
 } RPSGameState;
 
+static const char *const MOVE_STRING[4] = {
+    "NONE",
+    "ROCK",
+    "PAPER",
+    "SCISSORS"};
+
+static const char *const RESULT_STRING[4] = {
+    "OPPONENT QUIT",
+    "WIN",
+    "LOSE",
+    "TIE"};
+
 int Signup(int server);
 int Play(int server, RPSMove move);
 int Quit(int server);
+
+#endif // __RPS_INTERFACE_H__

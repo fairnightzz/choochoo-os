@@ -1,43 +1,45 @@
 #include "client.h"
+#include "interface.h"
+#include "user/nameserver.h"
 
+// Plays only rock!
 void RPSClientTask1()
 {
-  Tid rps = WhoIs(RPS_ADDRESS);
-  Signup(rps);
+  int server = WhoIs(RPSAddress);
+  Signup(server);
 
-  Play(rps, MOVE_ROCK);
-  Play(rps, MOVE_ROCK);
-  Play(rps, MOVE_ROCK);
+  Play(server, MOVE_ROCK);
+  Play(server, MOVE_ROCK);
+  Play(server, MOVE_ROCK);
 
-  Quit(rps);
-  Exit();
+  Quit(server);
 }
 
+// Plays in a certain order
 void RPSClientTask2()
 {
-  Tid rps = WhoIs(RPS_ADDRESS);
-  Signup(rps);
+  int server = WhoIs(RPSAddress);
+  Signup(server);
 
-  Play(rps, MOVE_SCISSORS);
-  Play(rps, MOVE_PAPER);
-  Play(rps, MOVE_ROCK);
-  Play(rps, MOVE_PAPER);
-  Play(rps, MOVE_SCISSORS);
+  Play(server, MOVE_ROCK);
+  Play(server, MOVE_PAPER);
+  Play(server, MOVE_SCISSORS);
+  Play(server, MOVE_ROCK);
+  Play(server, MOVE_PAPER);
+  Play(server, MOVE_SCISSORS);
 
-  Quit(rps);
-  Exit();
+  Quit(server);
 }
 
+// Plays one move, quits and then signs up to play another move
 void RPSClientTask3()
 {
-  Tid rps = WhoIs(RPS_ADDRESS);
-  Signup(rps);
-  Play(rps, MOVE_ROCK);
-  Quit(rps);
+  int server = WhoIs(RPSAddress);
+  Signup(server);
+  Play(server, MOVE_ROCK);
+  Quit(server);
 
-  Signup(rps);
-  Play(rps, MOVE_SCISSORS);
-  Quit(rps);
-
-  Exit();
+  Signup(server);
+  Play(server, MOVE_PAPER);
+  Quit(server);
 }

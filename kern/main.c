@@ -1,6 +1,7 @@
 #include "kern.h"
 #include "stdlib.h"
 #include "user/k1.h"
+#include "user/k2.h"
 
 int kmain()
 {
@@ -9,10 +10,15 @@ int kmain()
 
     // set_log_level(LOG_LEVEL_DEBUG);
 
+    // K1
+    /*
     svc_create(4, &FirstUserTask);
-    // TaskDescriptor *task1 = get_task(tid1);
     svc_yield_first();
-    // enter_usermode(task1->switch_frame);
+    */
+
+    // K2
+    svc_create(10, &startK2Task);
+    svc_yield_first();
 
     return 0;
 }

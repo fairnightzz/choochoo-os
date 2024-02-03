@@ -1,7 +1,7 @@
-#ifndef __USERPROG_H__
-#define __USERPROG_H__
+#ifndef __K1_H__
+#define __K1_H__
 
 void OtherTask();
 void FirstUserTask();
 
-#endif // __USERPROG_H__
+#endif // __K1_H__
