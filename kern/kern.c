@@ -18,6 +18,7 @@ void kernel_init()
   scheduler_init();
   llist_init();
   hashmap_init();
+  string_init();
 }
 
 static int next_tid = 0;

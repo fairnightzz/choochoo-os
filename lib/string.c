@@ -1,5 +1,11 @@
 #include <stdarg.h>
 #include "string.h"
+#include "kern/kalloc.h"
+
+void string_init()
+{
+  slab_set_block_size(STRING, sizeof(String));
+}
 
 void string_copy(char *dest, char *src)
 {
@@ -10,10 +16,11 @@ void string_copy(char *dest, char *src)
   *dest = '\0';
 }
 
-String make_string(char *charString)
+String *make_string(char *charString)
 {
-  String str = {.string = ""};
-  string_copy(str.string, charString);
+  String *str = slab_alloc(STRING);
+  *str = (String){.string = ""};
+  string_copy(str->string, charString);
   return str;
 }
 
@@ -97,4 +104,9 @@ char *string_puts(char *cur, char *buf)
     buf++;
   }
   return cur;
+}
+
+void string_destroy(String *str)
+{
+  slab_free(str, STRING);
 }

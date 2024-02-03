@@ -10,14 +10,14 @@ typedef enum
   HASH_MAP_BUCKETS = 9,
   HASH_MAP_NODE = 10,
   RPS_GAME_STATE = 11,
+  USER_STRING = 12,
 } UserAllocationType;
 
 void alloc_init(UserAllocationType uat, size_t size);
 
-void*
+void *
 alloc(UserAllocationType uat);
 
-void
-free(void *ptr, UserAllocationType uat);
+void free(void *ptr, UserAllocationType uat);
 
 #endif /* __ALLOC_H__ */

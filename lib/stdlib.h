@@ -9,5 +9,6 @@
 #include "hashmap.h"
 #include "util.h"
 #include "alloc.h"
+#include "string.h"
 
 #endif // __STDLIB_H__
