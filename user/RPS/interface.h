@@ -2,6 +2,8 @@
 #define __RPS_INTERFACE_H__
 #include <stdbool.h>
 
+#define RPSAddress "ROCK-PAPER-SCISSORS"
+
 typedef enum
 {
   RPS_SIGNUP,
@@ -12,9 +14,9 @@ typedef enum
 typedef enum
 {
   MOVE_NONE = 0,
-  MOVE_ROCK,
-  MOVE_PAPER,
-  MOVE_SCISSORS,
+  MOVE_ROCK = 1,
+  MOVE_PAPER = 2,
+  MOVE_SCISSORS = 3,
 } RPSMove;
 
 typedef enum
@@ -30,7 +32,7 @@ typedef struct
 {
   RPSMessageType type;
   RPSMove move;
-} RPSMessage;
+} RPSRequest;
 
 typedef struct
 {

@@ -1,8 +1,9 @@
 #include "interface.h"
+#include "stdlib.h"
 
 int Signup(int server)
 {
-  RPSMessage request = (RPSMessage){
+  RPSRequest request = (RPSRequest){
       .type = RPS_SIGNUP,
       .move = MOVE_NONE,
   };
@@ -13,11 +14,11 @@ int Signup(int server)
   int returnValue = Send(
       server,
       (const char *)&request,
-      sizeof(RPSMessage),
+      sizeof(RPSRequest),
       (char *)&response,
       sizeof(RPSResponse));
 
-  if (ret < 0)
+  if (returnValue < 0)
   {
     PRINT("Player %d signup failed.", MyTid());
     return -1;
@@ -29,9 +30,9 @@ int Signup(int server)
 }
 
 RPSResult
-Play(Tid server, RPSMove move)
+Play(int server, RPSMove move)
 {
-  RPSMessage request = (RPSMessage){
+  RPSRequest request = (RPSRequest){
       .type = RPS_PLAY,
       .move = move,
   };
@@ -58,14 +59,14 @@ Play(Tid server, RPSMove move)
 
 int Quit(int server)
 {
-  RPSMessage request = (RPSMessage){
+  RPSRequest request = (RPSRequest){
       .type = RPS_QUIT,
   };
   RPSResponse response;
 
   PRINT("Player %d quitting", MyTid());
 
-  int ret = Send(server, (const char *)&request, sizeof(RPSMessage), (char *)&response, sizeof(RPSResponse));
+  int ret = Send(server, (const char *)&request, sizeof(RPSRequest), (char *)&response, sizeof(RPSResponse));
   if (ret < 0)
   {
     PRINT("Player %d Quit()'s Send() call returned a negative value", MyTid());
