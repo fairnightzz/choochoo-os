@@ -6,7 +6,7 @@
 int kmain()
 {
 
-    set_log_level(LOG_LEVEL_DEBUG);
+    // set_log_level(LOG_LEVEL_DEBUG);
 
     LOG_DEBUG("start kernel init");
     kernel_init();

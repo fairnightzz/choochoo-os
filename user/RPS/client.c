@@ -5,12 +5,13 @@
 // Plays only rock!
 void RPSClientTask1()
 {
+  PRINT("RUNNING RPS CLIENT TASK 1");
   int server = WhoIs(RPSAddress);
   Signup(server);
 
   Play(server, MOVE_ROCK);
-  Play(server, MOVE_ROCK);
-  Play(server, MOVE_ROCK);
+  // Play(server, MOVE_ROCK);
+  // Play(server, MOVE_ROCK);
 
   Quit(server);
 }

@@ -21,7 +21,7 @@ RPSResult result(RPSMove p1, RPSMove p2)
 
 void rps_signup(int *waitingTid, int senderTid, HashMap *player_games, RPSResponse *resp)
 {
-  if (waitingTid == 0)
+  if (*waitingTid == 0)
   { // no other player waiting to join
     LOG_DEBUG("[RPS Signup]: Player Tid %d joined. Waiting for one more.", senderTid);
     *waitingTid = senderTid;
@@ -129,6 +129,7 @@ void rps_quit(int senderTid, RPSResponse *resp, HashMap *player_games)
 
 void RPSServer()
 {
+  PRINT("Running Server");
   alloc_init(RPS_GAME_STATE, sizeof(RPSGameState));
   HashMap *player_games = hashmap_new();
   RPSRequest request;

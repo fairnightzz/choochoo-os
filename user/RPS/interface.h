@@ -22,10 +22,10 @@ typedef enum
 typedef enum
 {
   RESULT_NONE = 0,   // Undefined behaviour
-  RESULT_INCOMPLETE, // the other player quits
-  RESULT_WIN,
-  RESULT_LOSE,
-  RESULT_TIE,
+  RESULT_INCOMPLETE = 1, // the other player quits
+  RESULT_WIN = 2,
+  RESULT_LOSE = 3,
+  RESULT_TIE = 4,
 } RPSResult;
 
 typedef struct
@@ -55,7 +55,8 @@ static const char *const MOVE_STRING[4] = {
     "PAPER",
     "SCISSORS"};
 
-static const char *const RESULT_STRING[4] = {
+static const char *const RESULT_STRING[5] = {
+    "ERROR",
     "OPPONENT QUIT",
     "WIN",
     "LOSE",

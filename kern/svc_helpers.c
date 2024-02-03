@@ -24,10 +24,10 @@ void svc_yield(TaskDescriptor *curr_task)
 {
   next_tid = scheduler_next_task();
 
-  if (next_tid == 0)
+  while (next_tid == 0)
   {
-    LOG_ERROR("[SYSCALL - Yield]: No tasks left");
-    return;
+    LOG_ERROR("[SYSCALL - Yield]: No tasks left (2)");
+    next_tid = scheduler_next_task();
   }
 
   LOG_DEBUG("[SYSCALL - Yield]: Context Switch [%d -> %d]", curr_task->tid, next_tid);
