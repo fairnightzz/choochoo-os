@@ -1,6 +1,6 @@
 #include "kern.h"
 #include "stdlib.h"
-#include "user/userprog.h"
+#include "user/k1.h"
 
 int kmain()
 {
