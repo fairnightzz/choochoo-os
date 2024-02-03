@@ -13,7 +13,10 @@ typedef enum
   LLIST = 5,
   LLIST_NODE = 6,
   LLIST_ITERATOR = 7,
-  COUNT = 8,
+  HASHMAP = 8,
+  HASHMAP_BUCKETS = 9,
+  HASHMAP_NODE = 10,
+  COUNT = 11,
 } AllocationType;
 
 void slab_init();
