@@ -16,7 +16,7 @@ RPSResult result(RPSMove p1, RPSMove p2)
   if (p1 == MOVE_ROCK && p2 == MOVE_SCISSORS)
     return RESULT_WIN;
 
-  return (p1 > p2) ? RESULT_WIN : RESULT_LOSE;
+  return (p1 > p2) ? RESULT_LOSE : RESULT_WIN;
 }
 
 void rps_signup(int *waitingTid, int senderTid, HashMap *player_games, RPSResponse *resp)
