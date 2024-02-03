@@ -17,8 +17,6 @@ void *memcpy(void *restrict dest, const void *restrict src, size_t n);
 // miscellanious
 void format_clock(unsigned int time, char *buffer);
 
-extern uint32_t get_esr_el1(void);
-
 int min(int a, int b);
 
 #endif /* util.h */

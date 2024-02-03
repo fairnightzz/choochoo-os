@@ -1,7 +1,6 @@
 #include "svc_helpers.h"
 #include "scheduler.h"
 #include "kalloc.h"
-#include "util.h"
 #include "stdlib.h"
 
 static int next_tid = 0;
@@ -56,9 +55,10 @@ void svc_yield_first()
 int svc_send(int tid, const char *msg, int msglen, char *reply, int rplen, TaskDescriptor *curr_task)
 {
   // Task that is receiving
-  TaskDescriptor* receive_task = get_task(tid);
+  TaskDescriptor *receive_task = get_task(tid);
 
-  if (receive_task == 0) {
+  if (receive_task == 0)
+  {
     return -1;
   }
 
@@ -81,7 +81,8 @@ int svc_send(int tid, const char *msg, int msglen, char *reply, int rplen, TaskD
 
   // Scenario 1: Send first
   // Look up receiver, make sure it's not in receive wait
-  if (receive_task->status != RECEIVE_WAIT) {
+  if (receive_task->status != RECEIVE_WAIT)
+  {
     // Sender blocks
     LOG_DEBUG("Sending message to task %d, not in RECEIVE_WAIT", tid);
     set_task_status(curr_task, SEND_WAIT);
@@ -89,12 +90,14 @@ int svc_send(int tid, const char *msg, int msglen, char *reply, int rplen, TaskD
     push(receive_task->send_listeners_queue, (uint8_t)curr_task->tid);
 
     // Save message state
-    curr_task->send_state->send_buffer = (char*)msg;
+    curr_task->send_state->send_buffer = (char *)msg;
     curr_task->send_state->send_buffer_len = msglen;
   }
   // Scenario 2: Receiver first
-  else{
-    if (receive_task->receive_state == 0) {
+  else
+  {
+    if (receive_task->receive_state == 0)
+    {
       slab_free(sendState, SEND_STATE);
       curr_task->send_state = 0;
       LOG_ERROR("Receiving task does not have receive state intialized");
@@ -108,7 +111,7 @@ int svc_send(int tid, const char *msg, int msglen, char *reply, int rplen, TaskD
     set_task_status(curr_task, REPLY_WAIT);
 
     // Kernel copies data
-    int copylen = min(msglen, receive_task->receive_state->receive_buffer_len); 
+    int copylen = min(msglen, receive_task->receive_state->receive_buffer_len);
     memcpy(receive_task->receive_state->receive_buffer, msg, copylen);
 
     // Return
@@ -125,13 +128,16 @@ int svc_send(int tid, const char *msg, int msglen, char *reply, int rplen, TaskD
   return 0;
 }
 
-void svc_receive(int *tid, char* msg, int msg_len, TaskDescriptor *curr_task) {
+void svc_receive(int *tid, char *msg, int msg_len, TaskDescriptor *curr_task)
+{
   /// Scenario 1: Send First
-  if (length(curr_task->send_listeners_queue) != 0) {
+  if (length(curr_task->send_listeners_queue) != 0)
+  {
     uint8_t sender_tid = pop(curr_task->send_listeners_queue);
     TaskDescriptor *sender_task = get_task(sender_tid);
     // Sanity Check
-    if (sender_task->status != SEND_WAIT) {
+    if (sender_task->status != SEND_WAIT)
+    {
       LOG_WARN("[SYSCALL ERROR] - sender task %d not in Send Wait as expected", sender_tid);
     }
 
@@ -139,40 +145,45 @@ void svc_receive(int *tid, char* msg, int msg_len, TaskDescriptor *curr_task) {
     set_task_status(sender_task, REPLY_WAIT);
 
     // copy over data
-    int copylen = min(sender_task->send_state->send_buffer_len, msg_len); 
+    int copylen = min(sender_task->send_state->send_buffer_len, msg_len);
     memcpy(msg, sender_task->send_state->send_buffer, copylen);
 
     curr_task->switch_frame->x0 = copylen;
 
     *tid = sender_tid; // update sender on receiver side
-  } else { // Scenario 2: Receive First
+  }
+  else
+  { // Scenario 2: Receive First
     set_task_status(curr_task, RECEIVE_WAIT);
     ReceiveState *receive_state = slab_alloc(RECEIVE_STATE);
-    *receive_state = (ReceiveState) {
-      .receive_buffer = msg,
-      .receive_buffer_len = msg_len,
-      .sender_tid = tid
-    };
+    *receive_state = (ReceiveState){
+        .receive_buffer = msg,
+        .receive_buffer_len = msg_len,
+        .sender_tid = tid};
     curr_task->receive_state = receive_state;
     LOG_DEBUG("[SYSCALL - Receive]: empty receive queue blocking on TID %d", curr_task->tid);
   }
 }
 
-int svc_reply(int tid, const char* reply, int rplen) {
+int svc_reply(int tid, const char *reply, int rplen)
+{
   // Sender must be waiting
-  TaskDescriptor* senderTask = get_task(tid);
+  TaskDescriptor *senderTask = get_task(tid);
 
-  if (senderTask == 0) {
+  if (senderTask == 0)
+  {
     return -1;
   }
 
   // Look up sender (sanity check for reply wait)
-  if (senderTask->status != REPLY_WAIT) {
+  if (senderTask->status != REPLY_WAIT)
+  {
     return -2;
   }
 
   // Make sure that the sender send state is initialized
-  if (senderTask->send_state == 0) {
+  if (senderTask->send_state == 0)
+  {
     LOG_ERROR("Sender task send state not initialized");
   }
 
@@ -180,7 +191,7 @@ int svc_reply(int tid, const char* reply, int rplen) {
   set_task_status(senderTask, READY);
 
   // kernel copies data
-  int copylen = min(rplen, senderTask->send_state->reply_buffer_len); 
+  int copylen = min(rplen, senderTask->send_state->reply_buffer_len);
   memcpy(senderTask->send_state->reply_buffer, reply, copylen);
 
   // Free senderTask send state
@@ -192,5 +203,3 @@ int svc_reply(int tid, const char* reply, int rplen) {
 
   return copylen;
 }
-
-

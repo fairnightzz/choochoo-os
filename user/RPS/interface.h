@@ -62,7 +62,7 @@ static const char *const RESULT_STRING[4] = {
     "TIE"};
 
 int Signup(int server);
-int Play(int server, RPSMove move);
+RPSResult Play(int server, RPSMove move);
 int Quit(int server);
 
 #endif // __RPS_INTERFACE_H__

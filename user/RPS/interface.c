@@ -43,7 +43,7 @@ Play(int server, RPSMove move)
   int returnValue = Send(
       server,
       (const char *)&request,
-      sizeof(RPSMsg),
+      sizeof(RPSRequest),
       (char *)&response,
       sizeof(RPSResponse));
 
@@ -66,8 +66,8 @@ int Quit(int server)
 
   PRINT("Player %d quitting", MyTid());
 
-  int ret = Send(server, (const char *)&request, sizeof(RPSRequest), (char *)&response, sizeof(RPSResponse));
-  if (ret < 0)
+  int returnValue = Send(server, (const char *)&request, sizeof(RPSRequest), (char *)&response, sizeof(RPSResponse));
+  if (returnValue < 0)
   {
     PRINT("Player %d Quit()'s Send() call returned a negative value", MyTid());
     return -1;

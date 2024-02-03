@@ -1,3 +1,6 @@
+#ifndef __NAMESERVER_H__
+#define __NAMESERVER_H__
+
 #include "stdlib.h"
 #include <stdbool.h>
 
@@ -58,3 +61,5 @@ int RegisterAs(const char *name);
 int WhoIs(const char *name);
 
 void NameServerTaskInit();
+
+#endif // __NAMESERVER_H__

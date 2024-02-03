@@ -7,5 +7,6 @@
 #include "syscall_utils.h"
 #include "linked_list.h"
 #include "hashmap.h"
+#include "util.h"
 
 #endif // __STDLIB_H__
