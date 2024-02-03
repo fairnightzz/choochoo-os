@@ -124,6 +124,11 @@ void rps_quit(int senderTid, RPSResponse *resp, HashMap *player_games)
     if (game_state->gameComplete == true)
     {
       free(game_state, RPS_GAME_STATE);
+    } else {
+      resp->type = RPS_PLAY;
+      resp->res = RESULT_INCOMPLETE;
+      int otherTid = (senderTid == game_state->p1) ? game_state->p2 : game_state->p1;
+      Reply(otherTid, (char *)resp, sizeof(RPSResponse));
     }
     game_state->gameComplete = true;
     hashmap_remove(player_games, mapKey);

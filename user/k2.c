@@ -24,7 +24,7 @@ void RPSTask()
 
   PRINT("Test 4");
   Create(3, &RPSClientTask2);
-  // Create(3, &RPSClientTask3);
+  Create(3, &RPSClientTask3);
 }
 
 void startK2Task()
