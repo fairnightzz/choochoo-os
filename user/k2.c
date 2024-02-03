@@ -10,23 +10,20 @@ void RPSTask()
 
   // PRINT("Test 1, TID: %d", MyTid());
   // Should end after three and then task 2 sends three
-  int tid = Create(3, &RPSClientTask1);
-  PRINT("First Tid %d", tid);
-  tid = Create(3, &RPSClientTask1);
-  PRINT("Second Tid %d", tid);
-
-  PRINT("RPSTask Exiting...");
+  // PRINT("Test 1");
+  // Create(3, &RPSClientTask1);
+  // Create(3, &RPSClientTask1);
 
   // PRINT("Test 2");
   // Create(3, &RPSClientTask1);
   // Create(3, &RPSClientTask2);
 
   // PRINT("Test 3");
-  // Create(3, &RPSClientTask1);
-  // Create(3, &RPSClientTask1);
+  // Create(3, &RPSClientTask2);
+  // Create(3, &RPSClientTask2);
 
-  // PRINT("Test 4");
-  // Create(3, &RPSClientTask3);
+  PRINT("Test 4");
+  Create(3, &RPSClientTask2);
   // Create(3, &RPSClientTask3);
 }
 

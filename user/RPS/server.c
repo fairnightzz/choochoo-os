@@ -135,7 +135,6 @@ void rps_quit(int senderTid, RPSResponse *resp, HashMap *player_games)
 
 void RPSServer()
 {
-  PRINT("Running Server");
   alloc_init(RPS_GAME_STATE, sizeof(RPSGameState));
   HashMap *player_games = hashmap_new();
   RPSRequest request;

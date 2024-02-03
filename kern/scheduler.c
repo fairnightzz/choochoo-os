@@ -47,41 +47,56 @@ int scheduler_add_task(int tid, uint8_t priority)
   return 0;
 }
 
+// Return task coutn for a given level of the queue
+uint8_t scheduler_count_tasks(SchedulerNode *node)
+{
+  uint8_t count = 0;
+  while (node != 0)
+  {
+    ++count;
+    node = node->next;
+  }
+  return count;
+}
+
 int scheduler_next_task()
 {
   for (uint8_t i = 0; i < NUM_PRIORITY_LEVELS; i++)
   {
-    if (mlfq[i] != 0)
+    for (uint8_t j = 0; j < scheduler_count_tasks(mlfq[i]); j++)
     {
-      SchedulerNode *nextTask = mlfq[i];
-
-      // Move next task forward
-      mlfq[i] = mlfq[i]->next;
-
-      // Add the next task to the end of the priority list
-      // Reach the end of the linked list and insert the task there
-      if (mlfq[i] == 0)
+      if (mlfq[i] != 0)
       {
-        mlfq[i] = nextTask;
-      }
-      else
-      {
-        SchedulerNode *current = mlfq[i];
-        for (;;)
+        SchedulerNode *nextTask = mlfq[i];
+
+        // Move next task forward
+        mlfq[i] = mlfq[i]->next;
+
+        // Add the next task to the end of the priority list
+        // Reach the end of the linked list and insert the task there
+        if (mlfq[i] == 0)
         {
-          if (current->next == 0)
-          {
-            current->next = nextTask;
-            break;
-          }
-          current = current->next;
+          mlfq[i] = nextTask;
         }
+        else
+        {
+          SchedulerNode *current = mlfq[i];
+          for (;;)
+          {
+            if (current->next == 0)
+            {
+              current->next = nextTask;
+              break;
+            }
+            current = current->next;
+          }
+        }
+        // Set the linked list tail
+        nextTask->next = 0;
+        TaskStatus task_status = get_task(nextTask->tid)->status;
+        if (task_status == READY || task_status == RUNNING)
+          return nextTask->tid;
       }
-      // Set the linked list tail
-      nextTask->next = 0;
-      TaskStatus task_status = get_task(nextTask->tid)->status;
-      if (task_status == READY || task_status == RUNNING)
-        return nextTask->tid;
     }
   }
   LOG_WARN("No next task");
