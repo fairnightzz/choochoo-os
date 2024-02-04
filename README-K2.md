@@ -191,8 +191,7 @@ Then, three tests are initialized.
 
 Test 1 starts by creating RPS client task 1 and client task 2, where the behaviour is expected to be a tie on the first round, task 2 winning the second round, and then task 1 winning the third round. Task 1 quits, while task 2 plays three more moves (that are invalid since task 1 quit already) and then quits.
 
-Test 2 starts by calling task 1, task 2. This should have the same behaviour as test 1.
-Then, it calls task 1 twice. Since they are both the same, there should be three ties.
+Test 2 starts by calling task 1 twice. Since they are both the same, there should be three ties.
 Then, it calls task 2 twice. Since they are both the same, there should be six ties.
 
 Test 3 creates Task 3 three times. We will call the tasks 1, 2, and 3 respectively.
@@ -200,6 +199,10 @@ Test 3 creates Task 3 three times. We will call the tasks 1, 2, and 3 respective
 Task 1 will play rock and task 2 will also play rock, giving a tie. They both quit, and then signup again, resulting in them both playing paper, resulting in a tie. 
 
 Task 3 gets created, and hangs on the initial sign up.
+
+Output:
+```
+```
 
 # 6 Performance Measurement
 

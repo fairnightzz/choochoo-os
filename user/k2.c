@@ -17,8 +17,6 @@ void RPSTask()
 
   PRINT("Test 2");
   Create(3, &RPSClientTask1);
-  Create(3, &RPSClientTask2);
-  Create(3, &RPSClientTask1);
   Create(3, &RPSClientTask1);
   Create(3, &RPSClientTask2);
   Create(3, &RPSClientTask2);

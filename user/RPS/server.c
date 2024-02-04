@@ -18,7 +18,7 @@ RPSResult result(RPSMove p1, RPSMove p2)
 
   if (p1 == MOVE_PAPER && p2 == MOVE_ROCK)
     return RESULT_WIN;
-  
+
   if (p1 == MOVE_SCISSORS && p2 == MOVE_PAPER)
     return RESULT_WIN;
 
@@ -29,12 +29,12 @@ void rps_signup(int *waitingTid, int senderTid, HashMap *player_games, RPSRespon
 {
   if (*waitingTid == 0)
   { // no other player waiting to join
-    LOG_DEBUG("[RPS Signup]: Player Tid %d joined. Waiting for one more.", senderTid);
+    PRINT("[RPS SERVER Signup]: Player Tid %d joined. Waiting for one more.", senderTid);
     *waitingTid = senderTid;
     return;
   }
 
-  LOG_DEBUG("[RPS Signup]: Player Tid %d joined. Player Tid %d already here. Starting...", *waitingTid, senderTid);
+  PRINT("[RPS SERVER Signup]: Player Tid %d joined. Player Tid %d already here. Starting...", senderTid, *waitingTid);
 
   RPSGameState *game = alloc(RPS_GAME_STATE);
   game->gameComplete = false;
@@ -66,7 +66,7 @@ void rps_error(int senderTid, RPSResponse *resp, RPSMessageType type)
 
 void rps_play(int senderTid, RPSRequest req, RPSResponse *resp, HashMap *player_games)
 {
-  LOG_DEBUG("[RPS Play] Player %d played move: %s", senderTid, MOVE_STRING[req.move]);
+  PRINT("[RPS SERVER Play] Player %d played move: %s", senderTid, MOVE_STRING[req.move]);
 
   bool success;
   char mapKey[4];
@@ -80,7 +80,7 @@ void rps_play(int senderTid, RPSRequest req, RPSResponse *resp, HashMap *player_
   }
   else if (game_state->gameComplete)
   {
-    LOG_WARN("[RPS Play] Rejected player %d's move since game is already completed.", senderTid);
+    PRINT("[RPS SERVER Play] Rejected player %d's move since game is already completed.", senderTid);
     rps_error(senderTid, resp, RPS_PLAY);
   }
   else
@@ -92,7 +92,7 @@ void rps_play(int senderTid, RPSRequest req, RPSResponse *resp, HashMap *player_
 
     if (game_state->p1Move != MOVE_NONE && game_state->p2Move != MOVE_NONE)
     {
-      LOG_DEBUG("[RPS Play] player %d and %d's game completed -> responding with results", game_state->p1, game_state->p2);
+      PRINT("[RPS SERVER Play] player %d and %d's game completed -> responding with results", game_state->p1, game_state->p2);
 
       resp->type = RPS_PLAY;
       resp->res = result(game_state->p1Move, game_state->p2Move);
@@ -108,7 +108,7 @@ void rps_play(int senderTid, RPSRequest req, RPSResponse *resp, HashMap *player_
 
 void rps_quit(int senderTid, RPSResponse *resp, HashMap *player_games)
 {
-  LOG_DEBUG("[RPS Quit] Player %d has quit", senderTid);
+  PRINT("[RPS SERVER Quit] Player %d has quit", senderTid);
   bool success;
   char mapKey[4];
   ui2a(senderTid, 10, mapKey);
@@ -124,7 +124,9 @@ void rps_quit(int senderTid, RPSResponse *resp, HashMap *player_games)
     if (game_state->gameComplete == true)
     {
       free(game_state, RPS_GAME_STATE);
-    } else {
+    }
+    else
+    {
       resp->type = RPS_PLAY;
       resp->res = RESULT_INCOMPLETE;
       int otherTid = (senderTid == game_state->p1) ? game_state->p2 : game_state->p1;

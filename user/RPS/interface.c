@@ -9,7 +9,7 @@ int Signup(int server)
   };
   RPSResponse response;
 
-  PRINT("Player %d signing up", MyTid());
+  PRINT("[CLIENT] Player %d requesting to sign up", MyTid());
 
   int returnValue = Send(
       server,
@@ -24,7 +24,7 @@ int Signup(int server)
     return -1;
   }
 
-  PRINT("Player %d signed up.", MyTid());
+  // PRINT("Player %d signed up.", MyTid());
 
   return 0;
 }
@@ -38,7 +38,7 @@ Play(int server, RPSMove move)
   };
   RPSResponse response;
 
-  PRINT("Player %d Playing move %s", MyTid(), MOVE_STRING[request.move]);
+  PRINT("[CLIENT] Player %d requesting to play move %s", MyTid(), MOVE_STRING[request.move]);
 
   int returnValue = Send(
       server,
@@ -52,7 +52,7 @@ Play(int server, RPSMove move)
     PRINT("Player %d Play()'s Send() call returned a negative value", MyTid());
     return -1;
   }
-  PRINT("Player %d got a %s", MyTid(), RESULT_STRING[response.res]);
+  PRINT("[CLIENT] Player %d got a %s", MyTid(), RESULT_STRING[response.res]);
 
   return response.res;
 }
@@ -64,7 +64,7 @@ int Quit(int server)
   };
   RPSResponse response;
 
-  PRINT("Player %d quitting", MyTid());
+  PRINT("[CLIENT] Player %d requesting to quit", MyTid());
 
   int returnValue = Send(server, (const char *)&request, sizeof(RPSRequest), (char *)&response, sizeof(RPSResponse));
   if (returnValue < 0)
@@ -73,7 +73,7 @@ int Quit(int server)
     return -1;
   }
 
-  PRINT("Player %d quit successfully", MyTid());
+  // PRINT("Player %d quit successfully", MyTid());
 
   return 0;
 }
