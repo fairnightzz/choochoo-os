@@ -15,7 +15,7 @@ INCLUDEDIR  = include
 WARNINGS=-Wall -Wextra -Wpedantic -Wno-unused-const-variable
 CFLAGS:=-g -pipe -static $(WARNINGS) -ffreestanding -nostartfiles\
 	-mcpu=$(ARCH) -static-pie -mstrict-align -fno-builtin -mgeneral-regs-only\
-	-I./$(INCLUDEDIR) -I./ -O3
+	-I./$(INCLUDEDIR) -I./ #-O3
 
 # -Wl,option tells g++ to pass 'option' to the linker with commas replaced by spaces
 # doing this rather than calling the linker ourselves simplifies the compilation procedure

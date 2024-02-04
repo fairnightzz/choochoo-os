@@ -7,8 +7,8 @@
 #define SCTLR_RESERVED (3 << 28) | (3 << 22) | (1 << 20) | (1 << 11)
 #define USER_MASK_ACCESS (1 << 9)
 #define SCTLR_WFE_WFI_ENABLED (1 << 18) | (1 << 16)
-#define CACHE_ENABLE (1 << 12 | 1 << 2) // I and C flags
-#define SCTLR_VALUE_MMU_DISABLED (SCTLR_RESERVED | USER_MASK_ACCESS | SCTLR_WFE_WFI_ENABLED)
+#define CACHE_ENABLE (0 << 12 | 0 << 2) // CURRENTLY DISABLED. To enable, replace with this -> // (1 << 12 | 1 << 2) // I and C flags
+#define SCTLR_VALUE_MMU_DISABLED (SCTLR_RESERVED | USER_MASK_ACCESS | SCTLR_WFE_WFI_ENABLED | CACHE_ENABLE)
 
 // ***************************************
 // HCR_EL2, Hypervisor Configuration Register (EL2)
