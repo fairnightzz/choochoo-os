@@ -1,4 +1,4 @@
-<div align="center">
+r<div align="center">
 
 # CS452 - Kernel Part 2: Message Passing & Nameserver
 ### Names: Anish Aggarwal, Zhehai Zhang
@@ -22,6 +22,7 @@ The above has been tested on machine `ubuntu2204-010`.
 
 To run the RPS Game Test, head to `user/k2.c` and make sure to have this structure for `startK2Task()`:
 
+## 2.1 RPS Testing
 ```c
 void startK2Task()
 {
@@ -32,6 +33,7 @@ void startK2Task()
 }
 ```
 
+## 2.2 Performance Testing
 To run performance tests on ONE row, have this structure:
 ```c
 void startK2Task()
@@ -107,7 +109,7 @@ The kernel creates a task that runs `startK2Task()` in `user/k2.h`, which starts
 
 ## 3.2 Additional Kernel Structure (since K1)
 
-### 3.21 Message Passing (`lib/syscall.S`) (`kern/svc_helpers.c`)
+### 3.21 Message Passing (`lib/syscall.S`) (`kern/svc_helpers.h`)
 
 We added the new syscalls to `syscall.S` and added the expected behaviour of Send and Receive described in the kernel specification into `svc_helpers.c`. 
 
@@ -115,13 +117,27 @@ The logic for sending first versus receive first is implemented using states suc
 It is implemented using this logic: `https://student.cs.uwaterloo.ca/~cs452/W24/lectures/lec06.html`. If the task tid does not exist, then 
 the function returns with a negative return value.
 
-### 3.22 User Allocation (`lib/alloc.c`)
+### 3.22 User Allocation (`lib/alloc.h`)
+We want users to also be able to allocate memory for structures; however, this cannot overlap with the kernel structures. Hence, we made a library (`lib/alloc.h`) that wraps `kern/kalloc.h` and still uses `slab allocation` but as specified user memmory structures. This is done by making the `UserAllocationType` enum a subset of `AllocationType` enum. Hence, allowing for reusability of our slab allocator but also for distinction between user program allocated memory and kernel allocated memory. One important note is that for our fixed size slabs, user programs still need to initialize the block size of each struct before calling `alloc` / `free`. 
 
-### 3.23 Linked List, HashMap, Byte Queue, RPS_STATE (`lib/hashmap.c`) (`linked_list.c`) (`byte_queue.c`) (`kern/kalloc.c`)
+### 3.23 Linked List (`lib/linked_list.h`)
+We made a linked list structure because we decided to do hashing with chaining to ensure we do not run into any hash collisions and have to resize our hashmap. Hence, currently this linked list structure is only used to help implement the hashmap described in the next section; however, it was made in a way that allows it to be independent (with iterators as well). Thus, it could be used more in future assignments.
+
+### 3.24 HashMap (`lib/hashmap.h`)
+We made a hashmap for two reasons:
+1. Nameserver needs to map names to tids
+2. Want to map player tids to player objects for RPS. Could have used an array to do this, but went with hashmap approach for readability and to battle test our hash map implementation; since we know we will need this in future.
+
+The HashMap structure allows users to create a hashmap with `char *` keys and `void *` values. The `char *` keys are string copied to ensure no user changes and for stability. Note due to our copy, keys should be of length <= 20. The `void *` values allow for generic values meaning anything can be stored. This is useful in our case as in some place we may want integers (1.) and in some places we want object pointers(2.).
+
+The HashMap utilizes hashing with chaining with a 67 buckets as well as a simple hash function that uses prime 31 and the ascii values.
+
+### 3.25 Return of Circular Buffer: Byte Queue (`lib/byte_queue.h`)
+The byte queue is needed to help facillitate our `Send-Receive-Reply` functionality. When a sender sends first, they add their tid to a circular buffer queue on the receiver's task descriptor so when the receiver calls `Receive()` it can look if a sender is already in its queue. Through testing, we have verified that this buffer does not overflow.
 
 # 4 User Features
 
-## 4.1 NameServer (`user/nameserver.c`)
+## 4.1 NameServer (`user/nameserver.h`)
 
 Implemented using the specification in `https://student.cs.uwaterloo.ca/~cs452/W24/assignments/kernel.html`.
 
@@ -134,13 +150,19 @@ structs, `NameServerMessage` is to send requests to the nameserver (register as 
 The `NameServerTask()` is an infinite loop that receives messages and parses them to determine what kind of request it is. `RegisterAs()` will add the name to the hashmap which links the tid. This way, 
 when `WhoIs()` gets called, we are able to return the correct TID of whoever registered the name.
 
-## 4.2 RPS Server and Client (`user/RPS/*.c`)
+## 4.2 RPS Server and Client (`user/RPS/*.h`)
 
-### 4.21 RPS Server
+### 4.21 RPS Server (`user/RPS/server.h`)
 
-### 4.22 RPS Client (`user/RPS/client.c`) (`user/RPS/interface.c`)
+The RPS Server can be started by running the function `RPSServer()` in `user/RPS/server.h`. This server holds a hashmap that maps player tids to games. Each game instance will have its pointer stored twice in the map (one under each player).
 
-The client calls three functions in the `interface.c`:
+Then this server will constantly loop calling `Receive()` to receive a request from some client. These requests have one of three types: `RPS_SIGNUP`, `RPS_PLAY`, and `RPS_QUIT` which calls the appropriate handlers. These handlers then use and alter the RPSGameState and based on the game state, reply to the appropriate tasks. When a player plays, the corresponding game is updated with their move. If both players have moves recorded, the game is evaluated and the results are replied to each player. Games are removed from the hash map when they are quit.
+
+The game logic follows normal logic and for more specifics you can see our implmentation in `user/RPS/server.c`.
+
+### 4.22 RPS Client (`user/RPS/client.h`) (`user/RPS/interface.h`)
+
+The client calls three functions in the `interface.h`:
 
 ```c
 int Signup(int server);

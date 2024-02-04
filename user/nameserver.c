@@ -40,7 +40,7 @@ int WhoIs(const char *name)
       .data = {
           .who_is = {
               .name = (char *)name,
-          }}};
+        }}}
   NameServerResponse response;
 
   int returnValue = Send(
@@ -83,8 +83,6 @@ void NameServerTask()
     if (message.type == NS_REGISTER_AS)
     {
       // Register the name to the tid.
-      // Don't need to worry about string destructuring as long as the user task doesn't destructure
-      // TODO: copy the string
       char *name = message.data.register_as.name;
       hashmap_insert(nameserver_map, name, (void *)(uintptr_t)sender_tid);
 
