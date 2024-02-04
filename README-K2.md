@@ -1,6 +1,6 @@
 r<div align="center">
 
-# CS452 - Kernel Part 2: Message Passing & Nameserver
+# CS452 - K2: Message Passing & Nameserver
 ### Names: Anish Aggarwal, Zhehai Zhang
 ### Student IDs: a59aggar, z2252zha
 ### Date: 02/06/24
@@ -8,6 +8,7 @@ r<div align="center">
 </div>
 
 # 1 Overview
+This is **Kernel Part 2** of CS452 W24 @UWaterloo. We added to the implementation of the Kernel that allows for message passing, nameserver, and RPS. Hope you like it :)
 
 # 2 Hash Commit & Testing
 Run the following on a `linux.student.cs` environment:
