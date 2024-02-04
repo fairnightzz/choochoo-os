@@ -203,13 +203,34 @@ Task 3 gets created, and hangs on the initial sign up.
 
 # 6 Performance Measurement
 
+## 6.1 Performance Methodology
+The performance methodology we used is measuring multiple times:
+
+```C
+loop N=20 times:
+  set_start(&timer, SSR_TIME);
+  Send();
+  set_end(&timer, SSR_TIME);
+endloop;
+```
+We use this methodology as it allows us to measure variance and single instances of time. From comparing, max, avg, and the iteration values, we see that variance between tests is very low. Furthermore, the overhead from the PerfTimingState is very low because we did not see a difference in tests when testing , which we know because when we tried the other methodology of `inflate impact of operation`:
+```c
+set_start(&timer, SSR_TIME);
+loop N=20 times:
+    operation();
+endloop;
+set_end(&timer, SSR_TIME);
+```
+By comparing these to, we realize that our overhead on the timer is not much as the results do not differ.
+
+## 6.2 Performance Testing
 For each variation of test, we create two tasks: one that sends, and one that receives. Each task will perform 20 iterations of their respective send/receive on either 4, 64, 256 bytes of a message size. 20 iterations are used to prevent a high variance and a consistent recording in measurements. The timer is created in Send and ends when a reply has been received to time a full SRR.
 
 The following features were permuted and tested: Optimization/No Optimization, icache/dcache/both/none, ReceiverFirst/SenderFirst, 4/64/256 Bytes.
 
 Currently, `-O3` flag is commented out in the Makefile. The `CACHE_ENABLE` variable in `boot.S` is also disabled. To test caching and optimization features, please uncomment those.
 
-## Conclusions
+## 6.3 Performance Conclusions
 
 We can see that with regardless of whether optimization is on or whether cache is on, the general behaviour when the message size is increased is that the SRR time in microseconds increases. This makes sense as it takes longer for `memcopy` to copy over the message, making the SRR time longer.
 
