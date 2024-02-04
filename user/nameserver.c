@@ -40,7 +40,7 @@ int WhoIs(const char *name)
       .data = {
           .who_is = {
               .name = (char *)name,
-        }}}
+        }}};
   NameServerResponse response;
 
   int returnValue = Send(
