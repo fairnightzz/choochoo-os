@@ -25,4 +25,5 @@ void uart_puts(size_t line, const char *buf);
 void uart_printf(size_t line, char *fmt, ...);
 void uart_format_print(size_t line, char *fmt, va_list va);
 
+
 #endif /* rpi.h */

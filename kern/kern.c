@@ -31,13 +31,6 @@ void handle_svc()
   opCode = get_esr_el1() & 0x1ffffff;
   LOG_DEBUG("[SYSCALL - Handle SVC]: Vector Table Handler OpCode #%x", opCode);
 
-  // If kernel just started
-  // if (get_current_task_id() == 0)
-  // {
-  //   LOG_DEBUG("YIELD ON FIRST CALL", opCode);
-  //   svc_yield_first();
-  // }
-
   curr_task = get_current_task();
 
   switch (opCode)
@@ -83,7 +76,6 @@ void handle_svc()
     LOG_DEBUG("[SYSCALL - Exit]: Context Switch [%d -> %d]", curr_task->tid, next_tid);
 
     set_current_task(next_tid);
-    LOG_DEBUG("Done setting current task");
     enter_usermode(get_task(next_tid)->switch_frame);
     break;
   }

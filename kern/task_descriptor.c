@@ -108,6 +108,5 @@ void delete_task(int tid)
 
 void set_task_status(TaskDescriptor *task, TaskStatus status)
 {
-  LOG_DEBUG("SETTING TASK %d STATUS: %d", task->tid, status);
   task->status = status;
 }

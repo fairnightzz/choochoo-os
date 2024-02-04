@@ -15,8 +15,6 @@ void scheduler_init()
 
 int scheduler_add_task(int tid, uint8_t priority)
 {
-  LOG_DEBUG("Add Task: %d, with priority %d", tid, priority);
-
   if (priority >= NUM_PRIORITY_LEVELS)
   {
     LOG_ERROR("Invalid priority, should never reach this stage");
@@ -105,8 +103,6 @@ int scheduler_next_task()
 
 void scheduler_delete_task(int tid)
 {
-  LOG_DEBUG("Removing Task: %d", tid);
-
   for (uint8_t i = 0; i < NUM_PRIORITY_LEVELS; i++)
   {
     SchedulerNode *previous = 0;
@@ -130,6 +126,5 @@ void scheduler_delete_task(int tid)
       current = current->next;
     }
   }
-
-  LOG_DEBUG("Could not find task %d in scheduler", tid);
+  LOG_ERROR("Could not find task %d in scheduler", tid);
 }
