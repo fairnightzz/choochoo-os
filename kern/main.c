@@ -7,6 +7,7 @@ int kmain()
 {
 
     // set_log_level(LOG_LEVEL_DEBUG);
+    // asm volatile("msr SCTLR_EL1, %x0\n\t" ::"r"((1 << 2) | (1 << 12)));
 
     kernel_init();
 
