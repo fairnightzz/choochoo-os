@@ -18,7 +18,7 @@ git checkout <insert hash>
 make
 ```
 
-The above has been tested on machine `ubuntu2204-010`.
+The above has been tested on machine `ubuntu2204-002`.
 
 To run the RPS Game Test, head to `user/k2.c` and make sure to have this structure for `startK2Task()`:
 
@@ -202,6 +202,163 @@ Task 3 gets created, and hangs on the initial sign up.
 
 Output:
 ```
+Starting K2 TAsk!
+Test 1
+[CLIENT] Player 4 requesting to sign up
+[RPS SERVER Signup]: Player Tid 4 joined. Waiting for one more.
+[CLIENT] Player 5 requesting to sign up
+[RPS SERVER Signup]: Player Tid 5 joined. Player Tid 4 already here. Starting...
+[CLIENT] Player 4 requesting to play move ROCK
+[CLIENT] Player 5 requesting to play move ROCK
+[RPS SERVER Play] Player 4 played move: ROCK
+[RPS SERVER Play] Player 5 played move: ROCK
+[RPS SERVER Play] player 4 and 5's game completed -> responding with results
+[CLIENT] Player 4 got a TIE
+[CLIENT] Player 5 got a TIE
+[CLIENT] Player 4 requesting to play move ROCK
+[RPS SERVER Play] Player 4 played move: ROCK
+[CLIENT] Player 5 requesting to play move PAPER
+[RPS SERVER Play] Player 5 played move: PAPER
+[RPS SERVER Play] player 4 and 5's game completed -> responding with results
+[CLIENT] Player 4 got a LOSE
+[CLIENT] Player 5 got a WIN
+[CLIENT] Player 4 requesting to play move ROCK
+[RPS SERVER Play] Player 4 played move: ROCK
+[CLIENT] Player 5 requesting to play move SCISSORS
+[RPS SERVER Play] Player 5 played move: SCISSORS
+[RPS SERVER Play] player 4 and 5's game completed -> responding with results
+[CLIENT] Player 4 got a WIN
+[CLIENT] Player 5 got a LOSE
+[CLIENT] Player 4 requesting to quit
+[RPS SERVER Quit] Player 4 has quit
+[CLIENT] Player 5 requesting to play move ROCK
+[RPS SERVER Play] Player 5 played move: ROCK
+[RPS SERVER Play] Rejected player 5's move since game is already completed.
+[CLIENT] Player 5 got a OPPONENT QUIT
+[CLIENT] Player 5 requesting to play move PAPER
+[RPS SERVER Play] Player 5 played move: PAPER
+[RPS SERVER Play] Rejected player 5's move since game is already completed.
+[CLIENT] Player 5 got a OPPONENT QUIT
+[CLIENT] Player 5 requesting to play move SCISSORS
+[RPS SERVER Play] Player 5 played move: SCISSORS
+[RPS SERVER Play] Rejected player 5's move since game is already completed.
+[CLIENT] Player 5 got a OPPONENT QUIT
+[CLIENT] Player 5 requesting to quit
+[RPS SERVER Quit] Player 5 has quit
+Test 2
+[CLIENT] Player 6 requesting to sign up
+[RPS SERVER Signup]: Player Tid 6 joined. Waiting for one more.
+[CLIENT] Player 7 requesting to sign up
+[RPS SERVER Signup]: Player Tid 7 joined. Player Tid 6 already here. Starting...
+[CLIENT] Player 6 requesting to play move ROCK
+[CLIENT] Player 7 requesting to play move ROCK
+[RPS SERVER Play] Player 6 played move: ROCK
+[RPS SERVER Play] Player 7 played move: ROCK
+[RPS SERVER Play] player 6 and 7's game completed -> responding with results
+[CLIENT] Player 6 got a TIE
+[CLIENT] Player 7 got a TIE
+[CLIENT] Player 6 requesting to play move ROCK
+[RPS SERVER Play] Player 6 played move: ROCK
+[CLIENT] Player 7 requesting to play move ROCK
+[RPS SERVER Play] Player 7 played move: ROCK
+[RPS SERVER Play] player 6 and 7's game completed -> responding with results
+[CLIENT] Player 6 got a TIE
+[CLIENT] Player 7 got a TIE
+[CLIENT] Player 6 requesting to play move ROCK
+[RPS SERVER Play] Player 6 played move: ROCK
+[CLIENT] Player 7 requesting to play move ROCK
+[RPS SERVER Play] Player 7 played move: ROCK
+[RPS SERVER Play] player 6 and 7's game completed -> responding with results
+[CLIENT] Player 6 got a TIE
+[CLIENT] Player 7 got a TIE
+[CLIENT] Player 6 requesting to quit
+[RPS SERVER Quit] Player 6 has quit
+[CLIENT] Player 7 requesting to quit
+[RPS SERVER Quit] Player 7 has quit
+[CLIENT] Player 8 requesting to sign up
+[RPS SERVER Signup]: Player Tid 8 joined. Waiting for one more.
+[CLIENT] Player 9 requesting to sign up
+[RPS SERVER Signup]: Player Tid 9 joined. Player Tid 8 already here. Starting...
+[CLIENT] Player 8 requesting to play move ROCK
+[CLIENT] Player 9 requesting to play move ROCK
+[RPS SERVER Play] Player 8 played move: ROCK
+[RPS SERVER Play] Player 9 played move: ROCK
+[RPS SERVER Play] player 8 and 9's game completed -> responding with results
+[CLIENT] Player 8 got a TIE
+[CLIENT] Player 9 got a TIE
+[CLIENT] Player 8 requesting to play move PAPER
+[RPS SERVER Play] Player 8 played move: PAPER
+[CLIENT] Player 9 requesting to play move PAPER
+[RPS SERVER Play] Player 9 played move: PAPER
+[RPS SERVER Play] player 8 and 9's game completed -> responding with results
+[CLIENT] Player 8 got a TIE
+[CLIENT] Player 9 got a TIE
+[CLIENT] Player 8 requesting to play move SCISSORS
+[RPS SERVER Play] Player 8 played move: SCISSORS
+[CLIENT] Player 9 requesting to play move SCISSORS
+[RPS SERVER Play] Player 9 played move: SCISSORS
+[RPS SERVER Play] player 8 and 9's game completed -> responding with results
+[CLIENT] Player 8 got a TIE
+[CLIENT] Player 9 got a TIE
+[CLIENT] Player 8 requesting to play move ROCK
+[RPS SERVER Play] Player 8 played move: ROCK
+[CLIENT] Player 9 requesting to play move ROCK
+[RPS SERVER Play] Player 9 played move: ROCK
+[RPS SERVER Play] player 8 and 9's game completed -> responding with results
+[CLIENT] Player 8 got a TIE
+[CLIENT] Player 9 got a TIE
+[CLIENT] Player 8 requesting to play move PAPER
+[RPS SERVER Play] Player 8 played move: PAPER
+[CLIENT] Player 9 requesting to play move PAPER
+[RPS SERVER Play] Player 9 played move: PAPER
+[RPS SERVER Play] player 8 and 9's game completed -> responding with results
+[CLIENT] Player 8 got a TIE
+[CLIENT] Player 9 got a TIE
+[CLIENT] Player 8 requesting to play move SCISSORS
+[RPS SERVER Play] Player 8 played move: SCISSORS
+[CLIENT] Player 9 requesting to play move SCISSORS
+[RPS SERVER Play] Player 9 played move: SCISSORS
+[RPS SERVER Play] player 8 and 9's game completed -> responding with results
+[CLIENT] Player 8 got a TIE
+[CLIENT] Player 9 got a TIE
+[CLIENT] Player 8 requesting to quit
+[RPS SERVER Quit] Player 8 has quit
+[CLIENT] Player 9 requesting to quit
+[RPS SERVER Quit] Player 9 has quit
+Test 3
+[CLIENT] Player 10 requesting to sign up
+[RPS SERVER Signup]: Player Tid 10 joined. Waiting for one more.
+[CLIENT] Player 11 requesting to sign up
+[RPS SERVER Signup]: Player Tid 11 joined. Player Tid 10 already here. Starting...
+[CLIENT] Player 10 requesting to play move ROCK
+[CLIENT] Player 11 requesting to play move ROCK
+[RPS SERVER Play] Player 10 played move: ROCK
+[RPS SERVER Play] Player 11 played move: ROCK
+[RPS SERVER Play] player 10 and 11's game completed -> responding with results
+[CLIENT] Player 10 got a TIE
+[CLIENT] Player 11 got a TIE
+[CLIENT] Player 10 requesting to quit
+[RPS SERVER Quit] Player 10 has quit
+[CLIENT] Player 11 requesting to quit
+[CLIENT] Player 10 requesting to sign up
+[RPS SERVER Quit] Player 11 has quit
+[CLIENT] Player 11 requesting to sign up
+[RPS SERVER Signup]: Player Tid 10 joined. Waiting for one more.
+[RPS SERVER Signup]: Player Tid 11 joined. Player Tid 10 already here. Starting...
+[CLIENT] Player 10 requesting to play move PAPER
+[CLIENT] Player 11 requesting to play move PAPER
+[RPS SERVER Play] Player 10 played move: PAPER
+[RPS SERVER Play] Player 11 played move: PAPER
+[RPS SERVER Play] player 10 and 11's game completed -> responding with results
+[CLIENT] Player 10 got a TIE
+[CLIENT] Player 11 got a TIE
+[CLIENT] Player 10 requesting to quit
+[RPS SERVER Quit] Player 10 has quit
+[CLIENT] Player 11 requesting to quit
+[RPS SERVER Quit] Player 11 has quit
+[CLIENT] Player 12 requesting to sign up
+[RPS SERVER Signup]: Player Tid 12 joined. Waiting for one more.
+[WARN] No next task
 ```
 
 # 6 Performance Measurement
