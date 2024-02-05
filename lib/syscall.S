@@ -48,3 +48,9 @@ Receive:
 Reply:
     svc 0x7
     ret
+
+.global AwaitEvent
+.type AwaitEvent, %function
+Reply:
+    svc 0x8
+    ret

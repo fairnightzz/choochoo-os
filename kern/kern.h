@@ -13,7 +13,8 @@ typedef enum
     EXIT = 4,
     SEND = 5,
     RECEIVE = 6,
-    REPLY = 7
+    REPLY = 7,
+    AWAIT_EVENT = 8
 } opcode;
 
 void kernel_init();

@@ -116,6 +116,11 @@ void handle_svc()
     svc_yield(curr_task);
     break;
   }
+  case (AWAIT_EVENT):
+  {
+    LOG_DEBUG("[SYSCALL - AwaitEvent]");
+    break;
+  }
   default:
   {
     LOG_WARN("[SYSCALL - ERROR]: Uncaught System Call [OpCode %x]", opCode);
