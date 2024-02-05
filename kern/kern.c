@@ -5,6 +5,7 @@
 #include "kalloc.h"
 #include "scheduler.h"
 #include "svc_helpers.h"
+#include "gic.h"
 
 void kernel_init()
 {
@@ -19,6 +20,8 @@ void kernel_init()
   llist_init();
   hashmap_init();
   string_init();
+  gic_target_and_enable(97);
+
 }
 
 static int next_tid = 0;

@@ -51,6 +51,6 @@ Reply:
 
 .global AwaitEvent
 .type AwaitEvent, %function
-Reply:
+AwaitEvent:
     svc 0x8
     ret
