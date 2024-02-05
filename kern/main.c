@@ -7,8 +7,7 @@
 int kmain()
 {
 
-    // set_log_level(LOG_LEVEL_DEBUG);
-    // asm volatile("msr SCTLR_EL1, %x0\n\t" ::"r"((1 << 2) | (1 << 12)));
+    set_log_level(LOG_LEVEL_DEBUG);
 
     kernel_init();
 
@@ -19,8 +18,8 @@ int kmain()
     */
 
     // K2
-    svc_create(15, &idleTask);
-    svc_create(10, &startK2Task);
+    svc_create(31, &idleTask);
+    // svc_create(10, &startK2Task);
     svc_yield_first();
 
     return 0;

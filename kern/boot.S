@@ -20,7 +20,8 @@
 // SPSR_EL2, Saved Program Status Register (EL2)
 // Architecture Reference Manual Section C5.2.19
 // ***************************************
-#define SPSR_MASK_ALL (11 << 6)
+// #define SPSR_MASK_ALL (11 << 6)
+#define SPSR_MASK_ALL (7 << 6)
 #define SPSR_EL1       (5 << 0)
 #define SPSR_VALUE (SPSR_MASK_ALL | SPSR_EL1)
 
@@ -54,6 +55,9 @@ el1_entry:
     // configure processor and mmu
     ldr x13, =SCTLR_VALUE_MMU_DISABLED
     msr sctlr_el1, x13
+
+    // pstate mask out exceptions at el1
+    msr DAIFSet, #0b1111
 
     // initialize SP
     msr SPSel, #1

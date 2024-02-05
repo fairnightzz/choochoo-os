@@ -135,15 +135,15 @@ void handle_svc()
 
 void handle_irq()
 {
-  LOG_DEBUG("[INTERRUPT]");
+  PRINT("[INTERRUPT]");
   uint32_t iar = gic_read_iar();
   uint32_t interruptId = iar & 0x3FF; // Read lower 10 bits
 
-  LOG_DEBUG("[INTERRUPT]: [InterruptID %x]", interruptId);
+  PRINT("[INTERRUPT]: [InterruptID %x]", interruptId);
 
   if (interruptId == 97)
   {
-    LOG_DEBUG("Clock tick");
+    PRINT("Clock tick");
   }
 
   gic_write_eoir(iar);
