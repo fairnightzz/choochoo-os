@@ -21,4 +21,8 @@ typedef struct
   int ticks;
 } ClockResponse;
 
+int Time(int tid);
+int Delay(int tid, int ticks);
+int DelayUntil(int tid, int ticks);
+
 #endif // __CLOCK_INTERFACE_H__

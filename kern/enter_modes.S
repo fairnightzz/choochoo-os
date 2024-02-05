@@ -180,4 +180,7 @@ str x1, [x0, #256]
 mrs x1, SP_EL0
 str x1, [x0, #264]
 
+# reset kernel stack pointer so that extra variables get destructured
+mov sp, #0x00200000
+
 b handle_irq

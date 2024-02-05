@@ -29,6 +29,8 @@ void kernel_init()
 static int next_tid = 0;
 static uint32_t opCode = 0;
 static TaskDescriptor *curr_task = 0;
+static uint32_t iar;
+static uint32_t interruptId;
 
 void handle_svc()
 {
@@ -139,8 +141,8 @@ void handle_irq()
 {
   curr_task = get_current_task();
   PRINT("[INTERRUPT]");
-  uint32_t iar = gic_read_iar();
-  uint32_t interruptId = iar & 0x3FF; // Read lower 10 bits
+  iar = gic_read_iar();
+  interruptId = iar & 0x3FF; // Read lower 10 bits
 
   PRINT("[INTERRUPT]: [InterruptID %d]", interruptId);
 
