@@ -1,5 +1,5 @@
 #include "perf_timing.h"
-#include "kern/rpi.h"
+#include "kern/timer.h"
 
 PerfTimingState new_perf_timing_state(void) {
   PerfTimingState new_state = {0};

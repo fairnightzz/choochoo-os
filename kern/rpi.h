@@ -5,6 +5,8 @@
 #include <stddef.h>
 #include <stdarg.h>
 
+static char *const MMIO_BASE = (char *)0xFE000000;
+
 // Serial line 1 on the RPi hat is used for the console; 2 for Marklin
 #define CONSOLE 1
 #define MARKLIN 2

@@ -7,6 +7,7 @@
 #include "svc_helpers.h"
 #include "asm_util.h"
 #include "gic.h"
+#include "timer.h"
 
 void kernel_init()
 {
@@ -22,6 +23,7 @@ void kernel_init()
   hashmap_init();
   string_init();
   gic_target_and_enable(97);
+  timer_init_c1();
 }
 
 static int next_tid = 0;
@@ -135,15 +137,17 @@ void handle_svc()
 
 void handle_irq()
 {
+  curr_task = get_current_task();
   PRINT("[INTERRUPT]");
   uint32_t iar = gic_read_iar();
   uint32_t interruptId = iar & 0x3FF; // Read lower 10 bits
 
-  PRINT("[INTERRUPT]: [InterruptID %x]", interruptId);
+  PRINT("[INTERRUPT]: [InterruptID %d]", interruptId);
 
   if (interruptId == 97)
   {
     PRINT("Clock tick");
+    timer_reset_c1();
   }
 
   gic_write_eoir(iar);
