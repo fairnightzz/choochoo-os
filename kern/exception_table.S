@@ -59,7 +59,7 @@ lower_el_aarch64_sync:   // The exception handler for a synchronous
 .balign 0x80
 lower_el_aarch64_irq:    // The exception handler for an IRQ from a lower EL
                          // (AArch64).
-  nop
+  b enter_kernelmode_irq
 
 .balign 0x80
 lower_el_aarch64_fiq:    // The exception handler for an FIQ from a lower EL

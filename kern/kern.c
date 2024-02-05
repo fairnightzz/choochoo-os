@@ -5,6 +5,7 @@
 #include "kalloc.h"
 #include "scheduler.h"
 #include "svc_helpers.h"
+#include "asm_util.h"
 #include "gic.h"
 
 void kernel_init()
@@ -21,7 +22,6 @@ void kernel_init()
   hashmap_init();
   string_init();
   gic_target_and_enable(97);
-
 }
 
 static int next_tid = 0;
@@ -31,7 +31,7 @@ static TaskDescriptor *curr_task = 0;
 void handle_svc()
 {
 
-  opCode = get_esr_el1() & 0x1ffffff;
+  opCode = get_esr_el1() & 0x1FFFFFF;
   LOG_DEBUG("[SYSCALL - Handle SVC]: Vector Table Handler OpCode #%x", opCode);
 
   curr_task = get_current_task();
@@ -131,4 +131,22 @@ void handle_svc()
     break;
   }
   }
+}
+
+void handle_irq()
+{
+  LOG_DEBUG("[INTERRUPT]");
+  uint32_t iar = gic_read_iar();
+  uint32_t interruptId = iar & 0x3FF; // Read lower 10 bits
+
+  LOG_DEBUG("[INTERRUPT]: [InterruptID %x]", interruptId);
+
+  if (interruptId == 97)
+  {
+    LOG_DEBUG("Clock tick");
+  }
+
+  gic_write_eoir(iar);
+
+  svc_yield(curr_task);
 }

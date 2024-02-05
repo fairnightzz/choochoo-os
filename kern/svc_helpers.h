@@ -16,6 +16,4 @@ void svc_receive(int *tid, char *msg, int msg_len, TaskDescriptor *curr_task);
 
 int svc_reply(int tid, const char *reply, int rplen);
 
-extern uint32_t get_esr_el1(void);
-
 #endif // __KERN_H__

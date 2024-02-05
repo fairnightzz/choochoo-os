@@ -1,1 +1,1 @@
-bash /u/cs452/public/tools/upload.sh k2.img D8:3A:DD:1B:36:9E
+bash /u/cs452/public/tools/upload.sh choochoo-os.img D8:3A:DD:1B:36:9E

@@ -28,18 +28,18 @@ SOURCES := $(wildcard $(KERNDIR)/*.[cS]) $(wildcard $(USERDIR)/*.[cS]) $(wildcar
 OBJECTS := $(patsubst %.c, %.o, $(patsubst %.S, %.o, $(SOURCES)))
 DEPENDS := $(patsubst %.c, %.d, $(patsubst %.S, %.d, $(SOURCES)))
 
-# The first rule is the default, ie. "make", "make all" and "make k2.img" mean the same
-all: k2.img
+# The first rule is the default, ie. "make", "make all" and "make choochoo-os.img" mean the same
+all: choochoo-os.img
 
 clean:
-	rm -f $(OBJECTS) $(DEPENDS) k2.elf k2.img
+	rm -f $(OBJECTS) $(DEPENDS) choochoo-os.elf choochoo-os.img
 
-k2.img: k2.elf
+choochoo-os.img: choochoo-os.elf
 	$(OBJCOPY) $< -O binary $@
 
-k2.elf: $(OBJECTS) linker.ld
+choochoo-os.elf: $(OBJECTS) linker.ld
 	$(CC) $(CFLAGS) $(filter-out %.ld, $^) -o $@ $(LDFLAGS)
-	@$(OBJDUMP) -d k2.elf | grep -Fq q0 && printf "\n***** WARNING: SIMD INSTRUCTIONS DETECTED! *****\n\n" || true
+	@$(OBJDUMP) -d choochoo-os.elf | grep -Fq q0 && printf "\n***** WARNING: SIMD INSTRUCTIONS DETECTED! *****\n\n" || true
 
 %.o: %.c Makefile
 	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
