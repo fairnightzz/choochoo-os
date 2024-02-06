@@ -126,6 +126,8 @@ void handle_svc()
   case (AWAIT_EVENT):
   {
     LOG_DEBUG("[SYSCALL - AwaitEvent]");
+    curr_task->switch_frame->x0 = ((int)curr_task->switch_frame->x0);
+    svc_yield(curr_task);
     break;
   }
   default:
@@ -140,15 +142,13 @@ void handle_svc()
 void handle_irq()
 {
   curr_task = get_current_task();
-  PRINT("[INTERRUPT]");
   iar = gic_read_iar();
   interruptId = iar & 0x3FF; // Read lower 10 bits
 
-  PRINT("[INTERRUPT]: [InterruptID %d]", interruptId);
-
   if (interruptId == 97)
   {
-    PRINT("Clock tick");
+    // Unblock tasks with EVENT_WAIT
+    scheduler_unblock_events(EVENT_CLOCK_TICK);
     timer_reset_c1();
   }
 

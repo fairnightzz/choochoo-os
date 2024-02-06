@@ -4,7 +4,6 @@
 
 void idleTask()
 {
-  PRINT("start idle task");
   for (;;)
   {
     call_wfi();

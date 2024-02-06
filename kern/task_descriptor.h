@@ -17,8 +17,16 @@ typedef enum
   ERROR = 3,
   SEND_WAIT = 4,
   RECEIVE_WAIT = 5,
-  REPLY_WAIT= 6,
+  REPLY_WAIT = 6,
+  EVENT_WAIT = 7,
 } TaskStatus;
+
+typedef enum
+{
+  EVENT_NONE = 0,
+  EVENT_CLOCK_TICK,
+  EVENT_MAX = 2,
+} EventType;
 
 // SRR Buffers
 
@@ -51,6 +59,8 @@ typedef struct
   BQueue send_listeners_queue;
   SendState *send_state;
   ReceiveState *receive_state;
+
+  EventType eventWaitType;
 
 } TaskDescriptor;
 

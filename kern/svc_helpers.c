@@ -207,3 +207,17 @@ int svc_reply(int tid, const char *reply, int rplen)
 
   return copylen;
 }
+
+int svc_await_event(int eventId, TaskDescriptor *curr_task)
+{
+  if (eventId <= EVENT_NONE || EVENT_MAX <= eventId)
+  {
+    // Invalid id
+    return -1;
+  }
+  EventType eventType = (EventType)eventId;
+
+  curr_task->status = EVENT_WAIT;
+  curr_task->eventWaitType = eventType;
+  return 0;
+}

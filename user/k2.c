@@ -29,7 +29,7 @@ void RPSTask()
 
 void startK2Task()
 {
-  PRINT("Starting K2 TAsk!");
+  PRINT("Starting K2 Task!");
   NameServerTaskInit();
   RPSTask();
   // k2_performance_measuring();

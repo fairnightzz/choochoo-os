@@ -40,7 +40,7 @@ int WhoIs(const char *name)
       .data = {
           .who_is = {
               .name = (char *)name,
-        }}};
+          }}};
   NameServerResponse response;
 
   int returnValue = Send(
@@ -127,7 +127,7 @@ void NameServerTaskInit()
 {
   nameserver_map = hashmap_new();
 
-  int tid = Create(2, &NameServerTask);
+  int tid = Create(3, &NameServerTask);
 
   if (tid < 0)
   {

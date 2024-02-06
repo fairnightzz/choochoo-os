@@ -128,3 +128,19 @@ void scheduler_delete_task(int tid)
   }
   LOG_ERROR("Could not find task %d in scheduler", tid);
 }
+
+void scheduler_unblock_events(EventType eventType)
+{
+  for (uint8_t i = 0; i < NUM_PRIORITY_LEVELS; i++) {
+    SchedulerNode* current = mlfq[i];
+    for (uint8_t j = 0; j < scheduler_count_tasks(mlfq[i]); j++) {
+      TaskDescriptor* task = get_task(current->tid);
+      if (task->status == EVENT_WAIT && task->eventWaitType == eventType) {
+        // unblock
+        task->status = READY;
+        task->eventWaitType = EVENT_NONE;
+      }
+      current = current->next;
+    }
+  }
+}
