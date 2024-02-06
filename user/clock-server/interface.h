@@ -1,6 +1,10 @@
 #ifndef __CLOCK_INTERFACE_H__
 #define __CLOCK_INTERFACE_H__
 
+#include <stdint.h>
+
+#define ClockAddress "TICK-TOCK"
+
 typedef enum
 {
   CLOCK_TIME = 1,
@@ -20,6 +24,13 @@ typedef struct
   ClockMessageType type;
   int ticks;
 } ClockResponse;
+
+typedef struct
+{
+  int tid;
+  uint32_t absolute_tick_delay;
+  ClockMessageType type;
+} ClockBufferRequest;
 
 int Time(int tid);
 int Delay(int tid, int ticks);

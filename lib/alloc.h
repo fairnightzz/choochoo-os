@@ -11,6 +11,7 @@ typedef enum
   HASH_MAP_NODE = 10,
   RPS_GAME_STATE = 11,
   USER_STRING = 12,
+  CLOCK_BUFFER_REQUEST = 13,
 } UserAllocationType;
 
 void alloc_init(UserAllocationType uat, size_t size);

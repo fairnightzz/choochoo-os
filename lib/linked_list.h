@@ -9,9 +9,25 @@
 typedef struct LList LList;
 typedef struct LListIter LListIter;
 
+typedef struct LListNode {
+    void* data;
+    struct LListNode* next;
+    struct LListNode* prev;
+} LListNode;
+
+struct LList {
+    LListNode* head;
+    LListNode* tail;
+    size_t length;
+};
+
+struct LListIter {
+    LListNode* current;
+};
+
 void llist_init(); // needs to be called once before any other methods
 LList* llist_new(void);
-void llist_destroy(LList* list);
+void llist_destroy(LList* list); 
 
 void llist_append_front(LList* list, void* item);
 void llist_append(LList* list, void* item);

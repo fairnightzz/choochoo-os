@@ -18,7 +18,8 @@ typedef enum
   HASHMAP_NODE = 10,
   RPS_STATE = 11,
   STRING = 12,
-  COUNT = 13,
+  CLK_BUFFER_REQUEST = 13,
+  COUNT = 14,
 } AllocationType;
 
 void slab_init();

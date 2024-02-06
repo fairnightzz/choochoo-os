@@ -2,21 +2,6 @@
 #include <stdlib.h>
 #include "alloc.h"
 
-typedef struct LListNode {
-    void* data;
-    struct LListNode* next;
-    struct LListNode* prev;
-} LListNode;
-
-struct LList {
-    LListNode* head;
-    LListNode* tail;
-    size_t length;
-};
-
-struct LListIter {
-    LListNode* current;
-};
 
 // Function to create a new list node
 static LListNode* llist_create_node(void* item) {
