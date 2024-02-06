@@ -38,7 +38,7 @@ void ClientTask4()
   ClientTask(delayInterval, numDelays);
 }
 
-void K3Tasks()
+void FirstUserTask()
 {
   Create(2, &ClockServer);
   Create(3, &ClientTask1);
@@ -51,6 +51,6 @@ void startK3Task()
 {
   PRINT("Starting K3 Task!");
   NameServerTaskInit();
-  K3Tasks();
+  FirstUserTask();
   // k3_performance_measuring();
 }

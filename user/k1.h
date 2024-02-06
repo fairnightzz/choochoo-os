@@ -2,6 +2,6 @@
 #define __K1_H__
 
 void OtherTask();
-void FirstUserTask();
+void K1_FirstUserTask();
 
 #endif // __K1_H__

@@ -10,7 +10,7 @@ void OtherTask()
     Exit();
 }
 
-void FirstUserTask()
+void K1_FirstUserTask()
 {
     int t1 = Create(5, &OtherTask);
     PRINT("Created: %d", t1);

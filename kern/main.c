@@ -2,6 +2,7 @@
 #include "stdlib.h"
 #include "user/k1.h"
 #include "user/k2.h"
+#include "user/k3.h"
 #include "user/init_tasks.h"
 
 int kmain()
@@ -19,7 +20,7 @@ int kmain()
 
     // K2
     svc_create(31, &idleTask);
-    // svc_create(10, &startK2Task);
+    svc_create(10, &startK3Task);
     svc_yield_first();
 
     return 0;
