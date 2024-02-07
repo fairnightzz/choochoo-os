@@ -16,4 +16,6 @@ void svc_receive(int *tid, char *msg, int msg_len, TaskDescriptor *curr_task);
 
 int svc_reply(int tid, const char *reply, int rplen);
 
+int svc_await_event(int eventId, TaskDescriptor *curr_task);
+
 #endif // __KERN_H__

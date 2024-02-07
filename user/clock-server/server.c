@@ -6,6 +6,7 @@
 
 void waitTick(int clock_server_tid);
 
+// notifier
 void awaitTick()
 {
   int clock_server = WhoIs(ClockAddress);
@@ -33,6 +34,7 @@ void waitTick(int clock_server_tid)
 
 void ClockServer()
 {
+  PRINT("[CLOCK SERVER]");
   RegisterAs(ClockAddress);
   timer_init_c1();
 
@@ -45,6 +47,7 @@ void ClockServer()
   int from_tid;
 
   Create(1, &awaitTick);
+  PRINT("AFTER AWAIT TICK CREATED");
 
   while (1)
   {

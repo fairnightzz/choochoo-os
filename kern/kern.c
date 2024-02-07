@@ -130,7 +130,7 @@ void handle_svc()
   case (AWAIT_EVENT):
   {
     LOG_DEBUG("[SYSCALL - AwaitEvent]");
-    curr_task->switch_frame->x0 = ((int)curr_task->switch_frame->x0);
+    curr_task->switch_frame->x0 = svc_await_event((int)curr_task->switch_frame->x0, curr_task);
     svc_yield(curr_task);
     break;
   }

@@ -42,13 +42,23 @@ void ClientTask4()
 void FirstUserTask()
 {
   Create(2, &ClockServer);
-
+  PRINT("CLOCK SERVER FINISHED");
   // For printing performance idle
+
   Create(15, &idlePerformanceTask);
+  PRINT("IDLE TASK CREATED");
+  
+  PRINT("CLIENT TASK 1");
 
   Create(3, &ClientTask1);
+  PRINT("CLIENT TASK 2");
+
   Create(4, &ClientTask2);
+  PRINT("CLIENT TASK 3");
+
   Create(5, &ClientTask3);
+  PRINT("CLIENT TASK 4");
+
   Create(6, &ClientTask4);
 }
 
@@ -56,6 +66,7 @@ void startK3Task()
 {
   PRINT("Starting K3 Task!");
   NameServerTaskInit();
+  PRINT("FIRST USER TASK");
   FirstUserTask();
   // k3_performance_measuring();
 }
