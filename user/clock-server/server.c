@@ -37,6 +37,7 @@ void ClockServer()
   PRINT("[CLOCK SERVER]");
   RegisterAs(ClockAddress);
   timer_init_c1();
+  alloc_init(CLOCK_BUFFER_REQUEST, sizeof(ClockBufferRequest));
 
   LList *clk_requests = llist_new();
   uint32_t tick_count = 0;
@@ -51,7 +52,6 @@ void ClockServer()
 
   while (1)
   {
-    PRINT("RECEIVING");
     int request_length = Receive(&from_tid, (char *)&request, sizeof(ClockBufferRequest));
     if (request_length < 0)
     {
@@ -100,7 +100,6 @@ void ClockServer()
       LListIter *it = llist_iter(clk_requests);
       while (it->current)
       {
-        PRINT("ITERATOR LOOP");
         ClockBufferRequest *clk_req = (ClockBufferRequest *)llist_next(it);
         if (clk_req->absolute_tick_delay <= tick_count)
         {

@@ -24,7 +24,6 @@ void kernel_init()
   hashmap_init();
   string_init();
   gic_target_and_enable(97);
-  timer_init_c1();
 }
 
 static int next_tid = 0;
