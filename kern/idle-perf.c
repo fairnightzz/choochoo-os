@@ -28,7 +28,7 @@ void idle_timer_stop()
 int idle_timer_percentage()
 {
   int total_time = timer_get() - start_time;
-  return total_idle_time / (total_time) * 100;
+  return total_idle_time * 100 / total_time;
 }
 
 void idle_timer_start_logic(int tid)

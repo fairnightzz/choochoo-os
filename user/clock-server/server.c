@@ -34,9 +34,7 @@ void waitTick(int clock_server_tid)
 
 void ClockServer()
 {
-  PRINT("[CLOCK SERVER]");
   RegisterAs(ClockAddress);
-  timer_init_c1();
   alloc_init(CLOCK_BUFFER_REQUEST, sizeof(ClockBufferRequest));
 
   LList *clk_requests = llist_new();
@@ -48,7 +46,7 @@ void ClockServer()
   int from_tid;
 
   Create(1, &awaitTick);
-  PRINT("AFTER AWAIT TICK CREATED");
+  timer_init_c1();
 
   while (1)
   {
