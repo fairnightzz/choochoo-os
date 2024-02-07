@@ -26,7 +26,7 @@ uint64_t timer_get(void) {
 void
 timer_reset_c1()
 {
-    TIMER_REG(TIMER_C1) = TIMER_REG(TIMER_C1) + TICK_TIME;
+    TIMER_REG(TIMER_C1) = TIMER_REG(TIMER_C1) + ((timer_get() - TIMER_REG(TIMER_C1))/TICK_TIME + 1) * TICK_TIME;
     TIMER_REG(TIMER_CS) |= (0x1 << 1);
 }
 

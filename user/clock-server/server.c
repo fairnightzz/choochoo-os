@@ -51,6 +51,7 @@ void ClockServer()
 
   while (1)
   {
+    PRINT("RECEIVING");
     int request_length = Receive(&from_tid, (char *)&request, sizeof(ClockBufferRequest));
     if (request_length < 0)
     {
@@ -97,8 +98,9 @@ void ClockServer()
       };
       Reply(from_tid, (char *)&response, sizeof(ClockResponse));
       LListIter *it = llist_iter(clk_requests);
-      while (it)
+      while (it->current)
       {
+        PRINT("ITERATOR LOOP");
         ClockBufferRequest *clk_req = (ClockBufferRequest *)llist_next(it);
         if (clk_req->absolute_tick_delay <= tick_count)
         {

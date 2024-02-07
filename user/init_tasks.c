@@ -15,10 +15,11 @@ void idleTask()
 
 void idlePerformanceTask()
 {
+  PRINT("IDLE PERF TASK");
   int clockServer = WhoIs(ClockAddress);
   for (;;)
   {
-    PRINT("Idle Task Execution: %d%", idle_timer_percentage());
+    PRINT("Idle Task Execution: %d percent", idle_timer_percentage());
     Delay(clockServer, 1000);
   }
 }
