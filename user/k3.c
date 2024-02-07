@@ -3,6 +3,7 @@
 #include "nameserver.h"
 #include "clock-server/interface.h"
 #include "clock-server/server.h"
+#include "init_tasks.h"
 
 void ClientTask(int delayInterval, int numDelays)
 {
@@ -41,6 +42,10 @@ void ClientTask4()
 void FirstUserTask()
 {
   Create(2, &ClockServer);
+
+  // For printing performance idle
+  Create(15, &idlePerformanceTask);
+
   Create(3, &ClientTask1);
   Create(4, &ClientTask2);
   Create(5, &ClientTask3);

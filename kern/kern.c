@@ -8,6 +8,7 @@
 #include "asm_util.h"
 #include "gic.h"
 #include "timer.h"
+#include "idle-perf.h"
 
 void kernel_init()
 {
@@ -39,6 +40,8 @@ void handle_svc()
   LOG_DEBUG("[SYSCALL - Handle SVC]: Vector Table Handler OpCode #%x", opCode);
 
   curr_task = get_current_task();
+
+  idle_timer_stop_logic(curr_task->tid);
 
   switch (opCode)
   {
@@ -83,6 +86,7 @@ void handle_svc()
     LOG_DEBUG("[SYSCALL - Exit]: Context Switch [%d -> %d]", curr_task->tid, next_tid);
 
     set_current_task(next_tid);
+    idle_timer_start_logic(next_tid);
     enter_usermode(get_task(next_tid)->switch_frame);
     break;
   }
@@ -142,6 +146,7 @@ void handle_svc()
 void handle_irq()
 {
   curr_task = get_current_task();
+  idle_timer_stop_logic(curr_task->tid);
   iar = gic_read_iar();
   interruptId = iar & 0x3FF; // Read lower 10 bits
 

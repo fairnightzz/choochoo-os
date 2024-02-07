@@ -2,6 +2,7 @@
 #include "scheduler.h"
 #include "kalloc.h"
 #include "stdlib.h"
+#include "idle-perf.h"
 
 static int next_tid = 0;
 
@@ -34,6 +35,7 @@ void svc_yield(TaskDescriptor *curr_task)
 
   LOG_DEBUG("[SYSCALL - Yield]: Context Switch [%d -> %d]", curr_task->tid, next_tid);
   set_current_task(next_tid);
+  idle_timer_start_logic(next_tid);
 
   enter_usermode(get_task(next_tid)->switch_frame);
 }
