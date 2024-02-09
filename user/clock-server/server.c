@@ -81,7 +81,7 @@ void ClockServer()
       ClockBufferRequest *buffer_request = alloc(CLOCK_BUFFER_REQUEST);
       buffer_request->tid = from_tid;
       buffer_request->absolute_tick_delay = request.ticks;
-      buffer_request->type = CLOCK_DELAY;
+      buffer_request->type = CLOCK_DELAY_UNTIL;
       llist_append(clk_requests, buffer_request);
       break;
     }
