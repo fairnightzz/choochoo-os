@@ -60,5 +60,4 @@ void startK3Task()
   PRINT("Starting K3 Task!");
   NameServerTaskInit();
   FirstUserTask();
-  // k3_performance_measuring();
 }
