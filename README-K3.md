@@ -119,6 +119,11 @@ which gets called at tick 3. This results in the ticks being additions of 33, gi
 We can also see the third task (delay interval 71, numDelays 3) which gets called at tick 3, resulting in additions of 71, giving:
 74, 145, 216.
 
+One interesting observation is that we don't lose ticks. This is because our server is set up to 
+send the response to the syscall the moment the tick value is equal to the delay we want. Another 
+observation is that all of our tasks start calling at tick 3. This can be attributed to the fact that after the clock server is created, the time to create each client task, have them send a request back to the server (parent tid task), and then have the server respond back with the correct parameters would account for a delay of 3 ticks. This is fine because this is an initial setup time as we can see that in our logging output, every tick afterwards is correct.
+
+
 ## 5.2 Output
 ```
 Starting K3 Task!
