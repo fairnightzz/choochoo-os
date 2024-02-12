@@ -18,7 +18,7 @@ void idlePerformanceTask()
   int clockServer = WhoIs(ClockAddress);
   for (;;)
   {
-    Delay(clockServer, 1000);
+    Delay(clockServer, 500);
     PRINT("Idle Task Execution: %d percent", idle_timer_percentage());
   }
 }

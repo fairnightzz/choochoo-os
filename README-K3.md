@@ -10,6 +10,8 @@ r<div align="center">
 # 1 Overview
 This is **Kernel Part 3** of CS452 W24 @UWaterloo. We added to the implementation of the Kernel that allows for event notification, clockserver functionality, and an idle task. Hope you like it :)
 
+NOTE: Compiler optimization and caches are turned on. Refer to `README-K2.md` for how to turn it off.
+
 # 2 Hash Commit & Testing
 Run the following on a `linux.student.cs` environment:
 ```bash
@@ -109,80 +111,71 @@ in which it creates the clock server and the 4 client tasks as requested in the 
 
 ## 5.1 Output Explanation
 
-We can see that for the first client task (delay interval 10, numDelays 20), we see that the task gets initially called at tick 3. This results in the ticks being additions of 10, that being 13, 23, 33, 43, ... 203.
+We can see that for the first client task (delay interval 10, numDelays 20), we see that the task gets initially called at tick 0. This results in the ticks being additions of 10, that being 10, 20, 30, 40, ... 200.
 
-We can also see the second task (delay interval 23, numDelays 9) which gets called at tick 3, resulting in additions of 23, that being 26, 49, 72, 95, ... 210.
+We can also see the second task (delay interval 23, numDelays 9) which gets called at tick 0, resulting in additions of 23, that being 23, 46, 69, 92, ... 207.
 
 We can also see the third task (delay interval 33, numDelays 6)
-which gets called at tick 3. This results in the ticks being additions of 33, giving 36, 69, 102, 135, 168, 201.
+which gets called at tick 0. This results in the ticks being additions of 33, giving 33, 66, 99, 132, 165, 198.
 
-We can also see the third task (delay interval 71, numDelays 3) which gets called at tick 3, resulting in additions of 71, giving:
-74, 145, 216.
+We can also see the third task (delay interval 71, numDelays 3) which gets called at tick 0, resulting in additions of 71, giving:
+71, 142, 213.
 
 One interesting observation is that we don't lose ticks. This is because our server is set up to 
-send the response to the syscall the moment the tick value is equal to the delay we want. Another 
-observation is that all of our tasks start calling at tick 3. This can be attributed to the fact that after the clock server is created, the time to create each client task, have them send a request back to the server (parent tid task), and then have the server respond back with the correct parameters would account for a delay of 3 ticks. This is fine because this is an initial setup time as we can see that in our logging output, every tick afterwards is correct.
-
+send the response to the syscall the moment the tick value is equal to the delay we want. 
 
 ## 5.2 Output
 ```
 Starting K3 Task!
-Tid: 7, Delay Interval: 10, Loop Iteration: 1, Tick: 13
-Tid: 7, Delay Interval: 10, Loop Iteration: 2, Tick: 23
-Tid: 8, Delay Interval: 23, Loop Iteration: 1, Tick: 26
-Tid: 7, Delay Interval: 10, Loop Iteration: 3, Tick: 33
-Tid: 9, Delay Interval: 33, Loop Iteration: 1, Tick: 36
-Tid: 7, Delay Interval: 10, Loop Iteration: 4, Tick: 43
-Tid: 8, Delay Interval: 23, Loop Iteration: 2, Tick: 49
-Tid: 7, Delay Interval: 10, Loop Iteration: 5, Tick: 53
-Tid: 7, Delay Interval: 10, Loop Iteration: 6, Tick: 63
-Tid: 9, Delay Interval: 33, Loop Iteration: 2, Tick: 69
-Tid: 8, Delay Interval: 23, Loop Iteration: 3, Tick: 72
-Tid: 7, Delay Interval: 10, Loop Iteration: 7, Tick: 73
-Tid: 10, Delay Interval: 71, Loop Iteration: 1, Tick: 74
-Tid: 7, Delay Interval: 10, Loop Iteration: 8, Tick: 83
-Tid: 7, Delay Interval: 10, Loop Iteration: 9, Tick: 93
-Tid: 8, Delay Interval: 23, Loop Iteration: 4, Tick: 95
-Tid: 9, Delay Interval: 33, Loop Iteration: 3, Tick: 102
-Tid: 7, Delay Interval: 10, Loop Iteration: 10, Tick: 103
-Tid: 7, Delay Interval: 10, Loop Iteration: 11, Tick: 113
-Tid: 8, Delay Interval: 23, Loop Iteration: 5, Tick: 118
-Tid: 7, Delay Interval: 10, Loop Iteration: 12, Tick: 123
-Tid: 7, Delay Interval: 10, Loop Iteration: 13, Tick: 133
-Tid: 9, Delay Interval: 33, Loop Iteration: 4, Tick: 135
-Tid: 8, Delay Interval: 23, Loop Iteration: 6, Tick: 141
-Tid: 7, Delay Interval: 10, Loop Iteration: 14, Tick: 143
-Tid: 10, Delay Interval: 71, Loop Iteration: 2, Tick: 145
-Tid: 7, Delay Interval: 10, Loop Iteration: 15, Tick: 153
-Tid: 7, Delay Interval: 10, Loop Iteration: 16, Tick: 163
-Tid: 8, Delay Interval: 23, Loop Iteration: 7, Tick: 164
-Tid: 9, Delay Interval: 33, Loop Iteration: 5, Tick: 168
-Tid: 7, Delay Interval: 10, Loop Iteration: 17, Tick: 173
-Tid: 7, Delay Interval: 10, Loop Iteration: 18, Tick: 183
-Tid: 8, Delay Interval: 23, Loop Iteration: 8, Tick: 187
-Tid: 7, Delay Interval: 10, Loop Iteration: 19, Tick: 193
-Tid: 9, Delay Interval: 33, Loop Iteration: 6, Tick: 201
-Tid: 7, Delay Interval: 10, Loop Iteration: 20, Tick: 203
-Tid: 8, Delay Interval: 23, Loop Iteration: 9, Tick: 210
-Tid: 10, Delay Interval: 71, Loop Iteration: 3, Tick: 216
-Idle Task Execution: 93 percent
-Idle Task Execution: 94 percent
-Idle Task Execution: 94 percent
-Idle Task Execution: 94 percent
-Idle Task Execution: 95 percent
-Idle Task Execution: 95 percent
-Idle Task Execution: 95 percent
-Idle Task Execution: 95 percent
-Idle Task Execution: 95 percent
-Idle Task Execution: 95 percent
-Idle Task Execution: 95 percent
-Idle Task Execution: 95 percent
+Tid: 7, Delay Interval: 10, Loop Iteration: 1, Tick: 10
+Tid: 7, Delay Interval: 10, Loop Iteration: 2, Tick: 20
+Tid: 8, Delay Interval: 23, Loop Iteration: 1, Tick: 23
+Tid: 7, Delay Interval: 10, Loop Iteration: 3, Tick: 30
+Tid: 9, Delay Interval: 33, Loop Iteration: 1, Tick: 33
+Tid: 7, Delay Interval: 10, Loop Iteration: 4, Tick: 40
+Tid: 8, Delay Interval: 23, Loop Iteration: 2, Tick: 46
+Tid: 7, Delay Interval: 10, Loop Iteration: 5, Tick: 50
+Tid: 7, Delay Interval: 10, Loop Iteration: 6, Tick: 60
+Tid: 9, Delay Interval: 33, Loop Iteration: 2, Tick: 66
+Tid: 8, Delay Interval: 23, Loop Iteration: 3, Tick: 69
+Tid: 7, Delay Interval: 10, Loop Iteration: 7, Tick: 70
+Tid: 10, Delay Interval: 71, Loop Iteration: 1, Tick: 71
+Tid: 7, Delay Interval: 10, Loop Iteration: 8, Tick: 80
+Tid: 7, Delay Interval: 10, Loop Iteration: 9, Tick: 90
+Tid: 8, Delay Interval: 23, Loop Iteration: 4, Tick: 92
+Tid: 9, Delay Interval: 33, Loop Iteration: 3, Tick: 99
+Tid: 7, Delay Interval: 10, Loop Iteration: 10, Tick: 100
+Tid: 7, Delay Interval: 10, Loop Iteration: 11, Tick: 110
+Tid: 8, Delay Interval: 23, Loop Iteration: 5, Tick: 115
+Tid: 7, Delay Interval: 10, Loop Iteration: 12, Tick: 120
+Tid: 7, Delay Interval: 10, Loop Iteration: 13, Tick: 130
+Tid: 9, Delay Interval: 33, Loop Iteration: 4, Tick: 132
+Tid: 8, Delay Interval: 23, Loop Iteration: 6, Tick: 138
+Tid: 7, Delay Interval: 10, Loop Iteration: 14, Tick: 140
+Tid: 10, Delay Interval: 71, Loop Iteration: 2, Tick: 142
+Tid: 7, Delay Interval: 10, Loop Iteration: 15, Tick: 150
+Tid: 7, Delay Interval: 10, Loop Iteration: 16, Tick: 160
+Tid: 8, Delay Interval: 23, Loop Iteration: 7, Tick: 161
+Tid: 9, Delay Interval: 33, Loop Iteration: 5, Tick: 165
+Tid: 7, Delay Interval: 10, Loop Iteration: 17, Tick: 170
+Tid: 7, Delay Interval: 10, Loop Iteration: 18, Tick: 180
+Tid: 8, Delay Interval: 23, Loop Iteration: 8, Tick: 184
+Tid: 7, Delay Interval: 10, Loop Iteration: 19, Tick: 190
+Tid: 9, Delay Interval: 33, Loop Iteration: 6, Tick: 198
+Tid: 7, Delay Interval: 10, Loop Iteration: 20, Tick: 200
+Tid: 8, Delay Interval: 23, Loop Iteration: 9, Tick: 207
+Tid: 10, Delay Interval: 71, Loop Iteration: 3, Tick: 213
+Idle Task Execution: 96 percent
+Idle Task Execution: 97 percent
+Idle Task Execution: 98 percent
+Idle Task Execution: 98 percent
+Idle Task Execution: 98 percent
 ```
 
 # 6 Performance Measurement - Idle Task
-We can see that the idle task has been executing for `93%` of the 
+We can see that the idle task has been executing for `96%` of the 
 time. We can also see that when there are no more tasks left, 
-the percentage increases as the idle task runs (in conjunction to the task that outputs the performance). As a result, we can see that the idle task runs about `93-95%` of the time.
+the percentage increases as the idle task runs (in conjunction to the task that outputs the performance). As a result, we can see that the idle task runs about `96-98%` of the time.
 
 ## 6.1 Performance Implementation - Kernel Sided
 
