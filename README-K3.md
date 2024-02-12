@@ -109,13 +109,84 @@ in which it creates the clock server and the 4 client tasks as requested in the 
 
 ## 5.1 Output Explanation
 
+We can see that for the first client task (delay interval 10, numDelays 20), we see that the task gets initially called at tick 3. This results in the ticks being additions of 10, that being 13, 23, 33, 43, ... 203.
+
+We can also see the second task (delay interval 23, numDelays 9) which gets called at tick 3, resulting in additions of 23, that being 26, 49, 72, 95, ... 210.
+
+We can also see the third task (delay interval 33, numDelays 6)
+which gets called at tick 3. This results in the ticks being additions of 33, giving 36, 69, 102, 135, 168, 201.
+
+We can also see the third task (delay interval 71, numDelays 3) which gets called at tick 3, resulting in additions of 71, giving:
+74, 145, 216.
+
 ## 5.2 Output
+```
+Starting K3 Task!
+Tid: 7, Delay Interval: 10, Loop Iteration: 1, Tick: 13
+Tid: 7, Delay Interval: 10, Loop Iteration: 2, Tick: 23
+Tid: 8, Delay Interval: 23, Loop Iteration: 1, Tick: 26
+Tid: 7, Delay Interval: 10, Loop Iteration: 3, Tick: 33
+Tid: 9, Delay Interval: 33, Loop Iteration: 1, Tick: 36
+Tid: 7, Delay Interval: 10, Loop Iteration: 4, Tick: 43
+Tid: 8, Delay Interval: 23, Loop Iteration: 2, Tick: 49
+Tid: 7, Delay Interval: 10, Loop Iteration: 5, Tick: 53
+Tid: 7, Delay Interval: 10, Loop Iteration: 6, Tick: 63
+Tid: 9, Delay Interval: 33, Loop Iteration: 2, Tick: 69
+Tid: 8, Delay Interval: 23, Loop Iteration: 3, Tick: 72
+Tid: 7, Delay Interval: 10, Loop Iteration: 7, Tick: 73
+Tid: 10, Delay Interval: 71, Loop Iteration: 1, Tick: 74
+Tid: 7, Delay Interval: 10, Loop Iteration: 8, Tick: 83
+Tid: 7, Delay Interval: 10, Loop Iteration: 9, Tick: 93
+Tid: 8, Delay Interval: 23, Loop Iteration: 4, Tick: 95
+Tid: 9, Delay Interval: 33, Loop Iteration: 3, Tick: 102
+Tid: 7, Delay Interval: 10, Loop Iteration: 10, Tick: 103
+Tid: 7, Delay Interval: 10, Loop Iteration: 11, Tick: 113
+Tid: 8, Delay Interval: 23, Loop Iteration: 5, Tick: 118
+Tid: 7, Delay Interval: 10, Loop Iteration: 12, Tick: 123
+Tid: 7, Delay Interval: 10, Loop Iteration: 13, Tick: 133
+Tid: 9, Delay Interval: 33, Loop Iteration: 4, Tick: 135
+Tid: 8, Delay Interval: 23, Loop Iteration: 6, Tick: 141
+Tid: 7, Delay Interval: 10, Loop Iteration: 14, Tick: 143
+Tid: 10, Delay Interval: 71, Loop Iteration: 2, Tick: 145
+Tid: 7, Delay Interval: 10, Loop Iteration: 15, Tick: 153
+Tid: 7, Delay Interval: 10, Loop Iteration: 16, Tick: 163
+Tid: 8, Delay Interval: 23, Loop Iteration: 7, Tick: 164
+Tid: 9, Delay Interval: 33, Loop Iteration: 5, Tick: 168
+Tid: 7, Delay Interval: 10, Loop Iteration: 17, Tick: 173
+Tid: 7, Delay Interval: 10, Loop Iteration: 18, Tick: 183
+Tid: 8, Delay Interval: 23, Loop Iteration: 8, Tick: 187
+Tid: 7, Delay Interval: 10, Loop Iteration: 19, Tick: 193
+Tid: 9, Delay Interval: 33, Loop Iteration: 6, Tick: 201
+Tid: 7, Delay Interval: 10, Loop Iteration: 20, Tick: 203
+Tid: 8, Delay Interval: 23, Loop Iteration: 9, Tick: 210
+Tid: 10, Delay Interval: 71, Loop Iteration: 3, Tick: 216
+Idle Task Execution: 93 percent
+Idle Task Execution: 94 percent
+Idle Task Execution: 94 percent
+Idle Task Execution: 94 percent
+Idle Task Execution: 95 percent
+Idle Task Execution: 95 percent
+Idle Task Execution: 95 percent
+Idle Task Execution: 95 percent
+Idle Task Execution: 95 percent
+Idle Task Execution: 95 percent
+Idle Task Execution: 95 percent
+Idle Task Execution: 95 percent
+```
 
 # 6 Performance Measurement - Idle Task
+We can see that the idle task has been executing for `93%` of the 
+time. We can also see that when there are no more tasks left, 
+the percentage increases as the idle task runs (in conjunction to the task that outputs the performance). As a result, we can see that the idle task runs about `93-95%` of the time.
 
 ## 6.1 Performance Implementation - Kernel Sided
 
+The performance of the idle task had to be calculated on the kernel side. What happens is we initialize
+the idle task and record its id. This is in `kern/idle-perf.c`. It records the start time since we have 
+started the OS. To calculate the performance, we record the time it takes for the idle timer to run, so we can get a percentage as `total_idle_time / total_time`.
 
-## 6.2 Performance Testing - Statistics
+Another notable portion is that we stop the timer for the idle task at the last possible second 
+(right when we enter the syscall/interrupt), and also start the timer right before we enter user mode (`kern.c`). 
+This is because we want to minimize the time of the kernel methods as that does not include the idle task time.
 
-93-95%s
+

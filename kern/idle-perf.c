@@ -12,7 +12,7 @@ void idle_timer_init(int idleTid)
   start_time = timer_get();
   total_idle_time = 0;
 
-  // does't mater
+  // doesn't matter
   last_idle_time = 0;
 }
 void idle_timer_start()
