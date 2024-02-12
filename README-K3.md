@@ -58,24 +58,33 @@ int DelayUntil(int tid, int ticks);
 
 The kernel creates a task that runs `startK3Task()` in `user/k3.h`, which starts the clockserver and runs the client tests. More on the expected behaviour of these tests is described in a later section.
 
+
 ## 3.2 Additional Kernel Structure (since K1)
 
 ### 3.21 Interrupt Handling (`lib/gic.h`) (`kern/kern.h`) (`kern/enter_modes.S`)
 
 The library `gic.h` allows for the targeting and enabling of specific interrupt ids. Currently, this is done in kernel initialization to target and enable interrupt id `97` which is used for handling the clock interrupts needed. Furthermore, this library also gives functionality allowing for the reading and writing of the interrupt acknowledgement register which is used when handling the interrupt. 
 
-<insert handle_irq description in kern.h>
+`enter_kernelmode_irq` in `kern/enter_modes.S` performs the same as `enter_kernelmode`, except
+we branch to a different function, that being `handle_irq()`. One noticeable difference is that we are also resetting the kernel stackpointer to avoid variables that are allocated on the stack from running kernel memory out.
 
-<insert assemebly code description for switching to kernel mode from interrupt>
+`handle_irq()` in `kern.h` gets the current task and makes sure to stop the idle timer if we just left the idle task. We then read the iar to get the interrupt id, where if it's `97`, then we unblock tasks that are waiting on the clock tick event. We then write the iar back and then yield to a task.
 
 ### 3.22 Event Notification (`lib/task_descriptor.h`) (`lib/syscall.h`)
+
+We added an `eventWaitType` so that tasks can be blocked on a certain type of event id. We also 
+added the `AwaitEvent(int eventType)` syscall.
 
 ### 3.23 Clock Server (`user/clock-server/server.h`)
 Used the linked list structure created previously to create a linked list of buffered clock requests (either `Delay()` or `DelayUntil()`). Then every time our clock server receives a `CLOCK_TICK` event which is a specialized event only sent to the clock server via the notifier task `awaitTick` (our clock counts time by counting the number of these specialized events). Then, we iterate through the buffered requests and reply to each one if the delay has been completed. Based on this implementation, a `DelayUntil()` call that delays to a past timestamp will be replied to on the very next tick.  
 
 This implementation might be inefficient for keeping track of many long lasting events and if our events keep getting queued, so this could be a future optimization point. For now, it works well enough from our performance tests.
 
-### 3.24 Idle Task (`user/init_tasks.h`)
+### 3.24 Idle Task (`user/init_tasks.h`) (`kern/idle-perh.h`)
+
+We have an `idleTask()` function which is an infinite while loop that waits for an interrupt. This puts the kernel in a low power state. Since we also need to track performance (how much time the idle task has taken), we also have a `idlePerformanceTask()` function which prints the percentage of the idle task time in comparison to everything else.
+
+To measure the time, `idle_timer_stop_logic` is called at the start of syscall and interrupt code which stops the idle task timer if we just came from the idle task. Similarily, `idle_timer_start_logic` will be called at the end to start the timer if we are entering the idle task.
 
 # 4 User Features
 
@@ -89,10 +98,14 @@ int Delay(int tid, int ticks)
 int DelayUntil(int tid, int ticks)
 ```
 
-<expand on the implementations a little>
+Each of these wrappers simply creates a `ClockRequest` struct which is then sent to the clockserver.
+`DelayUntil` and `Delay`'s logic are handled by the server.
 
 
 # 5 Client Task Testing (`user/k3.c`)
+
+`startK3Task()` starts by initializing the nameserver. It then runs `FirstUserTask()`, 
+in which it creates the clock server and the 4 client tasks as requested in the assignment webpage.
 
 ## 5.1 Output Explanation
 

@@ -5,54 +5,62 @@
 #include "clock-server/server.h"
 #include "init_tasks.h"
 
-void ClientTask(int delayInterval, int numDelays)
+typedef struct
 {
+  int delayInterval;
+  int numDelays;
+} K3Response;
+
+typedef struct
+{
+  bool fromClient;
+} K3Request;
+
+void ClientTask()
+{
+  K3Request request;
+  K3Response response;
+
+  Send(MyParentTid(), (char *)&request, sizeof(K3Request), (char *)&response, sizeof(K3Response));
+
   int clockServer = WhoIs(ClockAddress);
-  for (int i = 0; i < numDelays; ++i)
+  for (int i = 0; i < response.numDelays; ++i)
   {
-    int ticks = Delay(clockServer, delayInterval);
-    PRINT("Tid: %d, Delay Interval: %d, Loop Iteration: %d, Tick: %d", MyTid(), delayInterval, i + 1, ticks);
+    int ticks = Delay(clockServer, response.delayInterval);
+    PRINT("Tid: %d, Delay Interval: %d, Loop Iteration: %d, Tick: %d", MyTid(), response.delayInterval, i + 1, ticks);
   }
-}
-void ClientTask1()
-{
-  int delayInterval = 10;
-  int numDelays = 20;
-  ClientTask(delayInterval, numDelays);
-}
-void ClientTask2()
-{
-  int delayInterval = 23;
-  int numDelays = 9;
-  ClientTask(delayInterval, numDelays);
-}
-void ClientTask3()
-{
-  int delayInterval = 33;
-  int numDelays = 6;
-  ClientTask(delayInterval, numDelays);
-}
-void ClientTask4()
-{
-  int delayInterval = 71;
-  int numDelays = 3;
-  ClientTask(delayInterval, numDelays);
 }
 
 void FirstUserTask()
 {
   Create(2, &ClockServer);
+
   // For printing performance idle
-
-  Create(3, &ClientTask1);
-
-  Create(4, &ClientTask2);
-
-  Create(5, &ClientTask3);
-
-  Create(6, &ClientTask4);
-
   Create(15, &idlePerformanceTask);
+
+  Create(3, &ClientTask);
+
+  Create(4, &ClientTask);
+
+  Create(5, &ClientTask);
+
+  Create(6, &ClientTask);
+
+  int requestTid;
+
+  K3Request request;
+
+  int delay_intervals[4] = {10, 23, 33, 71};
+  int num_delays[4] = {20, 9, 6, 3};
+
+  for (int i = 0; i < 4; i++)
+  {
+    Receive(&requestTid, (char *)&request, sizeof(K3Request));
+    K3Response response = (K3Response){
+        .delayInterval = delay_intervals[i],
+        .numDelays = num_delays[i]};
+    Reply(requestTid, (char *)&response, sizeof(K3Response));
+  }
 }
 
 void startK3Task()
