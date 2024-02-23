@@ -71,6 +71,7 @@ static const uint32_t UART_ICR  = 0x44;
 #define UART_REG(line, offset) (*(volatile uint32_t *)(line_uarts[line] + offset))
 
 // masks for specific fields in the UART registers
+static const uint32_t UART_FR_CTS = 0x01;
 static const uint32_t UART_FR_RXFE = 0x10;
 static const uint32_t UART_FR_TXFF = 0x20;
 static const uint32_t UART_FR_RXFF = 0x40;
@@ -297,4 +298,24 @@ void uart_printf(size_t line, char *fmt, ...)
   va_start(va, fmt);
   uart_format_print(line, fmt, va);
   va_end(va);
+}
+
+bool uart_is_rx_interrupt(size_t line) {
+    return UART_REG(line, UART_MIS) & UART_MIS_RXMIS;
+}
+
+bool uart_is_tx_interrupt(size_t line) {
+    return UART_REG(line, UART_MIS) & UART_MIS_TXMIS;
+}
+
+bool uart_is_cts_interrupt(size_t line) {
+    return UART_REG(line, UART_MIS) & UART_MIS_CTSMMIS;
+}
+
+bool uart_get_cts(size_t line) {
+    return UART_REG(line, UART_FR) & UART_FR_CTS;
+}
+
+void uart_clear_cts(size_t line) {
+    UART_REG(line, UART_ICR) = UART_ICR_CTSMIC;
 }
