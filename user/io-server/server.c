@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include "lib/stdlib.h"
 
-void SendReceiveEvent(int io_server)
+int SendReceiveEvent(int io_server)
 {
     IOResponse response;
     IORequest request = (IORequest) {
@@ -27,7 +27,7 @@ void SendReceiveEvent(int io_server)
     return 0;
 }
 
-void SendSendEvent(int io_server)
+int SendSendEvent(int io_server)
 {
     IOResponse response;
     IORequest request = (IORequest) {
@@ -99,7 +99,7 @@ void IOServer(size_t line) {
       }
       switch (request.type) {
         case IO_GETC: {
-          LOG_DEBUG("[IOServer] Line %d Getc request from %d with name %s", line, from_tid, TaskName(from_tid)); // check if this fn exists (TaskName)
+          LOG_DEBUG("[IOServer] Line %d Getc request from %d", line, from_tid); // check if this fn exists (TaskName)
 
           bool is_buffer_empty;
           unsigned char ch = uart_getc_buffered(line, &is_buffer_empty); // check this function - exists?
@@ -111,12 +111,12 @@ void IOServer(size_t line) {
             };
             Reply(from_tid, (char *)&response, sizeof(IOResponse));
           } else {
-            llist_append(getc_tasks, (void *)from_tid);
+            llist_append(getc_tasks, (void *)(uintptr_t)from_tid);
           }
 
           break;
         } case IO_PUTC: {
-          LOG_DEBUG("[IOServer] Line %d Putc request from %d with name %s", line, from_tid, TaskName(from_tid));
+          LOG_DEBUG("[IOServer] Line %d Putc request from %d", line, from_tid);
 
           if (clearToSend) {
             LOG_DEBUG("[IOServer] Line %d sent immediately on putc", line);
@@ -124,7 +124,7 @@ void IOServer(size_t line) {
             clearToSend = false;
           } else {
             LOG_DEBUG("[IOServer] Line %d queued up on putc", line);
-            llist_append(putc_tasks, request.data);
+            llist_append(putc_tasks, (void *)(uintptr_t)request.data);
           }
           response = (IOResponse) {
             .type = IO_PUTC,
@@ -134,7 +134,7 @@ void IOServer(size_t line) {
 
           break;
         } case IO_RECEIVE_EVENT: {
-          LOG_DEBUG("[IOServer] Line %d RECEIVE_EVENT request from %d with name %s", line, from_tid, TaskName(from_tid));
+          LOG_DEBUG("[IOServer] Line %d RECEIVE_EVENT request from %d", line, from_tid);
 
           response = (IOResponse) {
             .type = IO_RECEIVE_EVENT,
@@ -147,7 +147,7 @@ void IOServer(size_t line) {
             bool is_buffer_empty;
             unsigned char ch = uart_getc_buffered(line, &is_buffer_empty);
             while (llist_length(getc_tasks) > 0) {
-                int tid = llist_pop_front(getc_tasks);
+                int tid = (int)(uintptr_t)llist_pop_front(getc_tasks);
 
                 response = (IOResponse) {
                     .type = IO_GETC,
@@ -167,7 +167,7 @@ void IOServer(size_t line) {
 
           if (llist_length(putc_tasks) > 0) {
             LOG_DEBUG("[IOServer] Line %d SEND_EVENT received, there is a queued char, printing...", line);
-            uart_putc(line, llist_pop_front(putc_tasks));
+            uart_putc(line, (unsigned char)(uintptr_t)llist_pop_front(putc_tasks));
           } else {
             LOG_DEBUG("[IOServer] Line %d SEND_EVENT received, there is no queued char.", line);
             clearToSend = true;
@@ -186,12 +186,12 @@ void MarklinIOServer() {
   RegisterAs(MarklinIOAddress);
   Create(5, &marklinReceiveNotifier);
   Create(5, &marklinSendNotifier);
-  IoServer(MARKLIN);
+  IOServer(MARKLIN);
 }
 
 void ConsoleIOServer() {
   RegisterAs(ConsoleIOAddress);
   Create(5, &consoleReceiveNotifier);
   Create(5, &consoleSendNotifier);
-  IoServer(CONSOLE);
+  IOServer(CONSOLE);
 }
