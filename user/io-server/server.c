@@ -102,7 +102,7 @@ void IOServer(size_t line) {
           LOG_DEBUG("[IOServer] Line %d Getc request from %d", line, from_tid); // check if this fn exists (TaskName)
 
           bool is_buffer_empty;
-          unsigned char ch = uart_getc_buffered(line, &is_buffer_empty); // check this function - exists?
+          unsigned char ch = uart_getc_queued(line, &is_buffer_empty); // check this function - exists?
 
           if (!is_buffer_empty) {
             response = (IOResponse) {
@@ -145,7 +145,7 @@ void IOServer(size_t line) {
           if (llist_length(getc_tasks) > 0) {
             // Respond to all tasks waiting on Getc()
             bool is_buffer_empty;
-            unsigned char ch = uart_getc_buffered(line, &is_buffer_empty);
+            unsigned char ch = uart_getc_queued(line, &is_buffer_empty);
             while (llist_length(getc_tasks) > 0) {
                 int tid = (int)(uintptr_t)llist_pop_front(getc_tasks);
 

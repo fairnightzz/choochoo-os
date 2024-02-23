@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 static char *const MMIO_BASE = (char *)0xFE000000;
 
@@ -26,6 +27,7 @@ void uart_putl(size_t line, const char *buf, size_t blen);
 void uart_puts(size_t line, const char *buf);
 void uart_printf(size_t line, char *fmt, ...);
 void uart_format_print(size_t line, char *fmt, va_list va);
-
+unsigned char uart_getc_queued(size_t line, bool* is_buffer_empty);
+void uart_clear_rx(size_t line);
 
 #endif /* rpi.h */
