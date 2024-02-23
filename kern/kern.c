@@ -147,6 +147,7 @@ void handle_irq()
 {
   curr_task = get_current_task();
   idle_timer_stop_logic(curr_task->tid);
+
   iar = gic_read_iar();
   interruptId = iar & 0x3FF; // Read lower 10 bits
 
@@ -155,6 +156,40 @@ void handle_irq()
     // Unblock tasks with EVENT_WAIT
     scheduler_unblock_events(EVENT_CLOCK_TICK);
     timer_reset_c1();
+  }
+  else if (interruptId == 153)
+  {
+    // Handle UART Interrupts
+    // don't know if two interupts can be in one
+    if (uart_is_tx_interrupt(MARKLIN) && uart_is_cts_interrupt(MARKLIN))
+    {
+      if (uart_get_cts(MARKLIN))
+      {
+        scheduler_unblock_events(EVENT_MARKLIN_SEND);
+      }
+      uart_clear_cts(MARKLIN);
+    }
+
+    if (uart_is_rx_interrupt(MARKLIN))
+    {
+      scheduler_unblock_events(EVENT_MARKLIN_RECEIVE);
+      uart_clear_rx(MARKLIN);
+    }
+
+    if (uart_is_tx_interrupt(CONSOLE) && uart_is_cts_interrupt(CONSOLE))
+    {
+      if (uart_get_cts(CONSOLE))
+      {
+        scheduler_unblock_events(EVENT_CONSOLE_SEND);
+      }
+      uart_clear_cts(CONSOLE);
+    }
+
+    if (uart_is_rx_interrupt(CONSOLE))
+    {
+      scheduler_unblock_events(EVENT_CONSOLE_RECEIVE);
+      uart_clear_rx(CONSOLE);
+    }
   }
 
   gic_write_eoir(iar);

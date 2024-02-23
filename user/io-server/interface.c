@@ -1,4 +1,5 @@
 #include "interface.h"
+#include "stdlib.h"
 
 int Getc(int tid)
 {
