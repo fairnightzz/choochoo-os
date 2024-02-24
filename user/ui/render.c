@@ -2,6 +2,7 @@
 
 #include "render.h"
 #include "kern/rpi.h"
+#include "user/io-server/interface.h"
 
 #define ANSI_CLEAR "\033[2J"
 #define ANSI_HIDE "\033[?25l"
@@ -47,7 +48,27 @@ void ui_init()
   UIState = (TermUIState){
       .cmd_line_history = 0,
       .sensor_count = 0,
+      .output_queue = new_byte_queue(),
   };
+}
+
+void print(char *fmt, ...)
+{
+  va_list va;
+  va_start(va, fmt);
+  string formattedString = string_format(fmt, va);
+  va_end(va);
+
+  for (int i = 0; i < str_length(&formattedString); i++)
+  {
+    push(&UIState.output_queue, formattedString.data[i]);
+  }
+
+  while (!isEmpty(&UIState.output_queue))
+  {
+    uint8_t ch = pop(&UIState.output_queue);
+    Putc(ConsoleIOAddress, ch);
+  }
 }
 
 void render_time(uint64_t time)
@@ -57,24 +78,24 @@ void render_time(uint64_t time)
   unsigned int f_secs = secs % 60;
   unsigned int f_min = secs / 60;
 
-  uart_printf(CONSOLE, "\033[2;%uH", 18);
+  string output = string_format("\033[2;%uH", 18);
 
   if (f_min < 10)
-    uart_printf(CONSOLE, "0%u:", f_min);
+    print("0%u:", f_min);
   else
-    uart_printf(CONSOLE, "%u:", f_min);
+    print("%u:", f_min);
 
   if (f_secs < 10)
-    uart_printf(CONSOLE, "0%u.", f_secs);
+    print("0%u.", f_secs);
   else
-    uart_printf(CONSOLE, "%u.", f_secs);
+    print("%u.", f_secs);
 
-  uart_printf(CONSOLE, "%u", f_tenths);
+  print("%u", f_tenths);
 }
 
 void render_perf_stats(int percentage)
 {
-  uart_printf(CONSOLE, "Idle Task Execution: %d percent", percentage);
+  print("Idle Task Execution: %d percent", percentage);
 }
 
 void render_prompt(string *prompt)
@@ -86,8 +107,8 @@ void render_prompt(string *prompt)
     out = get_data(&strippedString);
   }
   const char *COMMAND_START = ANSI_MOVE("19", "5");
-  uart_printf(CONSOLE, "%s                                                                           ", COMMAND_START);
-  uart_printf(CONSOLE, "%s%s", COMMAND_START, out);
+  print("%s                                                                           ", COMMAND_START);
+  print("%s%s", COMMAND_START, out);
 }
 
 void render_command(string *command)
@@ -98,7 +119,7 @@ void render_command(string *command)
     UIState.cmd_line_history = 0;
   }
 
-  uart_printf(CONSOLE, "\033[%u;3H", 10 + UIState.cmd_line_history);
+  print("\033[%u;3H", 10 + UIState.cmd_line_history);
 
   UIState.cmd_line_history += 1;
 }
@@ -107,7 +128,7 @@ void clear_console(void)
 {
   for (int i = 0; i < COMMAND_LINE_HISTORY; ++i)
   {
-    uart_printf(CONSOLE, "\033[%u;2H                                                                           ", 10 + i);
+    print("\033[%u;2H                                                                           ", 10 + i);
   }
 }
 
@@ -115,7 +136,7 @@ void clear_sensor_ui(void)
 {
   for (int i = 0; i < SENSOR_LINE_HISTORY; ++i)
   {
-    uart_printf(CONSOLE, "\033[%u;47H                                  ", 4 + i);
+    print("\033[%u;47H                                  ", 4 + i);
   }
 }
 
@@ -135,7 +156,7 @@ void render_switch(int32_t switch_id, SwitchMode switch_mode)
   {
     out = "C";
   }
-  uart_printf(CONSOLE, "\033[%u;%uH%s", row, col, out);
+  print("\033[%u;%uH%s", row, col, out);
 }
 
 void render_sensor(char bank, unsigned int sensor_number)
@@ -161,6 +182,6 @@ void render_sensor(char bank, unsigned int sensor_number)
   }
   int row = 4 + UIState.sensor_count / 6;
   int col = 47 + (UIState.sensor_count % 6) * 6;
-  uart_printf(CONSOLE, "\033[%u;%uH%s", row, col, sensorString);
+  print("\033[%u;%uH%s", row, col, sensorString);
   UIState.sensor_count += 1;
 }

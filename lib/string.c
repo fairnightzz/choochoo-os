@@ -1,5 +1,6 @@
 #include "string.h"
 #include <stdarg.h>
+#include "util.h"
 
 string new_string(void)
 {
@@ -122,6 +123,15 @@ string get_suffix(string *s, int length)
     }
     return new_str;
   }
+}
+
+void char_copy(char *dest, char *src)
+{
+  while (*src)
+  {
+    *dest++ = *src++;
+  }
+  *dest = '\0';
 }
 
 // f-style string formatting, with limited format support

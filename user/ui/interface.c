@@ -1,11 +1,12 @@
 #include "interface.h"
 #include "user/clock-server/interface.h"
+#include "user/nameserver.h"
 #include "kern/idle-perf.h"
+#include "render.h"
 
 void idlePerformanceTask()
 {
   int clockServer = WhoIs(ClockAddress);
-  int renderServer = WhoIs(RenderAddress);
   for (;;)
   {
     Delay(clockServer, 100);
@@ -15,9 +16,6 @@ void idlePerformanceTask()
 
 void UITask()
 {
-  // Render server
-  Create(2, &renderServer);
-
   // For printing performance idle
   Create(15, &idlePerformanceTask);
 
