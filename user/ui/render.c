@@ -3,6 +3,7 @@
 #include "render.h"
 #include "kern/rpi.h"
 #include "user/io-server/interface.h"
+#include "user/nameserver.h"
 
 #define ANSI_CLEAR "\033[2J"
 #define ANSI_HIDE "\033[?25l"
@@ -14,8 +15,9 @@
 
 static TermUIState UIState;
 
-void ui_init()
+void render_init()
 {
+  int console_server_tid = WhoIs(ConsoleIOAddress);
   uart_printf(CONSOLE, "%s%s%s", ANSI_CLEAR, ANSI_ORIGIN, ANSI_HIDE);
 
   // Draw part of UI that will not be re-rendered.
@@ -49,6 +51,7 @@ void ui_init()
       .cmd_line_history = 0,
       .sensor_count = 0,
       .output_queue = new_byte_queue(),
+      .console_server_tid = console_server_tid,
   };
 }
 
@@ -67,30 +70,31 @@ void print(char *fmt, ...)
   while (!isEmpty(&UIState.output_queue))
   {
     uint8_t ch = pop(&UIState.output_queue);
-    Putc(ConsoleIOAddress, ch);
+    Putc(UIState.console_server_tid, ch);
   }
 }
 
 void render_time(uint64_t time)
 {
-  unsigned int f_tenths = time % 10;
-  unsigned int secs = time / 10;
-  unsigned int f_secs = secs % 60;
-  unsigned int f_min = secs / 60;
+  unsigned int tenth_secs = time % 1000000 / 100000;
+  unsigned int total_secs = time / 1000000;
+  unsigned int secs = total_secs % 60;
+  unsigned int min = total_secs / 60;
 
-  string output = string_format("\033[2;%uH", 18);
+  char *single_secs = "";
+  char *single_min = "";
+  if (secs < 10)
+  {
+    single_secs = "0";
+  }
+  if (min < 10)
+  {
+    single_min = "0";
+  }
 
-  if (f_min < 10)
-    print("0%u:", f_min);
-  else
-    print("%u:", f_min);
-
-  if (f_secs < 10)
-    print("0%u.", f_secs);
-  else
-    print("%u.", f_secs);
-
-  print("%u", f_tenths);
+  string clockPosition = string_format("\033[%d;%dH", 3, 2);
+  string clockMessage = string_format("Clock: %s%u:%s%u:%u0", single_min, min, single_secs, secs, tenth_secs);
+  print("%s%s", clockPosition.data, clockMessage.data);
 }
 
 void render_perf_stats(int percentage)
@@ -111,6 +115,14 @@ void render_prompt(string *prompt)
   print("%s%s", COMMAND_START, out);
 }
 
+void clear_console()
+{
+  for (int i = 0; i < COMMAND_LINE_HISTORY; ++i)
+  {
+    print("\033[%u;2H                                                                           ", 10 + i);
+  }
+}
+
 void render_command(string *command)
 {
   if (UIState.cmd_line_history >= COMMAND_LINE_HISTORY)
@@ -119,20 +131,12 @@ void render_command(string *command)
     UIState.cmd_line_history = 0;
   }
 
-  print("\033[%u;3H", 10 + UIState.cmd_line_history);
+  print("\033[%u;3H%s", 10 + UIState.cmd_line_history, command->data);
 
   UIState.cmd_line_history += 1;
 }
 
-void clear_console(void)
-{
-  for (int i = 0; i < COMMAND_LINE_HISTORY; ++i)
-  {
-    print("\033[%u;2H                                                                           ", 10 + i);
-  }
-}
-
-void clear_sensor_ui(void)
+void clear_sensor_ui()
 {
   for (int i = 0; i < SENSOR_LINE_HISTORY; ++i)
   {

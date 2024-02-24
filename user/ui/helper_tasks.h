@@ -3,6 +3,6 @@
 
 void promptTask();
 
-void sensorTask();
+void trainsysTask();
 
 #endif // __UI_H__
