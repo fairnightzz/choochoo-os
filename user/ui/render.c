@@ -72,11 +72,9 @@ void render_time(uint64_t time)
   uart_printf(CONSOLE, "%u", f_tenths);
 }
 
-void render_perf_stats(PerfTimingState *ptime)
+void render_perf_stats(int percentage)
 {
-  // uart_printf(CONSOLE, "\033[22;%uH%d µs [AVG: %d µs, MAX: %d µs]      ", 19, get_perf_time(ptime, MAIN_LOOP), get_avg_perf_time(ptime, MAIN_LOOP), get_max_perf_time(ptime, MAIN_LOOP));
-  // uart_printf(CONSOLE, "\033[23;%uH%d µs [AVG: %d µs, MAX: %d µs]      ", 21, get_perf_time(ptime, SENSOR_LOOP), get_avg_perf_time(ptime, SENSOR_LOOP), get_max_perf_time(ptime, SENSOR_LOOP));
-  // uart_printf(CONSOLE, "\033[24;%uH%d µs [AVG: %d µs, MAX: %d µs]      ", 32, get_perf_time(ptime, SENSOR_LOOP_FIRST_BYTE), get_avg_perf_time(ptime, SENSOR_LOOP_FIRST_BYTE), get_max_perf_time(ptime, SENSOR_LOOP_FIRST_BYTE));
+  uart_printf(CONSOLE, "Idle Task Execution: %d percent", percentage);
 }
 
 void render_prompt(string *prompt)
@@ -94,17 +92,15 @@ void render_prompt(string *prompt)
 
 void render_command(string *command)
 {
-  if (UIState->cmd_line_history >= COMMAND_LINE_HISTORY)
+  if (UIState.cmd_line_history >= COMMAND_LINE_HISTORY)
   {
     clear_console();
-    UIState->cmd_line_history = 0;
+    UIState.cmd_line_history = 0;
   }
 
-  uart_printf(CONSOLE, "\033[%u;3H", 10 + tUi->cmd_line_history);
+  uart_printf(CONSOLE, "\033[%u;3H", 10 + UIState.cmd_line_history);
 
-  tUi->cmd_line_history += 1;
-  str_clear(&(tUi->curr_input));
-  update_command(&(tUi->curr_input));
+  UIState.cmd_line_history += 1;
 }
 
 void clear_console(void)
@@ -142,7 +138,7 @@ void render_switch(int32_t switch_id, SwitchMode switch_mode)
   uart_printf(CONSOLE, "\033[%u;%uH%s", row, col, out);
 }
 
-void render_sensor(unsigned int *sensor_count, char bank, unsigned int sensor_number)
+void render_sensor(char bank, unsigned int sensor_number)
 {
   char sensorString[4] = {0};
   sensorString[0] = bank;
@@ -158,13 +154,13 @@ void render_sensor(unsigned int *sensor_count, char bank, unsigned int sensor_nu
     sensorString[2] = '0' + (sensor_number % 10);
   }
 
-  if (*sensor_count == 30)
+  if (UIState.sensor_count == 30)
   {
     clear_sensor_ui();
-    *sensor_count = 0;
+    UIState.sensor_count = 0;
   }
-  int row = 4 + *sensor_count / 6;
-  int col = 47 + (*sensor_count % 6) * 6;
+  int row = 4 + UIState.sensor_count / 6;
+  int col = 47 + (UIState.sensor_count % 6) * 6;
   uart_printf(CONSOLE, "\033[%u;%uH%s", row, col, sensorString);
-  *sensor_count += 1;
+  UIState.sensor_count += 1;
 }

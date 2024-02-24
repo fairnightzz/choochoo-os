@@ -1,5 +1,6 @@
 #include "interface.h"
 #include "user/clock-server/interface.h"
+#include "kern/idle-perf.h"
 
 void idlePerformanceTask()
 {
@@ -8,8 +9,7 @@ void idlePerformanceTask()
   for (;;)
   {
     Delay(clockServer, 100);
-    // Replace this with render server call
-    PRINT("Idle Task Execution: %d percent", idle_timer_percentage());
+    render_perf_stats(idle_timer_percentage());
   }
 }
 

@@ -22,4 +22,7 @@ int str_cmp(string *a, string *b);
 string str_copy(string *s);
 string get_suffix(string *s, int length);
 
+// String formatting is useful for outputting to our console buffer
+string string_format(char *fmt, ...);
+
 #endif /* string.h */

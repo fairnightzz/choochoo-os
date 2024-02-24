@@ -1,4 +1,5 @@
 #include "string.h"
+#include <stdarg.h>
 
 string new_string(void)
 {
@@ -7,6 +8,15 @@ string new_string(void)
       .length = 0,
   };
   return string;
+}
+
+void string_copy(char *dest, char *src)
+{
+  while (*src)
+  {
+    *dest++ = *src++;
+  }
+  *dest = '\0';
 }
 
 string to_string(const char *cstring)
@@ -45,6 +55,14 @@ void pop_char(string *str)
 
   str->length -= 1;
   str->data[str->length] = '\0';
+}
+
+void string_concat(string *destination, string *source)
+{
+  for (int i = 0; i < str_length(source); i++)
+  {
+    push_char(destination, source->data[i]);
+  }
 }
 
 const char *get_data(string *str)
@@ -104,4 +122,69 @@ string get_suffix(string *s, int length)
     }
     return new_str;
   }
+}
+
+// f-style string formatting, with limited format support
+string _string_format(char *fmt, va_list va)
+{
+  string dest = to_string("");
+  char ch;
+
+  for (;;)
+  {
+    ch = *(fmt++);
+    char bf[12];
+    if (ch == '\0')
+    {
+      break;
+    }
+    if (ch != '%')
+    {
+      push_char(&dest, ch);
+    }
+    else
+    {
+      string temp = to_string("");
+      ch = *(fmt++);
+      switch (ch)
+      {
+      case 'u':
+        ui2a(va_arg(va, unsigned int), 10, bf);
+        temp = to_string(bf);
+        string_concat(&dest, &temp);
+        break;
+      case 'd':
+        i2a(va_arg(va, int), bf);
+        temp = to_string(bf);
+        string_concat(&dest, &temp);
+        break;
+      case 'x':
+        ui2a(va_arg(va, unsigned int), 16, bf);
+        temp = to_string(bf);
+        string_concat(&dest, &temp);
+        break;
+      case 's':
+        temp = to_string(va_arg(va, char *));
+        string_concat(&dest, &temp);
+        break;
+      case '%':
+        push_char(&dest, ch);
+        break;
+      case '\0':
+        break;
+      }
+    }
+  }
+
+  return dest;
+}
+
+string string_format(char *fmt, ...)
+{
+  va_list va;
+  va_start(va, fmt);
+  string formattedString = _string_format(fmt, va);
+  va_end(va);
+
+  return formattedString;
 }
