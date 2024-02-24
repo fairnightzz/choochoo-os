@@ -2,7 +2,7 @@
 #define __RENDER_H__
 
 #include "stdint.h"
-#include "stdlib.h"
+#include "lib/stdlib.h"
 #include "perf_timing.h"
 
 static const unsigned int CONSOLE_MAX_LINES = 16;
@@ -16,8 +16,8 @@ typedef struct
 
 void ui_init();
 void render_time(uint64_t time);
-void render_command(string line);
-void render_prompt(string line);
+void render_command(string *line);
+void render_prompt(string *line);
 void render_switch(int32_t switch_id, SwitchMode switch_mode);
 void render_sensor(char bank, unsigned int sensor_number);
 void render_perf_stats(PerfTimingState *ptime);

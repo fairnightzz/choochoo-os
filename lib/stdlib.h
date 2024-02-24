@@ -12,5 +12,6 @@
 #include "string.h"
 #include "perf_timing.h"
 #include "string.h"
+#include "switch.h"
 
 #endif // __STDLIB_H__
