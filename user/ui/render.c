@@ -16,34 +16,34 @@ static TermUIState UIState;
 
 void ui_init()
 {
-  uart_blocking_printf(CONSOLE, "%s%s%s", ANSI_CLEAR, ANSI_ORIGIN, ANSI_HIDE);
+  uart_printf(CONSOLE, "%s%s%s", ANSI_CLEAR, ANSI_ORIGIN, ANSI_HIDE);
 
   // Draw part of UI that will not be re-rendered.
-  uart_blocking_printf(CONSOLE, "╭───────────────────────────────────────────────────────────────────────────────╮\r\n");
-  uart_blocking_printf(CONSOLE, "│  Current Time:                                        CS 452 - Anish Aggarwal │\r\n");
-  uart_blocking_printf(CONSOLE, "├─[switches]────────────────────────────────┬─[sensors]─────────────────────────┤\r\n");
-  uart_blocking_printf(CONSOLE, "│ 001 .    002 .    003 .    004 .    005 . │                                   │\r\n");
-  uart_blocking_printf(CONSOLE, "│ 006 .    007 .    008 .    009 .    010 . │                                   │\r\n");
-  uart_blocking_printf(CONSOLE, "│ 011 .    012 .    013 .    014 .    015 . │                                   │\r\n");
-  uart_blocking_printf(CONSOLE, "│ 016 .    017 .    018 .    153 .    154 . │                                   │\r\n");
-  uart_blocking_printf(CONSOLE, "│ 155 .    156 .                            │                                   │\r\n");
-  uart_blocking_printf(CONSOLE, "│──[console]────────────────────────────────────────────────────────────────────┤\r\n");
-  uart_blocking_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_blocking_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_blocking_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_blocking_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_blocking_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_blocking_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_blocking_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_blocking_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_blocking_printf(CONSOLE, "│╭─────────────────────────────────────────────────────────────────────────────╮│\r\n");
-  uart_blocking_printf(CONSOLE, "││>                                                                            ││\r\n");
-  uart_blocking_printf(CONSOLE, "│╰─────────────────────────────────────────────────────────────────────────────╯│\r\n");
-  uart_blocking_printf(CONSOLE, "│─[performance]─────────────────────────────────────────────────────────────────┤\r\n");
-  uart_blocking_printf(CONSOLE, "│ Main Loop Time:                                                               │\r\n");
-  uart_blocking_printf(CONSOLE, "│ Sensor Loop Time:                                                             │\r\n");
-  uart_blocking_printf(CONSOLE, "│ Sensor First Byte Loop Time:                                                  │\r\n");
-  uart_blocking_printf(CONSOLE, "╰───────────────────────────────────────────────────────────────────────────────╯\r\n");
+  uart_printf(CONSOLE, "╭───────────────────────────────────────────────────────────────────────────────╮\r\n");
+  uart_printf(CONSOLE, "│  Current Time:                                        CS 452 - Anish Aggarwal │\r\n");
+  uart_printf(CONSOLE, "├─[switches]────────────────────────────────┬─[sensors]─────────────────────────┤\r\n");
+  uart_printf(CONSOLE, "│ 001 .    002 .    003 .    004 .    005 . │                                   │\r\n");
+  uart_printf(CONSOLE, "│ 006 .    007 .    008 .    009 .    010 . │                                   │\r\n");
+  uart_printf(CONSOLE, "│ 011 .    012 .    013 .    014 .    015 . │                                   │\r\n");
+  uart_printf(CONSOLE, "│ 016 .    017 .    018 .    153 .    154 . │                                   │\r\n");
+  uart_printf(CONSOLE, "│ 155 .    156 .                            │                                   │\r\n");
+  uart_printf(CONSOLE, "│──[console]────────────────────────────────────────────────────────────────────┤\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│╭─────────────────────────────────────────────────────────────────────────────╮│\r\n");
+  uart_printf(CONSOLE, "││>                                                                            ││\r\n");
+  uart_printf(CONSOLE, "│╰─────────────────────────────────────────────────────────────────────────────╯│\r\n");
+  uart_printf(CONSOLE, "│─[performance]─────────────────────────────────────────────────────────────────┤\r\n");
+  uart_printf(CONSOLE, "│ Main Loop Time:                                                               │\r\n");
+  uart_printf(CONSOLE, "│ Sensor Loop Time:                                                             │\r\n");
+  uart_printf(CONSOLE, "│ Sensor First Byte Loop Time:                                                  │\r\n");
+  uart_printf(CONSOLE, "╰───────────────────────────────────────────────────────────────────────────────╯\r\n");
 
   UIState = (TermUIState){
       .cmd_line_history = 0,

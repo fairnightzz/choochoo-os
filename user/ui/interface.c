@@ -3,6 +3,7 @@
 #include "user/nameserver.h"
 #include "kern/idle-perf.h"
 #include "render.h"
+#include "helper_tasks.h"
 
 void idlePerformanceTask()
 {

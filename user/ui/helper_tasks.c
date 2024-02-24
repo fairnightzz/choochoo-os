@@ -5,6 +5,7 @@
 #include "user/clock-server/interface.h"
 #include <ctype.h>
 #include "user/ui/render.h"
+#include "user/trainsys/trainsys.h"
 
 #define ENTER_CHARACTER 0x0d
 #define BACKSPACE_CHARACTER 0x08
@@ -63,6 +64,7 @@ void promptTask()
 {
   int io_server = WhoIs(ConsoleIOAddress);
   int marklin_server = WhoIs(MarklinIOAddress);
+  int clock_server = WhoIs(ClockAddress);
 
   string prompt = new_string();
 
@@ -71,12 +73,10 @@ void promptTask()
   while (1)
   {
     int c = Getc(io_server);
-    if (c < 0)
-    {
-      LOG_WARN("[Getc Error in promptTask()]: got %d", c);
+    if (c < 0) {
+      LOG_ERROR("[Getc Error in promptTask()]: got %d", c);
       continue;
     }
-
     unsigned char ch = c;
     if (isalnum(ch) || isblank(ch))
     {
@@ -87,26 +87,42 @@ void promptTask()
     {
       pop_char(&prompt);
       render_prompt(&prompt);
-    }
-    else if (c == ENTER_CHARACTER)
-    {
+    } else if (c == ENTER_CHARACTER) {
+    
+      int curr_tick = Time(clock_server);
+      if (curr_tick < 0) {
+        LOG_ERROR("[promptTask ERROR]: Time() from clock server error");
+        continue;
+      }
+    
       CommandResult command_result = parse_command(&prompt);
       string console_string = cres_to_string(command_result);
       render_command(&console_string);
       str_clear(&prompt);
       render_prompt(&prompt);
 
-      execute_command(command_result); // todo make sure this fn exists and works
+      trainsys_execute_command(command_result, curr_tick); // todo make sure this fn exists and works
     }
   }
 }
 
-void sensorTask()
-{
+void trainsysTask() {
   int clock_server = WhoIs(ClockAddress);
-  while (1)
-  {
-    read_all_sensors(Time(clock_server));
-    Delay(clock_server, 20);
+  int curr_tick = Time(clock_server);
+  if (curr_tick < 0) {
+    LOG_ERROR("[trainsysTask ERROR]: Time() from clock server error");
+    return;
+  }
+  trainsys_init_track(TRACK_A, curr_tick);
+
+  while (1) {
+    curr_tick = Time(clock_server);
+    if (curr_tick < 0) {
+      LOG_ERROR("[trainsysTask ERROR]: Time() from clock server error");
+      continue;
+    }
+    trainsys_read_all_sensors(curr_tick);
+    trainsys_check_rev_trains(curr_tick);
+    Delay(clock_server, 5);
   }
 }
