@@ -1,26 +1,25 @@
-#ifndef __STRING_H__
-#define __STRING_H__
+#ifndef _string_h_
+#define _string_h_ 1
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <stddef.h>
 
-typedef struct String
+#define MAX_STRING_LEN 128
+
+typedef struct string
 {
-  char string[100];
-} String;
+  char data[MAX_STRING_LEN + 1]; // null-terminated
+  int length;
+} string;
 
-void string_init();
-// Standard string functions (wrapping helps char* to not destructure)
-String *make_string(char *charString);
-int str_len(String *str);
-void string_copy(char *dest, char *src);
-void string_concat(String *dest, String *src);
-void string_add_char(String *dest, char ch);
-void string_pop_char(String *dest);
-void string_remove(String *dest);
-bool string_equal(String *str1, String *str2);
+string new_string(void);
+string to_string(const char *char_str);
+int push_char(string *str, char c);
+void pop_char(string *str);
+const char *get_data(string *str);
+int str_length(string *str);
+void str_clear(string *string);
+int str_cmp(string *a, string *b);
+string str_copy(string *s);
+string get_suffix(string *s, int length);
 
-// String formatting is useful for outputting to our console buffer
-String string_format(char *fmt, ...);
-
-#endif
+#endif /* string.h */

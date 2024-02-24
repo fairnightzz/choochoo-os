@@ -1,112 +1,107 @@
-#include <stdarg.h>
 #include "string.h"
-#include "kern/kalloc.h"
 
-void string_init()
+string new_string(void)
 {
-  slab_set_block_size(STRING, sizeof(String));
+  string string = {
+      .data = {0},
+      .length = 0,
+  };
+  return string;
 }
 
-void string_copy(char *dest, char *src)
+string to_string(const char *cstring)
 {
-  while (*src)
+  string new_str = new_string();
+
+  int idx = 0;
+
+  while (cstring[idx] != '\0')
   {
-    *dest++ = *src++;
-  }
-  *dest = '\0';
-}
-
-String *make_string(char *charString)
-{
-  String *str = slab_alloc(STRING);
-  *str = (String){.string = ""};
-  string_copy(str->string, charString);
-  return str;
-}
-
-int str_len(String *str)
-{
-  char *string = str->string;
-  int length = 0;
-  while (string[length] != '\0')
-  {
-    length++;
-  }
-  return length;
-}
-
-void string_concat(String *destination, String *source)
-{
-  char *dest = destination->string;
-  char *src = source->string;
-  while (*dest)
-  {
-    dest++;
+    push_char(&new_str, cstring[idx]);
+    idx += 1;
   }
 
-  while (*src)
-  {
-    *dest++ = *src++;
-  }
-  *dest = '\0';
+  return new_str;
 }
 
-void string_add_char(String *destination, char ch)
+int push_char(string *str, char c)
 {
-  char *dest = destination->string;
-  while (*dest)
-  {
-    dest++;
-  }
+  if (str->length >= MAX_STRING_LEN)
+    return -1;
 
-  *dest++ = ch;
-  *dest = '\0';
+  str->data[str->length] = c;
+  str->length += 1;
+  str->data[str->length] = '\0';
+
+  return 0;
 }
 
-void string_pop_char(String *destination)
+void pop_char(string *str)
 {
-  char *dest = destination->string;
-  while (*dest)
+  if (str->length == 0)
   {
-    dest++;
+    return;
   }
 
-  dest--;
-  *dest = '\0';
+  str->length -= 1;
+  str->data[str->length] = '\0';
 }
 
-void string_remove(String *destination)
+const char *get_data(string *str)
 {
-  char *dest = destination->string;
-  *dest = '\0';
+  return (const char *)str->data;
 }
 
-bool string_equal(String *string1, String *string2)
+int str_length(string *str)
 {
-  char *str1 = string1->string;
-  char *str2 = string2->string;
+  return str->length;
+}
 
-  while (*str1 && (*str1 == *str2))
+void str_clear(string *str)
+{
+  str->length = 0;
+  str->data[0] = '\0';
+}
+
+int str_cmp(string *s1, string *s2)
+{
+  if (str_length(s1) != str_length(s2))
   {
-    str1++;
-    str2++;
+    return 0;
   }
 
-  return *str1 == *str2;
-}
-
-char *string_puts(char *cur, char *buf)
-{
-  while (*buf)
+  for (int i = 0; i < str_length(s1); i++)
   {
-    *cur = *buf;
-    cur++;
-    buf++;
+    if (s1->data[i] != s2->data[i])
+      return 0;
   }
-  return cur;
+
+  return 1;
 }
 
-void string_destroy(String *str)
+string str_copy(string *s)
 {
-  slab_free(str, STRING);
+  string new_str = new_string();
+  for (int i = 0; i < str_length(s); i++)
+  {
+    push_char(&new_str, s->data[i]);
+  }
+  return new_str;
+}
+
+string get_suffix(string *s, int length)
+{
+  if (str_length(s) <= length)
+  {
+    return str_copy(s);
+  }
+  else
+  {
+    string new_str = new_string();
+    for (int i = str_length(s) - length; i < str_length(s); i++)
+    {
+      push_char(&new_str, s->data[i]);
+    }
+    return new_str;
+  }
 }

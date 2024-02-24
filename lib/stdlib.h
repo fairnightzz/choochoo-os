@@ -11,5 +11,6 @@
 #include "alloc.h"
 #include "string.h"
 #include "perf_timing.h"
+#include "string.h"
 
 #endif // __STDLIB_H__
