@@ -13,5 +13,6 @@
 #include "perf_timing.h"
 #include "string.h"
 #include "switch.h"
+#include "command_parser.h"
 
 #endif // __STDLIB_H__
