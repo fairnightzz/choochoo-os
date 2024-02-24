@@ -1,8 +1,8 @@
 #include "kern.h"
 #include "stdlib.h"
-#include "user/k1.h"
-#include "user/k2.h"
-#include "user/k3.h"
+// #include "user/k1.h"
+// #include "user/k2.h"
+// #include "user/k3.h"
 #include "user/init_tasks.h"
 #include "idle-perf.h"
 
@@ -26,10 +26,18 @@ int kmain()
     */
 
     // K3
+    /*
     int idleTid = svc_create(31, &idleTask);
     idle_timer_init(idleTid);
 
     svc_create(10, &startK3Task);
+    svc_yield_first();
+    */
+
+    // K4
+    int idleTid = svc_create(31, &idleTask);
+    idle_timer_init(idleTid);
+    svc_create(30, &initTask);
     svc_yield_first();
 
     return 0;

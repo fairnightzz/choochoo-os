@@ -3,5 +3,6 @@
 
 void idleTask();
 void idlePerformanceTask();
+void initTask();
 
 #endif // __INIT_TASKS_H__
