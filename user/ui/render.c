@@ -50,14 +50,14 @@ void render_init()
 
   // Draw part of UI that will not be re-rendered.
   uart_printf(CONSOLE, "╭───────────────────────────────────────────────────────────────────────────────╮\r\n");
-  uart_printf(CONSOLE, "│  Current Time:                                        CS 452 - choochoo os    │\r\n");
+  uart_printf(CONSOLE, "│ Current Time:                                         CS 452 - choochoo os    │\r\n");
   uart_printf(CONSOLE, "├─[switches]────────────────────────────────┬─[sensors]─────────────────────────┤\r\n");
   uart_printf(CONSOLE, "│ 001 .    002 .    003 .    004 .    005 . │                                   │\r\n");
   uart_printf(CONSOLE, "│ 006 .    007 .    008 .    009 .    010 . │                                   │\r\n");
   uart_printf(CONSOLE, "│ 011 .    012 .    013 .    014 .    015 . │                                   │\r\n");
   uart_printf(CONSOLE, "│ 016 .    017 .    018 .    153 .    154 . │                                   │\r\n");
   uart_printf(CONSOLE, "│ 155 .    156 .                            │                                   │\r\n");
-  uart_printf(CONSOLE, "│──[console]────────────────────────────────────────────────────────────────────┤\r\n");
+  uart_printf(CONSOLE, "├─[console]─────────────────────────────────────────────────────────────────────┤\r\n");
   uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│                                                                               │\r\n");
@@ -69,10 +69,8 @@ void render_init()
   uart_printf(CONSOLE, "│╭─────────────────────────────────────────────────────────────────────────────╮│\r\n");
   uart_printf(CONSOLE, "││>                                                                            ││\r\n");
   uart_printf(CONSOLE, "│╰─────────────────────────────────────────────────────────────────────────────╯│\r\n");
-  uart_printf(CONSOLE, "│─[performance]─────────────────────────────────────────────────────────────────┤\r\n");
-  uart_printf(CONSOLE, "│ Main Loop Time:                                                               │\r\n");
-  uart_printf(CONSOLE, "│ Sensor Loop Time:                                                             │\r\n");
-  uart_printf(CONSOLE, "│ Sensor First Byte Loop Time:                                                  │\r\n");
+  uart_printf(CONSOLE, "├─[performance]─────────────────────────────────────────────────────────────────┤\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "╰───────────────────────────────────────────────────────────────────────────────╯\r\n");
 
   UIState = (TermUIState){
@@ -108,7 +106,7 @@ void render_time(uint64_t time)
 
 void render_perf_stats(int percentage)
 {
-  print("\033[%u;%uHIdle Task Execution: %d percent", 2, 18, percentage);
+  print("\033[%u;%uHIdle Task Execution: %d percent", 22, 3, percentage);
 }
 
 void render_char(unsigned char ch, int prompt_length)
