@@ -65,8 +65,8 @@ static const uint32_t UART_LCRH = 0x2c;
 static const uint32_t UART_CR = 0x30;
 static const uint32_t UART_ILFS = 0x34;
 static const uint32_t UART_IMSC = 0x38;
-static const uint32_t UART_MIS  = 0x40;
-static const uint32_t UART_ICR  = 0x44;
+static const uint32_t UART_MIS = 0x40;
+static const uint32_t UART_ICR = 0x44;
 
 #define UART_REG(line, offset) (*(volatile uint32_t *)(line_uarts[line] + offset))
 
@@ -92,17 +92,17 @@ static const uint32_t UART_LCRH_FEN = 0x10;
 static const uint32_t UART_LCRH_WLEN_LOW = 0x20;
 static const uint32_t UART_LCRH_WLEN_HIGH = 0x40;
 
-static const uint32_t UART_IMSC_CTSMIM = 0x02; 
-static const uint32_t UART_IMSC_RXIM   = 0x10;
-static const uint32_t UART_IMSC_TXIM   = 0x20; 
+static const uint32_t UART_IMSC_CTSMIM = 0x02;
+static const uint32_t UART_IMSC_RXIM = 0x10;
+static const uint32_t UART_IMSC_TXIM = 0x20;
 
 static const uint32_t UART_MIS_CTSMMIS = 0x02;
-static const uint32_t UART_MIS_RXMIS   = 0x10;
-static const uint32_t UART_MIS_TXMIS   = 0x20;
+static const uint32_t UART_MIS_RXMIS = 0x10;
+static const uint32_t UART_MIS_TXMIS = 0x20;
 
 static const uint32_t UART_ICR_CTSMIC = 0x02;
-static const uint32_t UART_ICR_RXIC   = 0x10;
-static const uint32_t UART_ICR_TXIC   = 0x20;
+static const uint32_t UART_ICR_RXIC = 0x10;
+static const uint32_t UART_ICR_TXIC = 0x20;
 
 BQueue console_receive_q;
 BQueue marklin_receive_q;
@@ -158,15 +158,18 @@ void uart_config_and_enable(size_t line)
   switch (line)
   {
   case CONSOLE:
-    UART_REG(line, UART_LCRH) = UART_LCRH_WLEN_HIGH | UART_LCRH_WLEN_LOW | UART_LCRH_FEN;
+    UART_REG(line, UART_LCRH) = UART_LCRH_WLEN_HIGH | UART_LCRH_WLEN_LOW;
     break;
   case MARKLIN:
-    UART_REG(line, UART_LCRH) = UART_LCRH_WLEN_HIGH | UART_LCRH_WLEN_LOW | UART_LCRH_FEN | UART_LCRH_STP2;
+    UART_REG(line, UART_LCRH) = UART_LCRH_WLEN_HIGH | UART_LCRH_WLEN_LOW | UART_LCRH_STP2;
     break;
   }
 
   // re-enable the UART; enable both transmit and receive regardless of previous state
   UART_REG(line, UART_CR) = cr_state | UART_CR_UARTEN | UART_CR_TXE | UART_CR_RXE;
+
+  // enable interrupts
+  UART_REG(line, UART_IMSC) = UART_IMSC_CTSMIM | UART_IMSC_RXIM; // | UART_IMSC_TXIM;
 }
 
 int uart_getcnow(size_t line, unsigned char *data)
@@ -190,15 +193,17 @@ unsigned char uart_getc(size_t line)
   return (ch);
 }
 
-unsigned char uart_getc_queued(size_t line, bool* is_buffer_empty) {
-    BQueue* lineQ = (line == CONSOLE) ? &console_receive_q : &marklin_receive_q;
+unsigned char uart_getc_queued(size_t line, bool *is_buffer_empty)
+{
+  BQueue *lineQ = (line == CONSOLE) ? &console_receive_q : &marklin_receive_q;
 
-    if (length(lineQ) == 0) {
-        *is_buffer_empty = true;
-        return 0;
-    }
-    *is_buffer_empty = false;
-    return (unsigned char)pop(lineQ);
+  if (length(lineQ) == 0)
+  {
+    *is_buffer_empty = true;
+    return 0;
+  }
+  *is_buffer_empty = false;
+  return (unsigned char)pop(lineQ);
 }
 
 void uart_putc(size_t line, unsigned char c)
@@ -217,21 +222,30 @@ int uart_try_putc(size_t line, unsigned char c)
   return (1);
 }
 
-void uart_clear_rx(size_t line) {
-    unsigned char data;
-    if (uart_getcnow(line, &data) == 0) {
-        LOG_ERROR("no data on receive line");
-        return;
-    }
+void uart_clear_tx(size_t line)
+{
+  UART_REG(line, UART_ICR) = UART_ICR_TXIC;
+}
 
-    if (line == CONSOLE) {
-        push(&console_receive_q, data);
-    }
-    else if (line == MARKLIN) {
-        push(&marklin_receive_q, data);
-    }
+void uart_clear_rx(size_t line)
+{
+  unsigned char data;
+  if (uart_getcnow(line, &data) == 0)
+  {
+    LOG_ERROR("no data on receive line");
+    return;
+  }
 
-    UART_REG(line, UART_ICR) = UART_ICR_RXIC;
+  if (line == CONSOLE)
+  {
+    push(&console_receive_q, data);
+  }
+  else if (line == MARKLIN)
+  {
+    push(&marklin_receive_q, data);
+  }
+
+  UART_REG(line, UART_ICR) = UART_ICR_RXIC;
 }
 
 void uart_putl(size_t line, const char *buf, size_t blen)
@@ -300,22 +314,27 @@ void uart_printf(size_t line, char *fmt, ...)
   va_end(va);
 }
 
-bool uart_is_rx_interrupt(size_t line) {
-    return UART_REG(line, UART_MIS) & UART_MIS_RXMIS;
+bool uart_is_rx_interrupt(size_t line)
+{
+  return UART_REG(line, UART_MIS) & UART_MIS_RXMIS;
 }
 
-bool uart_is_tx_interrupt(size_t line) {
-    return UART_REG(line, UART_MIS) & UART_MIS_TXMIS;
+bool uart_is_tx_interrupt(size_t line)
+{
+  return UART_REG(line, UART_MIS) & UART_MIS_TXMIS;
 }
 
-bool uart_is_cts_interrupt(size_t line) {
-    return UART_REG(line, UART_MIS) & UART_MIS_CTSMMIS;
+bool uart_is_cts_interrupt(size_t line)
+{
+  return UART_REG(line, UART_MIS) & UART_MIS_CTSMMIS;
 }
 
-bool uart_get_cts(size_t line) {
-    return UART_REG(line, UART_FR) & UART_FR_CTS;
+bool uart_get_cts(size_t line)
+{
+  return UART_REG(line, UART_FR) & UART_FR_CTS;
 }
 
-void uart_clear_cts(size_t line) {
-    UART_REG(line, UART_ICR) = UART_ICR_CTSMIC;
+void uart_clear_cts(size_t line)
+{
+  UART_REG(line, UART_ICR) = UART_ICR_CTSMIC;
 }

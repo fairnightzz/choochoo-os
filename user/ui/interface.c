@@ -11,7 +11,7 @@ void idlePerformanceTask()
   int clockServer = WhoIs(ClockAddress);
   for (;;)
   {
-    Delay(clockServer, 100);
+    Delay(clockServer, 500);
     render_perf_stats(idle_timer_percentage());
   }
 }

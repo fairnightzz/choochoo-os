@@ -61,7 +61,7 @@ void *slab_alloc(AllocationType at)
     }
   }
 
-  LOG_WARN("slab allocator is out of memory");
+  LOG_WARN("slab allocator is out of memory %d", at);
   return 0;
 }
 

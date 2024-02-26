@@ -139,7 +139,7 @@ void IOServer(size_t line)
     }
     case IO_PUTC:
     {
-      LOG_DEBUG("[IOServer] Line %d Putc request from %d", line, from_tid);
+      LOG_DEBUG("[IOServer] Line %d Putc request from %d, queue length: %d, data: %d", line, from_tid, llist_length(putc_tasks), request.data);
 
       if (clearToSend)
       {
@@ -196,12 +196,12 @@ void IOServer(size_t line)
 
       if (llist_length(putc_tasks) > 0)
       {
-        LOG_DEBUG("[IOServer] Line %d SEND_EVENT received, there is a queued char, printing...", line);
+        LOG_DEBUG("[IOServer] Line %d SEND_EVENT received, there is a queued char, LOG_DEBUGing...", line);
         uart_putc(line, (unsigned char)(uintptr_t)llist_pop_front(putc_tasks));
       }
       else
       {
-        LOG_DEBUG("[IOServer] Line %d SEND_EVENT received, there is no queued char.", line);
+        // LOG_DEBUG("[IOServer] Line %d SEND_EVENT received, there is no queued char.", line);
         clearToSend = true;
       }
 

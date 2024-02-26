@@ -31,6 +31,7 @@ unsigned char uart_getc_queued(size_t line, bool *is_buffer_empty);
 bool uart_is_rx_interrupt(size_t line);
 bool uart_is_tx_interrupt(size_t line);
 void uart_clear_rx(size_t line);
+void uart_clear_tx(size_t line);
 bool uart_is_cts_interrupt(size_t line);
 bool uart_get_cts(size_t line);
 void uart_clear_cts(size_t line);

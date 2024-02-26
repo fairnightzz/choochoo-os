@@ -15,6 +15,7 @@ void kernel_init()
   vector_table_initialize();
   gpio_init();
   uart_config_and_enable(CONSOLE);
+  uart_config_and_enable(MARKLIN);
   slab_init();
   switchframe_init();
   pagetable_init();
@@ -151,6 +152,7 @@ void handle_irq()
   iar = gic_read_iar();
   interruptId = iar & 0x3FF; // Read lower 10 bits
 
+  // PRINT("interrupt: %d", interruptId);
   if (interruptId == 97)
   {
     // Unblock tasks with EVENT_WAIT
@@ -161,22 +163,43 @@ void handle_irq()
   {
     // Handle UART Interrupts
     // don't know if two interupts can be in one
-    if (uart_is_tx_interrupt(MARKLIN) && uart_is_cts_interrupt(MARKLIN))
+    if (uart_is_cts_interrupt(MARKLIN))
     {
       if (uart_get_cts(MARKLIN))
       {
         scheduler_unblock_events(EVENT_MARKLIN_SEND);
       }
       uart_clear_cts(MARKLIN);
+      // uart_clear_tx(MARKLIN);
     }
+
+    // if (uart_is_cts_interrupt(MARKLIN))
+    // {
+    //   if (uart_get_cts(MARKLIN))
+    //   {
+    //     scheduler_unblock_events(EVENT_MARKLIN_SEND);
+    //   }
+    //   uart_clear_cts(MARKLIN);
+    // }
 
     if (uart_is_rx_interrupt(MARKLIN))
     {
       scheduler_unblock_events(EVENT_MARKLIN_RECEIVE);
       uart_clear_rx(MARKLIN);
     }
+    /*
+        if (uart_is_tx_interrupt(CONSOLE))
+        {
+          if (uart_get_cts(CONSOLE))
+          {
+            scheduler_unblock_events(EVENT_CONSOLE_SEND);
+          }
+          uart_clear_cts(CONSOLE);
+          uart_clear_tx(CONSOLE);
+        }
+        */
 
-    if (uart_is_tx_interrupt(CONSOLE) && uart_is_cts_interrupt(CONSOLE))
+    if (uart_is_cts_interrupt(CONSOLE))
     {
       if (uart_get_cts(CONSOLE))
       {

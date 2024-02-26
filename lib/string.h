@@ -2,6 +2,7 @@
 #define _string_h_ 1
 
 #include <stddef.h>
+#include <stdarg.h>
 
 #define MAX_STRING_LEN 128
 
@@ -25,5 +26,6 @@ void char_copy(char *dest, char *src);
 
 // String formatting is useful for outputting to our console buffer
 string string_format(char *fmt, ...);
+string _string_format(char *fmt, va_list va);
 
 #endif /* string.h */

@@ -1,5 +1,4 @@
 #include "string.h"
-#include <stdarg.h>
 #include "util.h"
 
 string new_string(void)
@@ -137,7 +136,7 @@ void char_copy(char *dest, char *src)
 // f-style string formatting, with limited format support
 string _string_format(char *fmt, va_list va)
 {
-  string dest = to_string("");
+  string dest = new_string();
   char ch;
 
   for (;;)
@@ -154,7 +153,7 @@ string _string_format(char *fmt, va_list va)
     }
     else
     {
-      string temp = to_string("");
+      string temp = new_string();
       ch = *(fmt++);
       switch (ch)
       {

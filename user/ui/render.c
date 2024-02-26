@@ -15,6 +15,32 @@
 
 static TermUIState UIState;
 
+void print(char *fmt, ...)
+{
+  va_list va;
+  va_start(va, fmt);
+  string formattedString = _string_format(fmt, va);
+  va_end(va);
+
+  uart_printf(CONSOLE, formattedString.data);
+
+  /*
+  for (int i = 0; i < str_length(&formattedString); i++)
+  {
+    if (!push(&UIState.output_queue, formattedString.data[i]))
+    {
+      PRINT("BUFFER OVERFLOW");
+    }
+  }
+
+  while (!isEmpty(&UIState.output_queue))
+  {
+    uint8_t ch = pop(&UIState.output_queue);
+    Putc(UIState.console_server_tid, ch);
+  }
+  */
+}
+
 void render_init()
 {
   int console_server_tid = WhoIs(ConsoleIOAddress);
@@ -22,7 +48,7 @@ void render_init()
 
   // Draw part of UI that will not be re-rendered.
   uart_printf(CONSOLE, "╭───────────────────────────────────────────────────────────────────────────────╮\r\n");
-  uart_printf(CONSOLE, "│  Current Time:                                        CS 452 - Anish Aggarwal │\r\n");
+  uart_printf(CONSOLE, "│  Current Time:                                        CS 452 - choochoo os    │\r\n");
   uart_printf(CONSOLE, "├─[switches]────────────────────────────────┬─[sensors]─────────────────────────┤\r\n");
   uart_printf(CONSOLE, "│ 001 .    002 .    003 .    004 .    005 . │                                   │\r\n");
   uart_printf(CONSOLE, "│ 006 .    007 .    008 .    009 .    010 . │                                   │\r\n");
@@ -55,25 +81,6 @@ void render_init()
   };
 }
 
-void print(char *fmt, ...)
-{
-  va_list va;
-  va_start(va, fmt);
-  string formattedString = string_format(fmt, va);
-  va_end(va);
-
-  for (int i = 0; i < str_length(&formattedString); i++)
-  {
-    push(&UIState.output_queue, formattedString.data[i]);
-  }
-
-  while (!isEmpty(&UIState.output_queue))
-  {
-    uint8_t ch = pop(&UIState.output_queue);
-    Putc(UIState.console_server_tid, ch);
-  }
-}
-
 void render_time(uint64_t time)
 {
   unsigned int tenth_secs = time % 1000000 / 100000;
@@ -99,7 +106,7 @@ void render_time(uint64_t time)
 
 void render_perf_stats(int percentage)
 {
-  print("Idle Task Execution: %d percent", percentage);
+  print("\033[%u;%uHIdle Task Execution: %d percent", 2, 18, percentage);
 }
 
 void render_prompt(string *prompt)
