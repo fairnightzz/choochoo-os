@@ -60,6 +60,15 @@ string cres_to_string(CommandResult cres)
   }
 }
 
+void clockUITask() {
+  int clock_server = WhoIs(ClockAddress);
+  while (1) {
+    int cur_tick = Time(clock_server);
+    render_time(cur_tick);
+    Delay(clock_server, 5);
+  }
+}
+
 void promptTask()
 {
   int io_server = WhoIs(ConsoleIOAddress);

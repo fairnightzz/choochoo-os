@@ -25,6 +25,9 @@ void UITask()
 
   trainsys_init();
 
+  // clock update on ui
+  Create(2, &clockUITask);
+
   // Prompt task
   Create(2, &promptTask);
 
@@ -32,4 +35,5 @@ void UITask()
   Create(2, &trainsysTask);
 
   Create(2, &trainsysSlave);
+
 }

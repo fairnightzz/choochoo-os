@@ -3,6 +3,8 @@
 
 void promptTask();
 
+void clockUITask();
+
 void trainsysTask();
 
 void trainsysSlave();
