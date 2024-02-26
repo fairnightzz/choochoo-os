@@ -127,6 +127,7 @@ void ClockServer()
           }
           Reply(clk_req->tid, (char *)&response, sizeof(ClockResponse));
           llist_remove_item(clk_requests, clk_req);
+          free(clk_req, CLOCK_BUFFER_REQUEST);
         }
       }
       llist_delete(it);
