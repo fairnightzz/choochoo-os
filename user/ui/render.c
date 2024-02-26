@@ -69,8 +69,8 @@ void render_init()
   uart_printf(CONSOLE, "│╭─────────────────────────────────────────────────────────────────────────────╮│\r\n");
   uart_printf(CONSOLE, "││>                                                                            ││\r\n");
   uart_printf(CONSOLE, "│╰─────────────────────────────────────────────────────────────────────────────╯│\r\n");
-  uart_printf(CONSOLE, "├─[performance]─────────────────────────────────────────────────────────────────┤\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│─[performance]─────────────────────────────────────────────────────────────────┤\r\n");
+  uart_printf(CONSOLE, "│ Idle Task Execution Percentage:                                               │\r\n");
   uart_printf(CONSOLE, "╰───────────────────────────────────────────────────────────────────────────────╯\r\n");
 
   UIState = (TermUIState){
@@ -81,10 +81,11 @@ void render_init()
   };
 }
 
+// every tick is 10ms
 void render_time(uint64_t time)
 {
-  unsigned int tenth_secs = time % 1000000 / 100000;
-  unsigned int total_secs = time / 1000000;
+  unsigned int tenth_secs = time % 10000 / 1000;
+  unsigned int total_secs = time / 10000;
   unsigned int secs = total_secs % 60;
   unsigned int min = total_secs / 60;
 
@@ -99,14 +100,14 @@ void render_time(uint64_t time)
     single_min = "0";
   }
 
-  string clockPosition = string_format("\033[%d;%dH", 3, 2);
-  string clockMessage = string_format("Clock: %s%u:%s%u:%u0", single_min, min, single_secs, secs, tenth_secs);
+  string clockPosition = string_format("\033[%d;%dH", 2, 16);
+  string clockMessage = string_format("%s%u:%s%u:%u0", single_min, min, single_secs, secs, tenth_secs);
   print("%s%s", clockPosition.data, clockMessage.data);
 }
 
 void render_perf_stats(int percentage)
 {
-  print("\033[%u;%uHIdle Task Execution: %d percent", 22, 3, percentage);
+  print("\033[%u;%uH%d%%", 22, 33, percentage);
 }
 
 void render_char(unsigned char ch, int prompt_length)
