@@ -5,4 +5,6 @@ void promptTask();
 
 void trainsysTask();
 
+void trainsysSlave();
+
 #endif // __UI_H__

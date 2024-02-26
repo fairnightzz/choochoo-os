@@ -73,6 +73,7 @@ void promptTask()
   while (1)
   {
     int c = Getc(io_server);
+    int curr_tick = Time(clock_server);
     if (c < 0) {
       LOG_ERROR("[Getc Error in promptTask()]: got %d", c);
       continue;
@@ -89,7 +90,6 @@ void promptTask()
       render_prompt(&prompt);
     } else if (c == ENTER_CHARACTER) {
     
-      int curr_tick = Time(clock_server);
       if (curr_tick < 0) {
         LOG_ERROR("[promptTask ERROR]: Time() from clock server error");
         continue;
@@ -123,6 +123,15 @@ void trainsysTask() {
     }
     trainsys_read_all_sensors(curr_tick);
     trainsys_check_rev_trains(curr_tick);
-    Delay(clock_server, 5);
+    Delay(clock_server, 1);
+  }
+}
+
+void trainsysSlave() {
+  int clock_server = WhoIs(ClockAddress);
+  while (1) {
+    int curr_tick = Time(clock_server);
+    trainsys_try_serial_out(curr_tick);
+    Delay(clock_server, 1);
   }
 }

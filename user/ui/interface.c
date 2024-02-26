@@ -30,4 +30,6 @@ void UITask()
 
   // Train sensors task
   Create(2, &trainsysTask);
+  
+  Create(2, &trainsysSlave);
 }

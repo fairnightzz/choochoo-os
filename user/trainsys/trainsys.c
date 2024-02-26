@@ -32,10 +32,10 @@ void set_train_reverse(uint32_t train, uint64_t time)
   if (SystemState.stop_times[train] == 0 && SystemState.rev_times[train] == 0)
   {
     SystemState.trains_reversing += 1;
+    push(&(SystemState.serial_out), SystemState.train_state[train] & ~TRAIN_SPEED_MASK); // 0 train speed
+    push(&(SystemState.serial_out), train);
+    SystemState.stop_times[train] = time;
   }
-  push(&(SystemState.serial_out), SystemState.train_state[train] & ~TRAIN_SPEED_MASK); // 0 train speed
-  push(&(SystemState.serial_out), train);
-  SystemState.stop_times[train] = time;
 }
 
 void set_track_switch(uint32_t switch_id, SwitchMode switch_mode)
