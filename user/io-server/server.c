@@ -139,7 +139,10 @@ void IOServer(size_t line)
     }
     case IO_PUTC:
     {
-      LOG_DEBUG("[IOServer] Line %d Putc request from %d, queue length: %d, data: %d", line, from_tid, llist_length(putc_tasks), request.data);
+      if (line == 1 && llist_length(putc_tasks) > 500)
+      {
+        // PRINT("[IOServer] queue length: %d ", llist_length(putc_tasks));
+      }
 
       if (clearToSend)
       {
@@ -149,7 +152,7 @@ void IOServer(size_t line)
       }
       else
       {
-        LOG_DEBUG("[IOServer] Line %d queued up on putc", line);
+        // PRINT("[IOServer] Line %d queued up on putc", line);
         llist_append(putc_tasks, (void *)(uintptr_t)request.data);
       }
       response = (IOResponse){
@@ -194,17 +197,11 @@ void IOServer(size_t line)
       };
       Reply(from_tid, (char *)&response, sizeof(IOResponse));
 
-      if (llist_length(putc_tasks) > 0)
+      while (llist_length(putc_tasks) > 0 && uart_try_putc(line, (unsigned char)(uintptr_t)llist_front(putc_tasks)))
       {
-        LOG_DEBUG("[IOServer] Line %d SEND_EVENT received, there is a queued char, LOG_DEBUGing...", line);
-        uart_putc(line, (unsigned char)(uintptr_t)llist_pop_front(putc_tasks));
+        llist_pop_front(putc_tasks);
       }
-      else
-      {
-        // LOG_DEBUG("[IOServer] Line %d SEND_EVENT received, there is no queued char.", line);
-        clearToSend = true;
-      }
-
+      clearToSend = (llist_length(putc_tasks) == 0);
       break;
     }
     default:

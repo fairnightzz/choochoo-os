@@ -4,6 +4,7 @@
 #include "kern/rpi.h"
 #include "user/io-server/interface.h"
 #include "user/nameserver.h"
+#include "user/clock-server/interface.h"
 
 #define ANSI_CLEAR "\033[2J"
 #define ANSI_HIDE "\033[?25l"
@@ -22,9 +23,8 @@ void print(char *fmt, ...)
   string formattedString = _string_format(fmt, va);
   va_end(va);
 
-  uart_printf(CONSOLE, formattedString.data);
+  // uart_printf(CONSOLE, formattedString.data);
 
-  /*
   for (int i = 0; i < str_length(&formattedString); i++)
   {
     if (!push(&UIState.output_queue, formattedString.data[i]))
@@ -37,8 +37,10 @@ void print(char *fmt, ...)
   {
     uint8_t ch = pop(&UIState.output_queue);
     Putc(UIState.console_server_tid, ch);
+    if (length(&UIState.output_queue) % 5 == 0) {
+      Delay(WhoIs(ClockAddress), 1);
+    }
   }
-  */
 }
 
 void render_init()

@@ -158,18 +158,24 @@ void uart_config_and_enable(size_t line)
   switch (line)
   {
   case CONSOLE:
+  {
     UART_REG(line, UART_LCRH) = UART_LCRH_WLEN_HIGH | UART_LCRH_WLEN_LOW;
+    // enable interrupts
+    UART_REG(line, UART_IMSC) = UART_IMSC_RXIM | UART_IMSC_TXIM;
     break;
+  }
   case MARKLIN:
+  {
+
     UART_REG(line, UART_LCRH) = UART_LCRH_WLEN_HIGH | UART_LCRH_WLEN_LOW | UART_LCRH_STP2;
+    // enable interrupts
+    UART_REG(line, UART_IMSC) = UART_IMSC_CTSMIM | UART_IMSC_RXIM; // | UART_IMSC_TXIM;
     break;
+  }
   }
 
   // re-enable the UART; enable both transmit and receive regardless of previous state
   UART_REG(line, UART_CR) = cr_state | UART_CR_UARTEN | UART_CR_TXE | UART_CR_RXE;
-
-  // enable interrupts
-  UART_REG(line, UART_IMSC) = UART_IMSC_CTSMIM | UART_IMSC_RXIM; // | UART_IMSC_TXIM;
 }
 
 int uart_getcnow(size_t line, unsigned char *data)

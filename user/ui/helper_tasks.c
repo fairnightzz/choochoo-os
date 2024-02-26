@@ -74,7 +74,8 @@ void promptTask()
   {
     int c = Getc(io_server);
     int curr_tick = Time(clock_server);
-    if (c < 0) {
+    if (c < 0)
+    {
       LOG_ERROR("[Getc Error in promptTask()]: got %d", c);
       continue;
     }
@@ -88,13 +89,16 @@ void promptTask()
     {
       pop_char(&prompt);
       render_prompt(&prompt);
-    } else if (c == ENTER_CHARACTER) {
-    
-      if (curr_tick < 0) {
+    }
+    else if (c == ENTER_CHARACTER)
+    {
+
+      if (curr_tick < 0)
+      {
         LOG_ERROR("[promptTask ERROR]: Time() from clock server error");
         continue;
       }
-    
+
       CommandResult command_result = parse_command(&prompt);
       string console_string = cres_to_string(command_result);
       render_command(&console_string);
@@ -106,18 +110,22 @@ void promptTask()
   }
 }
 
-void trainsysTask() {
+void trainsysTask()
+{
   int clock_server = WhoIs(ClockAddress);
   int curr_tick = Time(clock_server);
-  if (curr_tick < 0) {
+  if (curr_tick < 0)
+  {
     LOG_ERROR("[trainsysTask ERROR]: Time() from clock server error");
     return;
   }
   trainsys_init_track(TRACK_A, curr_tick);
 
-  while (1) {
+  while (1)
+  {
     curr_tick = Time(clock_server);
-    if (curr_tick < 0) {
+    if (curr_tick < 0)
+    {
       LOG_ERROR("[trainsysTask ERROR]: Time() from clock server error");
       continue;
     }
@@ -127,9 +135,11 @@ void trainsysTask() {
   }
 }
 
-void trainsysSlave() {
+void trainsysSlave()
+{
   int clock_server = WhoIs(ClockAddress);
-  while (1) {
+  while (1)
+  {
     int curr_tick = Time(clock_server);
     trainsys_try_serial_out(curr_tick);
     Delay(clock_server, 1);

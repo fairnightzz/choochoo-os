@@ -199,12 +199,13 @@ void handle_irq()
         }
         */
 
-    if (uart_is_cts_interrupt(CONSOLE))
+    if (uart_is_tx_interrupt(CONSOLE))
     {
       if (uart_get_cts(CONSOLE))
       {
         scheduler_unblock_events(EVENT_CONSOLE_SEND);
       }
+      uart_clear_tx(CONSOLE);
       uart_clear_cts(CONSOLE);
     }
 
