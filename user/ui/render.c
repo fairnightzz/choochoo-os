@@ -82,12 +82,12 @@ void render_init()
 }
 
 // every tick is 10ms
-void render_time(uint64_t time)
+void render_time(int time)
 {
-  unsigned int tenth_secs = time % 10000 / 1000;
-  unsigned int total_secs = time / 10000;
-  unsigned int secs = total_secs % 60;
-  unsigned int min = total_secs / 60;
+  int tenth_secs = time % 100 / 10;
+  int total_secs = time / 100;
+  int secs = total_secs % 60;
+  int min = total_secs / 60;
 
   char *single_secs = "";
   char *single_min = "";
@@ -100,14 +100,14 @@ void render_time(uint64_t time)
     single_min = "0";
   }
 
-  string clockPosition = string_format("\033[%d;%dH", 2, 16);
+  string clockPosition = string_format("\033[%d;%dH", 2, 17);
   string clockMessage = string_format("%s%u:%s%u:%u0", single_min, min, single_secs, secs, tenth_secs);
   print("%s%s", clockPosition.data, clockMessage.data);
 }
 
 void render_perf_stats(int percentage)
 {
-  print("\033[%u;%uH%d%%", 22, 33, percentage);
+  print("\033[%u;%uH%d%%", 22, 35, percentage);
 }
 
 void render_char(unsigned char ch, int prompt_length)

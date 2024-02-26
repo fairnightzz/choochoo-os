@@ -16,7 +16,7 @@ typedef struct
 } TermUIState;
 
 void render_init();
-void render_time(uint64_t time);
+void render_time(int time);
 void render_command(string *line);
 void render_char(unsigned char ch, int prompt_length);
 void render_backspace(int prompt_length);
