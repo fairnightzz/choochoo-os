@@ -82,13 +82,13 @@ void promptTask()
     unsigned char ch = c;
     if (isalnum(ch) || isblank(ch))
     {
+      render_char(ch, str_length(&prompt));
       push_char(&prompt, ch);
-      render_prompt(&prompt);
     }
     else if (c == BACKSPACE_CHARACTER)
     {
+      render_backspace(str_length(&prompt));
       pop_char(&prompt);
-      render_prompt(&prompt);
     }
     else if (c == ENTER_CHARACTER)
     {
@@ -103,7 +103,7 @@ void promptTask()
       string console_string = cres_to_string(command_result);
       render_command(&console_string);
       str_clear(&prompt);
-      render_prompt(&prompt);
+      render_prompt_clear();
 
       trainsys_execute_command(command_result, curr_tick); // todo make sure this fn exists and works
     }

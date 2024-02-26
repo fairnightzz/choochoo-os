@@ -111,17 +111,31 @@ void render_perf_stats(int percentage)
   print("\033[%u;%uHIdle Task Execution: %d percent", 2, 18, percentage);
 }
 
-void render_prompt(string *prompt)
+void render_char(unsigned char ch, int prompt_length)
 {
-  const char *out = get_data(prompt);
-  if (str_length(prompt) > 74)
+  if (prompt_length < 74)
   {
-    string strippedString = get_suffix(prompt, 74);
-    out = get_data(&strippedString);
+    char buf[2];
+    buf[1] = '\0';
+    buf[0] = ch;
+    print("\033[19;%dH%s", prompt_length + 5, buf);
   }
-  const char *COMMAND_START = ANSI_MOVE("19", "5");
-  print("%s                                                                           ", COMMAND_START);
-  print("%s%s", COMMAND_START, out);
+}
+
+void render_backspace(int prompt_length)
+{
+  if (0 < prompt_length && prompt_length <= 74)
+  {
+    char buf[2];
+    buf[1] = '\0';
+    buf[0] = ' ';
+    print("\033[19;%dH%s", prompt_length + 5 - 1, buf);
+  }
+}
+
+void render_prompt_clear()
+{
+  print("\033[19;5H                                                                           ");
 }
 
 void clear_console()

@@ -18,7 +18,9 @@ typedef struct
 void render_init();
 void render_time(uint64_t time);
 void render_command(string *line);
-void render_prompt(string *line);
+void render_char(unsigned char ch, int prompt_length);
+void render_backspace(int prompt_length);
+void render_prompt_clear();
 void render_switch(int32_t switch_id, SwitchMode switch_mode);
 void render_sensor(char bank, unsigned int sensor_number);
 void render_perf_stats(int percentage);
