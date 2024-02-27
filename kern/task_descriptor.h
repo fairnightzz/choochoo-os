@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include "addrspace.h"
 #include "switchframe.h"
-#include "stdlib.h"
+#include "lib/stdlib.h"
 
 #define TASK_SIZE 128
 
