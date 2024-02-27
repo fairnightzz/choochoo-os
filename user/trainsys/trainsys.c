@@ -2,6 +2,7 @@
 #include "user/ui/render.h"
 #include "user/io-server/interface.h"
 #include "user/nameserver.h"
+#include "lib/stdlib.h"
 
 static TrainSystemState SystemState;
 
@@ -27,14 +28,16 @@ void set_train_lights(uint32_t train, bool state)
   push(&(SystemState.serial_out), train);
 }
 
-void set_train_reverse(uint32_t train, uint64_t time)
+void set_train_reverse(uint32_t train, int time)
 {
   if (SystemState.stop_times[train] == 0 && SystemState.rev_times[train] == 0)
   {
-    SystemState.trains_reversing += 1;
     push(&(SystemState.serial_out), SystemState.train_state[train] & ~TRAIN_SPEED_MASK); // 0 train speed
     push(&(SystemState.serial_out), train);
     SystemState.stop_times[train] = time;
+  } else {
+    string s = string_format("[rv]: train #%u already reversing, command ignored", train);
+    render_command(&s);
   }
 }
 
@@ -108,28 +111,24 @@ void trainsys_init()
 
 void trainsys_check_rev_trains(int curr_tick)
 {
-  if (SystemState.trains_reversing > 0)
+  for (int i = 0; i < TRAINS_COUNT; i++)
   {
-    for (int i = 0; i < TRAINS_COUNT; i++)
+    if (SystemState.stop_times[i] > 0 && curr_tick - SystemState.stop_times[i] > REV_STOP_DELAY)
     {
-      if (SystemState.stop_times[i] > 0 && curr_tick - SystemState.stop_times[i] > REV_STOP_DELAY)
-      {
-        SystemState.stop_times[i] = 0;
-        push(&(SystemState.serial_out), (SystemState.train_state[i] & ~TRAIN_SPEED_MASK) | 15); // reverse
-        push(&(SystemState.serial_out), i);
-        SystemState.rev_times[i] = curr_tick;
-      }
-
-      if (SystemState.rev_times[i] > 0 && curr_tick - SystemState.rev_times[i] > REV_DELAY)
-      {
-        SystemState.rev_times[i] = 0;
-        SystemState.trains_reversing -= 1;
-        push(&(SystemState.serial_out), SystemState.train_state[i]);
-        push(&(SystemState.serial_out), i);
-      }
+      push(&(SystemState.serial_out), (SystemState.train_state[i] & ~TRAIN_SPEED_MASK) | 15); // reverse
+      push(&(SystemState.serial_out), i);
+      SystemState.rev_times[i] = curr_tick;
+      SystemState.stop_times[i] = 0;
     }
-    trainsys_try_serial_out(curr_tick);
+
+    if (SystemState.rev_times[i] > 0 && curr_tick - SystemState.rev_times[i] > REV_DELAY)
+    {
+      push(&(SystemState.serial_out), SystemState.train_state[i]);
+      push(&(SystemState.serial_out), i);
+      SystemState.rev_times[i] = 0;
+    }
   }
+  trainsys_try_serial_out(curr_tick);
 }
 
 void trainsys_read_all_sensors(int curr_tick)
