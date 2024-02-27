@@ -55,15 +55,24 @@ The kernel creates a task that runs `initTask()` in `user/initTasks.h`, which st
 ### 3.21 Interrupt Handling (`lib/gic.h`) (`kern/kern.h`) (`kern/enter_modes.S`)
 
 We added a new interrupt id to handle, which is 153.
+We handle an interrupt depending on their type.
+
+For `MARKLIN`, we only check for CTS or RX interrupts and then unblock the respective event. We only check CTS because we noticed that CTS is only high after TX is high, so there's no point in setting up a state machine if we know that CTS will be high in the end and everything should be good to send. It's also important to note that we delaying the marklin send so that we will not be overloading the buffer. We also disabled all FIFOs.
+
+For `CONSOLE`, we only check for TX and RX interrupts. The reason for not checking CTS is because the console is incredibly responsive and fast so checking using state machines will only delay console output. This change was decided after rigorous testing.
 
 ### 3.22 Event Notification (`lib/task_descriptor.h`) (`lib/syscall.h`)
 
-Two new events.
+We added 4 new events, that being:
+1. `EVENT_MARKLIN_SEND`
+2. `EVENT_MARKLIN_RECEIVE`
+3. `EVENT_CONSOLE_SEND`
+4. `EVENT_CONSOLE_RECEIVE`
 
 
 ### 3.23 IO Server (`user/io-server/server.h`)
 
-We have two io servers.
+We have two io servers. ansih expdand
 
 # 4 User Features
 

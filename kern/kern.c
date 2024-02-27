@@ -162,7 +162,6 @@ void handle_irq()
   else if (interruptId == 153)
   {
     // Handle UART Interrupts
-    // don't know if two interupts can be in one
     if (uart_is_cts_interrupt(MARKLIN))
     {
       if (uart_get_cts(MARKLIN))
@@ -170,34 +169,13 @@ void handle_irq()
         scheduler_unblock_events(EVENT_MARKLIN_SEND);
       }
       uart_clear_cts(MARKLIN);
-      // uart_clear_tx(MARKLIN);
     }
-
-    // if (uart_is_cts_interrupt(MARKLIN))
-    // {
-    //   if (uart_get_cts(MARKLIN))
-    //   {
-    //     scheduler_unblock_events(EVENT_MARKLIN_SEND);
-    //   }
-    //   uart_clear_cts(MARKLIN);
-    // }
 
     if (uart_is_rx_interrupt(MARKLIN))
     {
       scheduler_unblock_events(EVENT_MARKLIN_RECEIVE);
       uart_clear_rx(MARKLIN);
     }
-    /*
-        if (uart_is_tx_interrupt(CONSOLE))
-        {
-          if (uart_get_cts(CONSOLE))
-          {
-            scheduler_unblock_events(EVENT_CONSOLE_SEND);
-          }
-          uart_clear_cts(CONSOLE);
-          uart_clear_tx(CONSOLE);
-        }
-        */
 
     if (uart_is_tx_interrupt(CONSOLE))
     {
