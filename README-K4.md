@@ -188,7 +188,6 @@ We added 4 new events, that being:
 3. `EVENT_CONSOLE_SEND`
 4. `EVENT_CONSOLE_RECEIVE`
 
-
 # User Features
 
 ## 4.1 NameServer (`user/nameserver.h`)
@@ -256,7 +255,6 @@ We have two IO Server(s): one for Marklin & one for Console. Each of these serve
 
 Using these 4 requests, each server is able to properly write / read to the specified line.
 
-
 ## 4.3 IO Interface (`user/io-server/interface.h`)
 
 The io server implements the following two methods as described on the assignment page, with no changes to their signatures:
@@ -268,15 +266,26 @@ int Putc(int tid, int channel, unsigned char ch)
 
 Each of these wrappers simply creates a `IORequest` struct which is then sent to the respective io server.
 
-## 5.1 A0 Revisited
+## 5 A0 Revisited
 
 We do a bunch in the UI task. We have separated it out into 5 tasks:
 
-* idle performance task
-* prompt task
-* clock ui task
-* trainsys task
-* trainsys slave task
+### 5.1 idle performance task (`user/ui/interface.c`)
+
+This task renders the idle task percentage onto the console every 500 ticks.
+
+### 5.2 prompt task (`user/ui/helper_tasks.h`)
+
+### 5.3 clock ui task (`user/ui/helper_tasks.h`)
+
+### 5.4 trainsys task (`user/ui/helper_tasks.h`)
+
+### 5.5 trainsys slave task (`user/ui/helper_tasks.h`)
+
+### 5.6 rendering to console (`user/ui/render.h`)
+
+This file is in charge of all the rendering semantics. In order to prevent `Putc` from getting put out of order, we place all the chars in a buffer to ensure the order is correct. The next putc will be the pop of the buffer.
+An important thing to note is that the initial rendering is done with blocking uart print. This is because there are many characters to output in the start. Afterwards, everything is exclusively non blocking using putc.
 
 # How our Kernel Runs
 The kernel creates a task that runs `initTask()` in `user/initTasks.h`, which starts the nameserver, clockserver console io server and marklin ioserver. Then, it runs the UI Task which does all the specifications in A0.
