@@ -8,7 +8,7 @@
 </div>
 
 # 1 Overview
-This is **Kernel Part 4** of CS452 W24 @UWaterloo. We added to the implementation of the Kernel that allows for an I/O server, and reimplements A0. Hope you like it :)
+This is **Kernel Part 4** of CS452 W24 @UWaterloo. We added to the implementation of the Kernel that allows for an I/O server, and reimplemented A0. Hope you like it :)
 
 # 2 Hash Commit & Testing
 Run the following on a `linux.student.cs` environment:
@@ -23,7 +23,7 @@ The above has been tested on machine `ubuntu2204-002`.
 
 To run the client tasks, head to `user/k3.c` and make sure to have this structure for `startK3Task()`:
 
-## 2.1 RPS Testing
+## 3 RPS Testing
 ```c
 void startK3Task()
 {
@@ -33,9 +33,9 @@ void startK3Task()
 };
 ```
 
-# 3 Kernel Features and Structure
+# 4 Kernel Features and Structure
 
-## 3.1 Kernel Features
+## 4.1 Kernel Features
 
 The choochoo-os kernel implements the following syscalls described on the assignment page with no modifications to their signatures:
 
@@ -75,7 +75,7 @@ int Reply( int tid, void *reply, int replylen);
 int AwaitEvent(int eventType);
 ```
 
-## 3.2 Kernel Structure
+## 4.2 Kernel Structure
 Our kernel program core is written in `kern.c` (header file `kern.h`) where we initialize our kernel which intern initializes all our structures and modular components on the kernel side (i.e. heap memory, i/o, vector exception table). It also provides two other functions: 
 ```C
  int svc_create(uint32_t priority, void (*entrypoint)());
@@ -86,7 +86,7 @@ void handle_svc();
 
 The first of which is the function which our `kern/main.c` file uses to execute the first user task program. The second function is used by our assembly script in `enter_mode.S` when entering kernel mode. This handles the system call made by the user mode. The following are all the core concepts and explanations of the algorithms / data structures used for each:
 
-### 3.21 Memory Management (`kern/addrspace.h`)
+### 4.21 Memory Management (`kern/addrspace.h`)
 
 We allocate 128KB for the kernel stack, and each task gets an address space of 4KB (+ extra allocated for switch frame, task descriptor, and scheduler in kernel ~ 400B) page to use as a stack.
 The maximum amount of tasks is 300 so our kernel does not exceed 128 KB in size.
@@ -99,7 +99,7 @@ At max memory usage of our address space we use 1.2 MB for user address spaces o
 
 One last thing is based on our task descriptor we can only do tasks up to 128. Meaning if there have already been 128 created tasks up to this point, creating a new task will result in -2. 
 
-### 3.22 Task Descriptor & Storage (`kern/task_descriptor.h`)
+### 4.22 Task Descriptor & Storage (`kern/task_descriptor.h`)
 
 The task descriptor used to define each task contains the following fields:
 
@@ -114,18 +114,18 @@ See: `kern/task_descriptor.h` for details.
 Task Descriptor metadata is stored in a hash table, which is implemented as an array of 128 task descriptor pointers. Note this is a caveat that does not allow us to make more than 128 tasks over the lifetime of this kernel. To fix this we can implement a hashmap like approach. To do in future assignments.
 
 
-### 3.23 Task Scheduler (`kern/scheduler.h`)
+### 4.23 Task Scheduler (`kern/scheduler.h`)
 
 The task scheduler is implemented using 32 priority levels, where 0 is the highest priority level and 31 is the lowest priority level. As per the kernel specification, since we can have more than one task at any priority, the scheduler is implemented as an array that is 32 long, and each value in the array has a linked list. Hence, it is a list of linked list nodes. It is implemented with round robin scheduling so the task at the head of the list will run first, and the 
 task at the tail of the list will run last. When there are no tasks running, 0 as tid gets returned and the kernel stalls.
 
-### 3.24 Heap Memory & Allocation (`kern/kalloc.h`)
+### 4.24 Heap Memory & Allocation (`kern/kalloc.h`)
 
 Created an allocator using direct addressing and pointer arithmetic to assign blocks of data for switch_frames, task descriptors, and scheduling nodes. This uses the slab allocation algorithm to assign one block of memory for each type of struct of memory we are allocating. It is worth noting that currently we are using equal blocks of memory for each partition of structs with each block being 10 KB.
 
 In future assignments, we might want to change this allocator to have more memory and to have different block sizes per struct allocated.
 
-### 3.25 Context Switch (`kern/switchframe.h` / `kern/enter_modes.S` / `exception_table.S`)
+### 4.25 Context Switch (`kern/switchframe.h` / `kern/enter_modes.S` / `exception_table.S`)
 
 Initialized vector exception table in the start.
 When a syscall gets called, we call the function `enter_kernelmode` which first get the switchframe struct in the task descriptor and we save all the registers onto the switchframe.
@@ -135,7 +135,7 @@ Once the svc has been handled, we call `enter_usermode`. This restores the regis
 
 Switchframe contains the entrypoint (user task function), the stack pointer of the user task, and also the `USER_TASK_EXIT` which will get called when the function returns. This is useful because if the user forgets to add an `Exit()` syscall, we will call it.
 
-### 3.21 Message Passing (`lib/syscall.S`) (`kern/svc_helpers.h`)
+### 4.21 Message Passing (`lib/syscall.S`) (`kern/svc_helpers.h`)
 
 We added the new syscalls to `syscall.S` and added the expected behaviour of Send and Receive described in the kernel specification into `svc_helpers.c`. 
 
@@ -143,13 +143,13 @@ The logic for sending first versus receive first is implemented using states suc
 It is implemented using this logic: `https://student.cs.uwaterloo.ca/~cs452/W24/lectures/lec06.html`. If the task tid does not exist, then 
 the function returns with a negative return value.
 
-### 3.22 User Allocation (`lib/alloc.h`)
+### 4.22 User Allocation (`lib/alloc.h`)
 We want users to also be able to allocate memory for structures; however, this cannot overlap with the kernel structures. Hence, we made a library (`lib/alloc.h`) that wraps `kern/kalloc.h` and still uses `slab allocation` but as specified user memmory structures. This is done by making the `UserAllocationType` enum a subset of `AllocationType` enum. Hence, allowing for reusability of our slab allocator but also for distinction between user program allocated memory and kernel allocated memory. One important note is that for our fixed size slabs, user programs still need to initialize the block size of each struct before calling `alloc` / `free`. 
 
-### 3.23 Linked List (`lib/linked_list.h`)
+### 4.23 Linked List (`lib/linked_list.h`)
 We made a linked list structure because we decided to do hashing with chaining to ensure we do not run into any hash collisions and have to resize our hashmap. Hence, currently this linked list structure is only used to help implement the hashmap described in the next section; however, it was made in a way that allows it to be independent (with iterators as well). Thus, it could be used more in future assignments.
 
-### 3.24 HashMap (`lib/hashmap.h`)
+### 4.24 HashMap (`lib/hashmap.h`)
 We made a hashmap for two reasons:
 1. Nameserver needs to map names to tids
 2. Want to map player tids to player objects for RPS. Could have used an array to do this, but went with hashmap approach for readability and to battle test our hash map implementation; since we know we will need this in future.
@@ -158,10 +158,10 @@ The HashMap structure allows users to create a hashmap with `char *` keys and `v
 
 The HashMap utilizes hashing with chaining with a 67 buckets as well as a simple hash function that uses prime 31 and the ascii values.
 
-### 3.25 Return of Circular Buffer: Byte Queue (`lib/byte_queue.h`)
+### 4.25 Return of Circular Buffer: Byte Queue (`lib/byte_queue.h`)
 The byte queue is needed to help facillitate our `Send-Receive-Reply` functionality. When a sender sends first, they add their tid to a circular buffer queue on the receiver's task descriptor so when the receiver calls `Receive()` it can look if a sender is already in its queue. Through testing, we have verified that this buffer does not overflow.
 
-### 3.21 Interrupt Handling (`lib/gic.h`) (`kern/kern.h`) (`kern/enter_modes.S`)
+### 4.26 Interrupt Handling (`lib/gic.h`) (`kern/kern.h`) (`kern/enter_modes.S`)
 
 The library `gic.h` allows for the targeting and enabling of specific interrupt ids. Currently, this is done in kernel initialization to target and enable interrupt id `97` which is used for handling the clock interrupts needed. Furthermore, this library also gives functionality allowing for the reading and writing of the interrupt acknowledgement register which is used when handling the interrupt. 
 
@@ -177,7 +177,7 @@ For `MARKLIN`, we only check for CTS or RX interrupts and then unblock the respe
 
 For `CONSOLE`, we only check for TX and RX interrupts. The reason for not checking CTS is because the console is incredibly responsive and fast so checking using state machines will only delay console output. This change was decided after rigorous testing.
 
-### 3.22 Event Notification (`lib/task_descriptor.h`) (`lib/syscall.h`)
+### 4.27 Event Notification (`lib/task_descriptor.h`) (`lib/syscall.h`)
 
 We added an `eventWaitType` so that tasks can be blocked on a certain type of event id. We also 
 added the `AwaitEvent(int eventType)` syscall.
@@ -246,12 +246,18 @@ int DelayUntil(int tid, int ticks)
 Each of these wrappers simply creates a `ClockRequest` struct which is then sent to the clockserver.
 `DelayUntil` and `Delay`'s logic are handled by the server.
 
+## 4.2 IO Server(s) - Marklin & Console
 
-## 4.x IO Server
+We have two IO Server(s): one for Marklin & one for Console. Each of these servers have two notifiers (two receive two event interrupts per server - one for clear to send event and one for a receive event) and each server handles an IORequest that is divided into one of 4 requests:
+1. PUTC Request: a user task wants to put a character on this line. This request also holds data.
+2. GETC Request: a user task wants to get a character on this line. This request's reply holds data.
+3. RECEIVE IO Request: sent from notifier to server on receive event as result of interrupt.
+4. SEND IO Request: sent from notifier on clear to send event as a result of interrupt.
 
-The choochoo-os kernel implements the additional syscall described on the assignment page with no modifications to their signatures:
+Using these 4 requests, each server is able to properly write / read to the specified line.
 
-## 4.1 IO Server Client (`user/io-server/interface.h`)
+
+## 4.3 IO Interface (`user/io-server/interface.h`)
 
 The io server implements the following two methods as described on the assignment page, with no changes to their signatures:
 
