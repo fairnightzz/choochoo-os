@@ -276,13 +276,17 @@ This task renders the idle task percentage onto the console every 500 ticks.
 
 ### 5.2 prompt task (`user/ui/helper_tasks.h`)
 
+This task renders the input and handles all console commands between the UI and the train system module. It also executes the train commands entered sending them to the marklin system via interactions with the train system.
+
 ### 5.3 clock ui task (`user/ui/helper_tasks.h`)
+
+The is task is just in charge of rendering the clock ui. It calls time and delays every 10 ticks to accurately get every 10th of a second without losing time.
 
 ### 5.4 trainsys task (`user/ui/helper_tasks.h`)
 
-### 5.5 trainsys slave task (`user/ui/helper_tasks.h`)
+This task is one that handles reading from the sensors periodically. It then sends these sensors to the UI to update it and get all the banks in order.
 
-### 5.6 rendering to console (`user/ui/render.h`)
+### 5.5 rendering to console (`user/ui/render.h`)
 
 This file is in charge of all the rendering semantics. In order to prevent `Putc` from getting put out of order, we place all the chars in a buffer to ensure the order is correct. The next putc will be the pop of the buffer.
 An important thing to note is that the initial rendering is done with blocking uart print. This is because there are many characters to output in the start. Afterwards, everything is exclusively non blocking using putc.
