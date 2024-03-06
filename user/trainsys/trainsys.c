@@ -84,6 +84,11 @@ void trainsys_execute_command(CommandResult cres, int curr_tick)
     SwitchMode switch_mode = cres.command_args.switch_args.switch_mode;
     set_track_switch(switch_id, switch_mode);
     break;
+  } 
+  case QUIT_COMMAND: 
+  {
+    SystemState.exited = true;
+    break;
   }
   case PATH_COMMAND:
   {
@@ -116,6 +121,8 @@ void trainsys_init()
       .last_sensor_byte_read = 0,
       .trains_reversing = 0,
       .marklin_tid = marklin_tid,
+      .track = {{0}},
+      .exited = false,
   };
 }
 
@@ -197,4 +204,14 @@ void trainsys_init_track(TrackSwitchPlans track_plan, int curr_tick)
     set_track_switch(switch_id, TRACK_PLANS[track_plan][i]);
   }
   trainsys_try_serial_out(curr_tick);
+  if (track_plan == TRACK_A) {
+    init_tracka(SystemState.track);
+  } else {
+    init_trackb(SystemState.track);
+  }
+}
+
+bool trainsys_exited()
+{
+  return SystemState.exited;
 }

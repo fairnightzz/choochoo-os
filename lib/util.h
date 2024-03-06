@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define countof(a)   (sizeof(a) / sizeof(*(a)))
+
 // conversions
 int a2d(char ch);
 char a2i(char ch, char **src, int base, int *nump);

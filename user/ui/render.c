@@ -43,6 +43,10 @@ void print(char *fmt, ...)
   }
 }
 
+void clear_screen() {
+  uart_printf(CONSOLE, "%s%s%s", ANSI_CLEAR, ANSI_ORIGIN, ANSI_HIDE);
+}
+
 void render_init()
 {
   int console_server_tid = WhoIs(ConsoleIOAddress);

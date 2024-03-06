@@ -4,6 +4,7 @@
 #include "lib/stdlib.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include "user/traintrack/track_data.h"
 
 #define TRAINS_COUNT 81
 #define M_WRITE 10
@@ -33,6 +34,9 @@ typedef struct
   bool sensor_states[80]; // 80 Sensors 16 * 5
 
   int marklin_tid;
+  track_node track[TRACK_MAX];
+
+  bool exited;
 } TrainSystemState;
 
 void trainsys_init();
@@ -41,5 +45,6 @@ void trainsys_try_serial_out(int curr_tick);
 void trainsys_execute_command(CommandResult cres, int curr_tick);
 void trainsys_check_rev_trains(int curr_tick);
 void trainsys_read_all_sensors(int curr_tick);
+bool trainsys_exited();
 
 #endif // __TRAINSYS_H__

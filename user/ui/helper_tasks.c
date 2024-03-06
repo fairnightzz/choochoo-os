@@ -70,8 +70,10 @@ string cres_to_string(CommandResult cres)
 void clockUITask()
 {
   int clock_server = WhoIs(ClockAddress);
-  while (1)
-  {
+  while (1) {
+    if (trainsys_exited()) {
+      break;
+    }
     int cur_tick = Time(clock_server);
     render_time(cur_tick);
     Delay(clock_server, 5);
@@ -124,6 +126,10 @@ void promptTask()
       render_prompt_clear();
 
       trainsys_execute_command(command_result, curr_tick); // todo make sure this fn exists and works
+      if (command_result.command_type == QUIT_COMMAND) {
+        clear_screen();
+        break;
+      }
     }
   }
 }
@@ -147,6 +153,9 @@ void trainsysTask()
       LOG_ERROR("[trainsysTask ERROR]: Time() from clock server error");
       continue;
     }
+    if (trainsys_exited()) {
+      break;
+    }
     trainsys_read_all_sensors(curr_tick);
     trainsys_check_rev_trains(curr_tick);
     Delay(clock_server, 1);
@@ -158,6 +167,9 @@ void trainsysSlave()
   int clock_server = WhoIs(ClockAddress);
   while (1)
   {
+    if (trainsys_exited()) {
+      break;
+    }
     int curr_tick = Time(clock_server);
     trainsys_try_serial_out(curr_tick);
     Delay(clock_server, 1);

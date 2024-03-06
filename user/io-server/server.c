@@ -10,7 +10,11 @@ int SendReceiveEvent(int io_server)
   IOResponse response;
   IORequest request = (IORequest){
       .type = IO_RECEIVE_EVENT,
-      .data = 0,
+      .data = {
+        .putc = {
+          .ch = 0, // ignore 
+        }
+      },
   };
 
   int ret = Send(io_server, (const char *)&request, sizeof(IORequest), (char *)&response, sizeof(IOResponse));
@@ -35,7 +39,11 @@ int SendSendEvent(int io_server)
   IOResponse response;
   IORequest request = (IORequest){
       .type = IO_SEND_EVENT,
-      .data = 0,
+      .data = {
+        .putc = {
+          .ch = 0, // ignore 
+        }
+      },
   };
 
   int ret = Send(io_server, (const char *)&request, sizeof(IORequest), (char *)&response, sizeof(IOResponse));
@@ -147,19 +155,36 @@ void IOServer(size_t line)
       if (clearToSend)
       {
         LOG_DEBUG("[IOServer] Line %d sent immediately on putc", line);
-        uart_putc(line, request.data);
+        uart_putc(line, request.data.putc.ch);
         clearToSend = false;
       }
       else
       {
         // PRINT("[IOServer] Line %d queued up on putc", line);
-        llist_append(putc_tasks, (void *)(uintptr_t)request.data);
+        llist_append(putc_tasks, (void *)(uintptr_t)request.data.putc.ch);
       }
       response = (IOResponse){
           .type = IO_PUTC,
           .data = 0};
       Reply(from_tid, (char *)&response, sizeof(IOResponse));
 
+      break;
+    }
+    case IO_PUTS: {
+      LOG_DEBUG("[IOServer] Line %d PUTS request from %d", line, from_tid);
+      unsigned char *s = request.data.puts.chs;
+      for (int i = 0; i < min(PUTS_BLOCK_SIZE, request.data.puts.chs_len); i++) {
+        if (i == 0 && clearToSend) {
+          uart_putc(line, s[i]);
+          clearToSend = false;
+          continue;
+        }
+        llist_append(putc_tasks, (void *)(uintptr_t)s[i]);
+      }
+      response = (IOResponse){
+        .type = IO_PUTS,
+        .data = 0};
+      Reply(from_tid, (char *)&response, sizeof(IOResponse));
       break;
     }
     case IO_RECEIVE_EVENT:

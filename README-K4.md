@@ -292,4 +292,4 @@ This file is in charge of all the rendering semantics. In order to prevent `Putc
 An important thing to note is that the initial rendering is done with blocking uart print. This is because there are many characters to output in the start. Afterwards, everything is exclusively non blocking using putc.
 
 # How our Kernel Runs
-The kernel creates a task that runs `initTask()` in `user/initTasks.h`, which starts the nameserver, clockserver console io server and marklin ioserver. Then, it runs the UI Task which does all the specifications in A0.
+The kernel creates a task that runs `initTask()` in `user/initTasks.h`, which starts the nameserver, clockserver console io server and marklin ioserver. Then, it runs the UI Task which does all the specifications in A0
