@@ -7,6 +7,7 @@ typedef enum
 {
   SWITCH_MODE_S = 33,
   SWITCH_MODE_C = 34,
+  SWITCH_MODE_UNKNOWN = 420,
 } SwitchMode;
 
 typedef enum

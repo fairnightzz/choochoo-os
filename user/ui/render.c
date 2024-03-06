@@ -185,6 +185,8 @@ void render_switch(int32_t switch_id, SwitchMode switch_mode)
   if (switch_mode == SWITCH_MODE_C)
   {
     out = "C";
+  } else if (switch_mode == SWITCH_MODE_UNKNOWN) {
+    out = "X";
   }
   print("\033[%u;%uH%s", row, col, out);
 }

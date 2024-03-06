@@ -13,6 +13,7 @@ typedef enum
   USER_STRING = 12,
   CLOCK_BUFFER_REQUEST = 13,
   SENSOR_BUFFER_REQUEST = 14,
+  SWITCH_BUFFER_REQUEST = 15,
 } UserAllocationType;
 
 void alloc_init(UserAllocationType uat, size_t size);

@@ -20,7 +20,8 @@ typedef enum
   STRING = 12,
   CLK_BUFFER_REQUEST = 13,
   SNSR_BUFFER_REQUEST = 14,
-  COUNT = 14,
+  SWCH_BUFFER_REQUEST = 15,
+  COUNT = 16,
 } AllocationType;
 
 void slab_init();
