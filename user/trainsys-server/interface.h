@@ -1,5 +1,5 @@
-#ifndef __CLOCK_INTERFACE_H__
-#define __CLOCK_INTERFACE_H__
+#ifndef __TRAIN_SYSTEM_INTERFACE_H__
+#define __TRAIN_SYSTEM_INTERFACE_H__
 
 #include <stdint.h>
 #include "lib/stdlib.h"
@@ -31,4 +31,4 @@ int TrainSystemSetSpeed(int system_server, int train, int speed);
 int TrainSystemSetLights(int system_server, int train, bool status);
 uint8_t TrainSystemGetTrainState(int system_server, int train);
 
-#endif // __CLOCK_INTERFACE_H__
+#endif // __TRAIN_SYSTEM_INTERFACE_H__

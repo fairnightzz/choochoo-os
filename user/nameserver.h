@@ -1,7 +1,7 @@
 #ifndef __NAMESERVER_H__
 #define __NAMESERVER_H__
 
-#include "stdlib.h"
+#include "lib/stdlib.h"
 #include <stdbool.h>
 
 typedef struct NameServerEntry NameServerEntry;

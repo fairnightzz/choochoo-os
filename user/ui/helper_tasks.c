@@ -51,6 +51,7 @@ string cres_to_string(CommandResult cres)
     {
       out_mode = "CURVED";
     }
+    render_switch(switch_id, switch_mode);
     return string_format("[sw]: Setting switch %u to %s mode", switch_id, out_mode);
   }
   case PATH_COMMAND:
@@ -89,6 +90,18 @@ void promptTask()
   string prompt = new_string();
 
   Putc(marklin_server, 192); // reset sensors
+
+  trainsys_init_track(TRACK_A);
+  for (int i = 0; i < SWITCH_COUNT; i++) {
+    int switch_id = i + 1;
+    if (switch_id > 18)
+    {
+      switch_id += 134;
+    }
+
+    render_switch(switch_id, TRACK_PLANS[TRACK_A][i]);
+  }
+ 
 
   while (1)
   {
@@ -134,44 +147,3 @@ void promptTask()
   }
 }
 
-void trainsysTask()
-{
-  int clock_server = WhoIs(ClockAddress);
-  int curr_tick = Time(clock_server);
-  if (curr_tick < 0)
-  {
-    LOG_ERROR("[trainsysTask ERROR]: Time() from clock server error");
-    return;
-  }
-  trainsys_init_track(TRACK_A, curr_tick);
-
-  while (1)
-  {
-    curr_tick = Time(clock_server);
-    if (curr_tick < 0)
-    {
-      LOG_ERROR("[trainsysTask ERROR]: Time() from clock server error");
-      continue;
-    }
-    if (trainsys_exited()) {
-      break;
-    }
-    trainsys_read_all_sensors(curr_tick);
-    trainsys_check_rev_trains(curr_tick);
-    Delay(clock_server, 1);
-  }
-}
-
-void trainsysSlave()
-{
-  int clock_server = WhoIs(ClockAddress);
-  while (1)
-  {
-    if (trainsys_exited()) {
-      break;
-    }
-    int curr_tick = Time(clock_server);
-    trainsys_try_serial_out(curr_tick);
-    Delay(clock_server, 1);
-  }
-}

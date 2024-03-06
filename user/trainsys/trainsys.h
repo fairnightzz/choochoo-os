@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "user/traintrack/track_data.h"
 
+
 #define TRAINS_COUNT 81
 #define M_WRITE 10
 #define SENSOR_READ 1
@@ -17,34 +18,16 @@
 
 typedef struct
 {
-  BQueue serial_out;
-  int train_state[TRAINS_COUNT];
-
-  int stop_times[TRAINS_COUNT];
-  int rev_times[TRAINS_COUNT];
-  unsigned int trains_reversing;
-
-  int switch_states[SWITCH_COUNT]; // indexing by switich id, S = 33, C = 34
-
-  int last_serial_write;
-
-  int last_sensor_read;
-  int last_sensor_byte_read;
-  int read_sensor_bytes;
-  bool sensor_states[80]; // 80 Sensors 16 * 5
-
   int marklin_tid;
-  track_node track[TRACK_MAX];
-
+  int system_tid;
+  int clock_tid;
+  int switch_tid;
   bool exited;
 } TrainSystemState;
 
 void trainsys_init();
-void trainsys_init_track(TrackSwitchPlans track_plan, int curr_tick);
-void trainsys_try_serial_out(int curr_tick);
-void trainsys_execute_command(CommandResult cres, int curr_tick);
-void trainsys_check_rev_trains(int curr_tick);
-void trainsys_read_all_sensors(int curr_tick);
+void trainsys_init_track(TrackSwitchPlans track_plan);
+void trainsys_execute_command(CommandResult cres);
 bool trainsys_exited();
 
 #endif // __TRAINSYS_H__

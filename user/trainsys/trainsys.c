@@ -1,60 +1,18 @@
 #include "user/trainsys/trainsys.h"
 #include "user/ui/render.h"
-#include "user/io-server/interface.h"
 #include "user/nameserver.h"
 #include "lib/stdlib.h"
+#include "user/io-server/interface.h"
+#include "user/clock-server/interface.h"
+#include "user/trainsys-server/interface.h"
+#include "user/switch-server/interface.h"
 
 static TrainSystemState SystemState;
 
-/* HELPER FUNCTIONS */
-void set_train_speed(uint32_t train, uint32_t speed)
-{
-  SystemState.train_state[train] = (SystemState.train_state[train] & ~TRAIN_SPEED_MASK) | speed;
-  push(&(SystemState.serial_out), SystemState.train_state[train]);
-  push(&(SystemState.serial_out), train);
-}
+#define SPEED_STOP     0
+#define SPEED_REVERSE 15
 
-void set_train_lights(uint32_t train, bool state)
-{
-  if (state)
-  {
-    SystemState.train_state[train] |= TRAIN_LIGHTS_MASK;
-  }
-  else
-  {
-    SystemState.train_state[train] &= ~TRAIN_LIGHTS_MASK;
-  }
-  push(&(SystemState.serial_out), SystemState.train_state[train]);
-  push(&(SystemState.serial_out), train);
-}
-
-void set_train_reverse(uint32_t train, int time)
-{
-  if (SystemState.stop_times[train] == 0 && SystemState.rev_times[train] == 0)
-  {
-    push(&(SystemState.serial_out), SystemState.train_state[train] & ~TRAIN_SPEED_MASK); // 0 train speed
-    push(&(SystemState.serial_out), train);
-    SystemState.stop_times[train] = time;
-  }
-  else
-  {
-    string s = string_format("[rv]: train #%u already reversing, command ignored", train);
-    render_command(&s);
-  }
-}
-
-void set_track_switch(uint32_t switch_id, SwitchMode switch_mode)
-{
-  SystemState.switch_states[switch_id] = switch_mode;
-  push(&(SystemState.serial_out), switch_mode);
-  push(&(SystemState.serial_out), switch_id);
-  push(&(SystemState.serial_out), 0x20); // reset solenoid
-
-  // draw switch on terminal
-  render_switch(switch_id, switch_mode);
-}
-
-void trainsys_execute_command(CommandResult cres, int curr_tick)
+void trainsys_execute_command(CommandResult cres)
 {
   switch (cres.command_type)
   {
@@ -62,27 +20,32 @@ void trainsys_execute_command(CommandResult cres, int curr_tick)
   {
     uint32_t train = cres.command_args.train_speed_args.train;
     uint32_t speed = cres.command_args.train_speed_args.speed;
-    set_train_speed(train, speed);
+    TrainSystemSetSpeed(SystemState.system_tid, train, speed);
     break;
   }
   case LIGHTS_COMMAND:
   {
     uint32_t train = cres.command_args.light_args.train;
     bool state = cres.command_args.light_args.state;
-    set_train_lights(train, state);
+    TrainSystemSetLights(SystemState.system_tid, train, state);
     break;
   }
   case REVERSE_COMMAND:
   {
     uint32_t train = cres.command_args.reverse_args.train;
-    set_train_reverse(train, curr_tick);
+    int old_speed = TrainSystemGetTrainState(SystemState.system_tid, train) & TRAIN_SPEED_MASK;
+    TrainSystemSetSpeed(SystemState.system_tid, train, SPEED_REVERSE);
+    Delay(SystemState.clock_tid, REV_STOP_DELAY); 
+    TrainSystemSetSpeed(SystemState.system_tid, train, SPEED_STOP);
+    Delay(SystemState.clock_tid, REV_DELAY);
+    TrainSystemSetSpeed(SystemState.clock_tid, train, old_speed);
     break;
   }
   case SWITCH_COMMAND:
   {
     uint32_t switch_id = cres.command_args.switch_args.switch_id;
     SwitchMode switch_mode = cres.command_args.switch_args.switch_mode;
-    set_track_switch(switch_id, switch_mode);
+    SwitchSet(SystemState.switch_tid, switch_id, switch_mode);
     break;
   } 
   case QUIT_COMMAND: 
@@ -101,97 +64,24 @@ void trainsys_execute_command(CommandResult cres, int curr_tick)
   default:
     break;
   }
-  trainsys_try_serial_out(curr_tick);
 }
 
-/* Driver Functions */
 void trainsys_init()
 {
   int marklin_tid = WhoIs(MarklinIOAddress);
-
+  int system_tid = WhoIs(TrainSystemAddress);
+  int clock_tid = WhoIs(ClockAddress);
+  int switch_tid = WhoIs(SwitchAddress);
   SystemState = (TrainSystemState){
-      .last_serial_write = 0,
-      .train_state = {0},
-      .serial_out = new_byte_queue(),
-      .stop_times = {0},
-      .rev_times = {0},
-      .last_sensor_read = 0,
-      .switch_states = {0},
-      .read_sensor_bytes = 0,
-      .last_sensor_byte_read = 0,
-      .trains_reversing = 0,
       .marklin_tid = marklin_tid,
-      .track = {{0}},
       .exited = false,
+      .system_tid = system_tid,
+      .clock_tid = clock_tid,
+      .switch_tid = switch_tid,
   };
 }
 
-void trainsys_check_rev_trains(int curr_tick)
-{
-  for (int i = 0; i < TRAINS_COUNT; i++)
-  {
-    if (SystemState.stop_times[i] > 0 && curr_tick - SystemState.stop_times[i] > REV_STOP_DELAY)
-    {
-      push(&(SystemState.serial_out), (SystemState.train_state[i] & ~TRAIN_SPEED_MASK) | 15); // reverse
-      push(&(SystemState.serial_out), i);
-      SystemState.rev_times[i] = curr_tick;
-      SystemState.stop_times[i] = 0;
-    }
-
-    if (SystemState.rev_times[i] > 0 && curr_tick - SystemState.rev_times[i] > REV_DELAY)
-    {
-      push(&(SystemState.serial_out), SystemState.train_state[i]);
-      push(&(SystemState.serial_out), i);
-      SystemState.rev_times[i] = 0;
-    }
-  }
-  trainsys_try_serial_out(curr_tick);
-}
-
-void trainsys_read_all_sensors(int curr_tick)
-{
-  if (curr_tick - SystemState.last_sensor_read > SENSOR_READ && SystemState.read_sensor_bytes == 0 && length(&(SystemState.serial_out)) == 0)
-  {
-    SystemState.last_sensor_read = curr_tick;
-    push(&(SystemState.serial_out), 0x80 + 0x05);
-    SystemState.read_sensor_bytes = 10;
-    trainsys_try_serial_out(curr_tick);
-  }
-  if (SystemState.read_sensor_bytes > 0)
-  {
-
-    unsigned char read_sensor_byte = Getc(SystemState.marklin_tid);
-
-    unsigned int bank_number = (10 - SystemState.read_sensor_bytes) / 2;
-    unsigned int offset = ((10 - SystemState.read_sensor_bytes) % 2 == 0) ? 0 : 8;
-
-    for (int i = 7; i >= 0; i--)
-    {
-      unsigned int sensor_id = bank_number * 16 + offset + i;
-      int status = (read_sensor_byte >> (7 - i)) & 0x1;
-      if (status && SystemState.sensor_states[sensor_id] != status)
-      {
-        render_sensor('A' + bank_number, offset + i + 1);
-      }
-      SystemState.sensor_states[sensor_id] = status;
-    }
-    SystemState.read_sensor_bytes -= 1;
-  }
-}
-
-void trainsys_try_serial_out(int curr_tick)
-{
-  if (curr_tick - SystemState.last_serial_write >= M_WRITE)
-  {
-    SystemState.last_serial_write = curr_tick;
-    while (length(&(SystemState.serial_out)) > 0)
-    {
-      Putc(SystemState.marklin_tid, pop(&(SystemState.serial_out)));
-    }
-  }
-}
-
-void trainsys_init_track(TrackSwitchPlans track_plan, int curr_tick)
+void trainsys_init_track(TrackSwitchPlans track_plan)
 {
   for (int i = 0; i < SWITCH_COUNT; i++)
   {
@@ -201,14 +91,15 @@ void trainsys_init_track(TrackSwitchPlans track_plan, int curr_tick)
       switch_id += 134;
     }
 
-    set_track_switch(switch_id, TRACK_PLANS[track_plan][i]);
+    SwitchSet(SystemState.switch_tid, switch_id, TRACK_PLANS[track_plan][i]);
   }
-  trainsys_try_serial_out(curr_tick);
+
+  /*
   if (track_plan == TRACK_A) {
     init_tracka(SystemState.track);
   } else {
     init_trackb(SystemState.track);
-  }
+  }*/
 }
 
 bool trainsys_exited()
