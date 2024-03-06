@@ -1,0 +1,1 @@
+bash /u/cs452/public/tools/upload.sh measure.img D8:3A:DD:1B:36:9E
