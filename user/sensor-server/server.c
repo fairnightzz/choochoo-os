@@ -121,6 +121,7 @@ void SensorServer()
                 .triggered = *triggered};
             Reply(sensor_buffer_req->tid, (char *)&reply_buf, sizeof(SensorResponse));
             llist_remove_item(sensor_requests, sensor_buffer_req);
+            free(sensor_buffer_req, SENSOR_BUFFER_REQUEST);
           }
         }
       }

@@ -7,6 +7,9 @@
 #include "clock-server/server.h"
 #include "io-server/server.h"
 #include "ui/interface.h"
+#include "sensor-server/server.h"
+#include "trainsys-server/server.h"
+#include "switch-server/server.h"
 
 void idleTask()
 {
@@ -48,6 +51,11 @@ void initTask()
 
   // Initialize clockserver
   Create(2, &ClockServer);
+
+  Create(3, &SensorServer);
+  // Create(3, &SwitchServer);
+
+  // Create(3, &TrainSystemServer);
 
   // Console IO Server
   Create(5, &ConsoleIOServer);
