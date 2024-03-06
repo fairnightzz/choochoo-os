@@ -2,7 +2,6 @@
 #include "user/ui/render.h"
 #include "user/nameserver.h"
 #include "lib/stdlib.h"
-#include "user/io-server/interface.h"
 #include "user/clock-server/interface.h"
 #include "user/trainsys-server/interface.h"
 #include "user/switch-server/interface.h"
@@ -68,12 +67,10 @@ void trainsys_execute_command(CommandResult cres)
 
 void trainsys_init()
 {
-  int marklin_tid = WhoIs(MarklinIOAddress);
   int system_tid = WhoIs(TrainSystemAddress);
   int clock_tid = WhoIs(ClockAddress);
   int switch_tid = WhoIs(SwitchAddress);
   SystemState = (TrainSystemState){
-      .marklin_tid = marklin_tid,
       .exited = false,
       .system_tid = system_tid,
       .clock_tid = clock_tid,

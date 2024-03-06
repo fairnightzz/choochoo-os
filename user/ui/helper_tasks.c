@@ -138,7 +138,7 @@ void promptTask()
       str_clear(&prompt);
       render_prompt_clear();
 
-      trainsys_execute_command(command_result, curr_tick); // todo make sure this fn exists and works
+      trainsys_execute_command(command_result); // todo make sure this fn exists and works
       if (command_result.command_type == QUIT_COMMAND) {
         clear_screen();
         break;

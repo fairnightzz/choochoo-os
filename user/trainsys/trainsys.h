@@ -18,7 +18,6 @@
 
 typedef struct
 {
-  int marklin_tid;
   int system_tid;
   int clock_tid;
   int switch_tid;
