@@ -19,6 +19,7 @@ typedef enum
   RPS_STATE = 11,
   STRING = 12,
   CLK_BUFFER_REQUEST = 13,
+  SNSR_BUFFER_REQUEST = 14,
   COUNT = 14,
 } AllocationType;
 

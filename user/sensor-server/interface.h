@@ -1,15 +1,15 @@
-#ifndef __CLOCK_INTERFACE_H__
-#define __CLOCK_INTERFACE_H__
+#ifndef __SENSOR_INTERFACE_H__
+#define __SENSOR_INTERFACE_H__
 
 #include <stdint.h>
 #include "lib/stdlib.h"
 
-#define ClockAddress "TICK-TOCK"
+#define SensorAddress "SENSOR-SERVER"
 
 typedef enum
 {
   SENSOR_TRIGGERED = 1, // from notifier
-  SENSOR_WAITING // from user
+  SENSOR_WAITING        // from user
 } SensorRequestType;
 
 typedef struct
@@ -25,6 +25,12 @@ typedef struct
   int triggered;
 } SensorResponse;
 
+typedef struct
+{
+  int tid;
+  int sensor_id;
+} SensorBufferRequest;
+
 int WaitOnSensor(int sensor_server, int sensor_id);
 
-#endif // __CLOCK_INTERFACE_H__
+#endif // __SENSOR_INTERFACE_H__
