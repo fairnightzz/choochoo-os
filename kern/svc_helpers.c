@@ -33,7 +33,7 @@ void svc_yield(TaskDescriptor *curr_task)
     }
   }
 
-  LOG_DEBUG("[SYSCALL - Yield]: Context Switch [%d -> %d]", curr_task->tid, next_tid);
+  // LOG_DEBUG("[SYSCALL - Yield]: Context Switch [%d -> %d]", curr_task->tid, next_tid);
   set_current_task(next_tid);
   idle_timer_start_logic(next_tid);
 
@@ -142,7 +142,7 @@ void svc_receive(int *tid, char *msg, int msg_len, TaskDescriptor *curr_task)
     uint8_t sender_tid = pop(&curr_task->send_listeners_queue);
     TaskDescriptor *sender_task = get_task(sender_tid);
     // Sanity Check
-    LOG_DEBUG("[SYSCALL - Receive]: Send first");
+    // LOG_DEBUG("[SYSCALL - Receive]: Send first");
     if (sender_task->status != SEND_WAIT)
     {
       LOG_WARN("[SYSCALL ERROR] - sender task %d not in Send Wait as expected", sender_tid);
@@ -168,7 +168,7 @@ void svc_receive(int *tid, char *msg, int msg_len, TaskDescriptor *curr_task)
         .receive_buffer_len = msg_len,
         .sender_tid = tid};
     curr_task->receive_state = receive_state;
-    LOG_DEBUG("[SYSCALL - Receive]: empty receive queue blocking on TID %d", curr_task->tid);
+    // LOG_DEBUG("[SYSCALL - Receive]: empty receive queue blocking on TID %d", curr_task->tid);
   }
 }
 

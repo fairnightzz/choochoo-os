@@ -38,7 +38,7 @@ void handle_svc()
 {
 
   opCode = get_esr_el1() & 0x1FFFFFF;
-  LOG_DEBUG("[SYSCALL - Handle SVC]: Vector Table Handler OpCode #%x", opCode);
+  // LOG_DEBUG("[SYSCALL - Handle SVC]: Vector Table Handler OpCode #%x", opCode);
 
   curr_task = get_current_task();
 
@@ -79,12 +79,12 @@ void handle_svc()
     next_tid = scheduler_next_task();
     if (next_tid == 0)
     {
-      LOG_DEBUG("[SYSCALL - Exit]: no more tasks");
+      // LOG_DEBUG("[SYSCALL - Exit]: no more tasks");
       while (1)
       {
       }
     }
-    LOG_DEBUG("[SYSCALL - Exit]: Context Switch [%d -> %d]", curr_task->tid, next_tid);
+    // LOG_DEBUG("[SYSCALL - Exit]: Context Switch [%d -> %d]", curr_task->tid, next_tid);
 
     set_current_task(next_tid);
     idle_timer_start_logic(next_tid);
@@ -93,7 +93,7 @@ void handle_svc()
   }
   case (SEND):
   {
-    LOG_DEBUG("[SYSCALL - Send]");
+    // LOG_DEBUG("[SYSCALL - Send]");
 
     // tid, msg, msglen, reply, rplen
     int ret = svc_send(
@@ -112,14 +112,14 @@ void handle_svc()
   }
   case (RECEIVE):
   {
-    LOG_DEBUG("[SYSCALL - Receive]");
+    // LOG_DEBUG("[SYSCALL - Receive]");
     svc_receive((int *)curr_task->switch_frame->x0, (char *)curr_task->switch_frame->x1, curr_task->switch_frame->x2, curr_task);
     svc_yield(curr_task);
     break;
   }
   case (REPLY):
   {
-    LOG_DEBUG("[SYSCALL - Reply]");
+    // LOG_DEBUG("[SYSCALL - Reply]");
 
     curr_task->switch_frame->x0 = svc_reply(
         (int)curr_task->switch_frame->x0,
@@ -130,7 +130,7 @@ void handle_svc()
   }
   case (AWAIT_EVENT):
   {
-    LOG_DEBUG("[SYSCALL - AwaitEvent]");
+    // LOG_DEBUG("[SYSCALL - AwaitEvent]");
     curr_task->switch_frame->x0 = svc_await_event((int)curr_task->switch_frame->x0, curr_task);
     svc_yield(curr_task);
     break;

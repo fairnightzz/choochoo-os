@@ -52,16 +52,16 @@ void initTask()
   // Initialize clockserver
   Create(2, &ClockServer);
 
-  Create(3, &SensorServer);
-  // Create(3, &SwitchServer);
-
-  // Create(3, &TrainSystemServer);
-
   // Console IO Server
   Create(5, &ConsoleIOServer);
 
   // Marklin IO Server
   Create(5, &MarklinIOServer);
+
+  Create(3, &SensorServer);
+  Create(3, &SwitchServer);
+
+  Create(3, &TrainSystemServer);
 
   // UI Task
   Create(5, &UITask);

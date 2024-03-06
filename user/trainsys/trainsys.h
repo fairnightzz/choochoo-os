@@ -6,14 +6,13 @@
 #include <stdint.h>
 #include "user/traintrack/track_data.h"
 
-
 #define TRAINS_COUNT 81
 #define M_WRITE 10
 #define SENSOR_READ 1
 #define SENSOR_BYTE_READ 1
 #define TRAIN_SPEED_MASK 0xF
 #define TRAIN_LIGHTS_MASK 0x10
-#define REV_STOP_DELAY 200
+#define REV_STOP_DELAY 300
 #define REV_DELAY 100
 
 typedef struct

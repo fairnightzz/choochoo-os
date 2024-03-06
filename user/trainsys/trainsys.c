@@ -33,11 +33,11 @@ void trainsys_execute_command(CommandResult cres)
   {
     uint32_t train = cres.command_args.reverse_args.train;
     int old_speed = TrainSystemGetTrainState(SystemState.system_tid, train) & TRAIN_SPEED_MASK;
-    TrainSystemSetSpeed(SystemState.system_tid, train, SPEED_REVERSE);
-    Delay(SystemState.clock_tid, REV_STOP_DELAY); 
     TrainSystemSetSpeed(SystemState.system_tid, train, SPEED_STOP);
+    Delay(SystemState.clock_tid, REV_STOP_DELAY); 
+    TrainSystemSetSpeed(SystemState.system_tid, train, SPEED_REVERSE);
     Delay(SystemState.clock_tid, REV_DELAY);
-    TrainSystemSetSpeed(SystemState.clock_tid, train, old_speed);
+    TrainSystemSetSpeed(SystemState.system_tid, train, old_speed);
     break;
   }
   case SWITCH_COMMAND:
