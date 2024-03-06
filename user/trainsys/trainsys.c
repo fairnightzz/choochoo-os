@@ -35,7 +35,9 @@ void set_train_reverse(uint32_t train, int time)
     push(&(SystemState.serial_out), SystemState.train_state[train] & ~TRAIN_SPEED_MASK); // 0 train speed
     push(&(SystemState.serial_out), train);
     SystemState.stop_times[train] = time;
-  } else {
+  }
+  else
+  {
     string s = string_format("[rv]: train #%u already reversing, command ignored", train);
     render_command(&s);
   }
@@ -81,6 +83,14 @@ void trainsys_execute_command(CommandResult cres, int curr_tick)
     uint32_t switch_id = cres.command_args.switch_args.switch_id;
     SwitchMode switch_mode = cres.command_args.switch_args.switch_mode;
     set_track_switch(switch_id, switch_mode);
+    break;
+  }
+  case PATH_COMMAND:
+  {
+    uint32_t train = cres.command_args.path_args.train;
+    uint32_t speed = cres.command_args.path_args.speed;
+    string dest_node = cres.command_args.path_args.dest_node;
+    // set_path(train, speed, dest_node);
     break;
   }
   default:

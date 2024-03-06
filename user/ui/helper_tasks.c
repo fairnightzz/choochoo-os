@@ -53,6 +53,13 @@ string cres_to_string(CommandResult cres)
     }
     return string_format("[sw]: Setting switch %u to %s mode", switch_id, out_mode);
   }
+  case PATH_COMMAND:
+  {
+    uint32_t train = cres.command_args.path_args.train;
+    uint32_t speed = cres.command_args.path_args.speed;
+    string dest_node = cres.command_args.path_args.dest_node;
+    return string_format("[path]: Pathing train #%u with speed %u to node %u", train, speed, dest_node.data);
+  }
   default:
   {
     return to_string("[ERROR]: Invalid Command. Please Try Again.");
@@ -60,9 +67,11 @@ string cres_to_string(CommandResult cres)
   }
 }
 
-void clockUITask() {
+void clockUITask()
+{
   int clock_server = WhoIs(ClockAddress);
-  while (1) {
+  while (1)
+  {
     int cur_tick = Time(clock_server);
     render_time(cur_tick);
     Delay(clock_server, 5);

@@ -155,6 +155,34 @@ parse_command(string *command)
         .command_type = QUIT_COMMAND,
     };
   }
+  else if (strcmp(get_data(&cmd_name), "path") == 0)
+  {
+    skip_whitespace(data, &it);
+
+    int train = get_i(data, &it);
+
+    skip_whitespace(data, &it);
+
+    int speed = get_i(data, &it);
+
+    string dest_node = get_str(data, &it); // todo: check this
+
+    if (speed > 14 || speed < 5 || !(train == 2 || train == 47))
+    {
+      return (CommandResult){
+          .command_type = ERROR_COMMAND,
+      };
+    }
+
+    return (CommandResult){
+        .command_type = PATH_COMMAND,
+        .command_args = {
+            .path_args = {
+                .train = train,
+                .speed = speed,
+                .dest_node = dest_node,
+            }}};
+  }
 
   return (CommandResult){
       .command_type = ERROR_COMMAND,
