@@ -11,6 +11,7 @@
 #include "trainsys-server/server.h"
 #include "switch-server/server.h"
 #include "user/io-server/io_marklin.h"
+#include "user/pathfinder-server/server.h"
 
 void idleTask()
 {
@@ -64,6 +65,7 @@ void initTask()
   Create(3, &SensorServer);
   Create(3, &SwitchServer);
 
+  Create(3, &PathFinderServer);
   Create(3, &TrainSystemServer);
 
   // UI Task

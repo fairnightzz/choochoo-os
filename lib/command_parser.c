@@ -166,7 +166,11 @@ parse_command(string *command)
 
     int speed = get_i(data, &it);
 
+    skip_whitespace(data, &it);
+
     int offset = get_signed_number(data, &it);
+    
+    skip_whitespace(data, &it);
 
     string dest_node = get_str(data, &it); // todo: check this
 

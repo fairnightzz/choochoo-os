@@ -59,7 +59,7 @@ string cres_to_string(CommandResult cres)
     uint32_t train = cres.command_args.path_args.train;
     uint32_t speed = cres.command_args.path_args.speed;
     string dest_node = cres.command_args.path_args.dest_node;
-    return string_format("[path]: Pathing train #%u with speed %u to node %u", train, speed, dest_node.data);
+    return string_format("[path]: Pathing train #%u with speed %u to node %s", train, speed, dest_node.data);
   }
   default:
   {
@@ -90,8 +90,6 @@ void promptTask()
   int clock_server = WhoIs(ClockAddress);
 
   string prompt = new_string();
-
-  Putc(marklin_server, 192); // reset sensors
 
   trainsys_init_track(TRACK_A);
   for (int i = 0; i < SWITCH_COUNT; i++)

@@ -9,6 +9,22 @@
 #define BYTE_PER_UNIT 2
 #define BYTE_COUNT 10
 
+int last_send_tick = 0;
+
+void sensorNotiferMonitorTask() {
+  int clock_server = WhoIs(ClockAddress);
+  int marklin_server = WhoIs(MarklinIOAddress);
+  
+  for (;;) {
+    int current_tick = Time(clock_server);
+    if (current_tick - last_send_tick > 100) {
+      io_marklin_dump_sensors(marklin_server, 5);
+      last_send_tick = current_tick;
+    }
+    Delay(clock_server, 50);
+  }
+}
+
 // task for querying sensor states
 void sensorNotifierTask()
 {
@@ -22,9 +38,9 @@ void sensorNotifierTask()
   for (;;)
   {
 
-    io_marklin_dump_sensors(marklin_server, 5);
     for (int sensor_index = 0; sensor_index < UNIT_COUNT; ++sensor_index)
     {
+      io_marklin_get_sensor(marklin_server, sensor_index+1);
 
       for (int byte_index = 0; byte_index < BYTE_PER_UNIT; ++byte_index)
       {
@@ -46,7 +62,6 @@ void sensorNotifierTask()
             int index = (7 - j);
 
             triggered_list[triggered_list_len] = i * 8 + index;
-            render_debug_log(i * 8 + index);
             ++triggered_list_len;
           }
         }
@@ -69,7 +84,7 @@ void sensorNotifierTask()
       }
     }
 
-    Delay(clock_server, 15);
+    Delay(clock_server, 5);
   }
 
   Exit();
@@ -81,6 +96,7 @@ void SensorServer()
   alloc_init(SENSOR_BUFFER_REQUEST, sizeof(SensorBufferRequest));
 
   Create(2, &sensorNotifierTask);
+  // Create(5, &sensorNotiferMonitorTask);
 
   LList *sensor_requests = llist_new();
   BQueue sensor_triggered_queue = new_byte_queue();

@@ -11,7 +11,7 @@
 #define ANSI_ORIGIN "\033[H"
 #define ANSI_MOVE(r, c) "\033[" r ";" c "H"
 #define ANSI_CLEAR_LINE "\033[K"
-#define COMMAND_LINE_HISTORY 8
+#define COMMAND_LINE_HISTORY 23
 #define SENSOR_LINE_HISTORY 5
 
 static TermUIState UIState;
@@ -42,6 +42,7 @@ void print(char *fmt, ...)
       Delay(WhoIs(ClockAddress), 1);
     }
   }
+
 }
 
 void clear_screen()
@@ -64,6 +65,21 @@ void render_init()
   uart_printf(CONSOLE, "│ 016 .    017 .    018 .    153 .    154 . │                                   │\r\n");
   uart_printf(CONSOLE, "│ 155 .    156 .                            │                                   │\r\n");
   uart_printf(CONSOLE, "├─[console]─────────────────────────────────────────────────────────────────────┤\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│                                                                               │\r\n");
@@ -114,12 +130,12 @@ void render_time(int time)
 
 void render_perf_stats(int percentage)
 {
-  print("\033[%u;%uH%d%%", 22, 35, percentage);
+  print("\033[%u;%uH%d%%", 22+15, 35, percentage);
 }
 
 void render_debug_log(int message)
 {
-  uart_printf(CONSOLE, "\033[%u;%uH%d", 23, 35, message);
+  uart_printf(CONSOLE, "\033[%u;%uH%d", 23+15, 35, message);
 }
 
 void render_char(unsigned char ch, int prompt_length)
@@ -129,7 +145,7 @@ void render_char(unsigned char ch, int prompt_length)
     char buf[2];
     buf[1] = '\0';
     buf[0] = ch;
-    print("\033[19;%dH%s", prompt_length + 5, buf);
+    print("\033[34;%dH%s", prompt_length + 5, buf);
   }
 }
 
@@ -140,13 +156,13 @@ void render_backspace(int prompt_length)
     char buf[2];
     buf[1] = '\0';
     buf[0] = ' ';
-    print("\033[19;%dH%s", prompt_length + 5 - 1, buf);
+    print("\033[34;%dH%s", prompt_length + 5 - 1, buf);
   }
 }
 
 void render_prompt_clear()
 {
-  print("\033[19;5H                                                                           ");
+  print("\033[34;5H                                                                           ");
 }
 
 void clear_console()

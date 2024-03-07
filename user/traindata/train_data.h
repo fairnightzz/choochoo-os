@@ -14,11 +14,11 @@
 static const uint32_t TRAIN_DATA_TRAINS[TRAIN_DATA_TRAIN_COUNT] = {2, 47};
 static const uint32_t TRAIN_DATA_SPEEDS[TRAIN_DATA_SPEED_COUNT] = {5, 8, 11, 14};
 static const uint32_t TRAIN_DATA_VEL[TRAIN_DATA_TRAIN_COUNT][TRAIN_DATA_SPEED_COUNT] = {
-    {224, 387, 554, 650},  // 2
+    {234, 387, 554, 650},  // 2
     {239, 390, 537, 578},  // 47
 };
 static const uint32_t TRAIN_DATA_STOP_DIST[TRAIN_DATA_TRAIN_COUNT][TRAIN_DATA_SPEED_COUNT] = {
-    {275, 525, 770, 971},  // 2
+    {259, 525, 770, 971},  // 2
     {284, 521, 709, 828},  // 47
 };
 

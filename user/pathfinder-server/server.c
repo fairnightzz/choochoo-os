@@ -7,6 +7,7 @@
 #include "user/traintrack/track_data.h"
 #include "user/io-server/io_marklin.h"
 #include "user/traindata/train_data.h"
+#include "user/ui/render.h"
 
 #define INF 2147483647
 #define NONE 2147483646
@@ -17,6 +18,7 @@ uint32_t prev[TRACK_MAX];
 track_edge* edges[TRACK_MAX];
 bool visited[TRACK_MAX];
 track_edge* route_edges[TRACK_MAX];
+track_node track[TRACK_MAX];
 
 int do_djikstra(track_node *track, int source_node, int dest_node);
 void do_train_course(track_node *track, int io_server, int sensor_server, int switch_server, int clock_server, int src, int dest, int train, int train_speed, int offset);
@@ -29,7 +31,6 @@ void PathFinderServer() {
   int io_server = WhoIs(MarklinIOAddress);
   int clock_server = WhoIs(ClockAddress);
 
-  track_node track[TRACK_MAX];
   HashMap *NodeIndexMap = hashmap_new();
 
   init_tracka(track, NodeIndexMap);
@@ -55,9 +56,9 @@ void PathFinderServer() {
       continue;
     }
 
+    char letter[2] = {'A' + start_sensor/16, '\0'};
+    string start_str = string_format("%s%d", letter, (start_sensor%16)+1);
     
-    string start_str = string_format("%c%d", start_sensor/16+'A', (start_sensor%16)+1);
-
     bool success, success2;
     int start_node_index = (int)(intptr_t)hashmap_get(NodeIndexMap, start_str.data, &success);
     int end_node_index = (int)(intptr_t)hashmap_get(NodeIndexMap, request.destination, &success2);
@@ -66,7 +67,8 @@ void PathFinderServer() {
       continue;
     }
 
-    LOG_INFO("start node %s, index = %d, len = %d, dest node %s, index = %d", start_str.data, start_node_index, start_str.length, request.destination, end_node_index);
+    string new_string_life = string_format("start node %s, index = %d, len = %d, dest node %s, index = %d", start_str.data, start_node_index, start_str.length, request.destination, end_node_index);
+    render_command(&new_string_life);
 
     do_train_course(track, io_server, sensor_server, switch_server, clock_server, start_node_index, end_node_index, request.train, request.speed, request.offset);
   }
@@ -83,6 +85,8 @@ int do_edge_trace(int cur_node, int src_node, int src_rev_node, int iter_count) 
   }
   int tot_iterations = do_edge_trace(prev[cur_node], src_node, src_rev_node, iter_count + 1);
   route_edges[tot_iterations - iter_count] = edges[cur_node];
+  string render_string = string_format("edge trace: tot_iterations - iter_count: %d, src: %s, dest: %s, dist: %d", tot_iterations - iter_count, edges[cur_node]->src->name, edges[cur_node]->dest->name, edges[cur_node]->dist);
+  render_command(&render_string);
   return tot_iterations;
 }
 
@@ -176,7 +180,7 @@ void do_train_course(track_node *track, int io_server, int sensor_server, int sw
   int train_vel = train_data_vel(train, train_speed);
 
   track_node* waiting_sensor = 0;
-  for (int i = 0; i < edges_in_path; i++) {
+  for (int i = edges_in_path; i >= 0; i--) {
     stopping_distance -= route_edges[i]->dist;
     if (stopping_distance <= 0 && route_edges[i]->src->type == NODE_SENSOR) {
         waiting_sensor = route_edges[i]->src; // sensor that we should wait to trip
@@ -190,7 +194,7 @@ void do_train_course(track_node *track, int io_server, int sensor_server, int sw
     return;
   }
 
-  for (int i = 0; i < edges_in_path; i++) {
+  for (int i = 0; i <= edges_in_path; i++) {
     if (route_edges[i]->src->type == NODE_BRANCH) {
       int switch_num = route_edges[i]->src->num;
       if (&(route_edges[i]->src->edge[DIR_STRAIGHT]) == route_edges[i]) {
@@ -200,9 +204,12 @@ void do_train_course(track_node *track, int io_server, int sensor_server, int sw
       }
     }
   }
-  
+  string command_life = string_format("[PathFinderServer INFO]: waiting on sensor %s", track[waiting_sensor->num].name);
+  render_command(&command_life);
+
   WaitOnSensor(sensor_server, waiting_sensor->num);
-  LOG_DEBUG("[PathFinderServer INFO]: hit target waiting sensor");
+  string new_command_life = to_string("[PathFinderServer INFO]: hit target waiting sensor");
+  render_command(&new_command_life);
 
   int delay_ticks = distance_from_sensor*100/train_vel;
   Delay(clock_server, delay_ticks);

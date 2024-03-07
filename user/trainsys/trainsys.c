@@ -5,6 +5,7 @@
 #include "user/clock-server/interface.h"
 #include "user/trainsys-server/interface.h"
 #include "user/switch-server/interface.h"
+#include "user/pathfinder-server/interface.h"
 
 static TrainSystemState SystemState;
 
@@ -57,7 +58,9 @@ void trainsys_execute_command(CommandResult cres)
     uint32_t train = cres.command_args.path_args.train;
     uint32_t speed = cres.command_args.path_args.speed;
     string dest_node = cres.command_args.path_args.dest_node;
-    // set_path(train, speed, dest_node);
+    int32_t offset = cres.command_args.path_args.offset;
+
+    FindPath(SystemState.pathfinder_tid, train, speed, offset, dest_node.data);
     break;
   }
   default:
@@ -70,11 +73,13 @@ void trainsys_init()
   int system_tid = WhoIs(TrainSystemAddress);
   int clock_tid = WhoIs(ClockAddress);
   int switch_tid = WhoIs(SwitchAddress);
+  int pathfinder_tid = WhoIs(PathFinderAddress);
   SystemState = (TrainSystemState){
       .exited = false,
       .system_tid = system_tid,
       .clock_tid = clock_tid,
       .switch_tid = switch_tid,
+      .pathfinder_tid = pathfinder_tid,
   };
 }
 

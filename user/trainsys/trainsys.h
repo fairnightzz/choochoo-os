@@ -20,6 +20,7 @@ typedef struct
   int system_tid;
   int clock_tid;
   int switch_tid;
+  int pathfinder_tid;
   bool exited;
 } TrainSystemState;
 
