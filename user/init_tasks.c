@@ -62,11 +62,11 @@ void initTask()
 
   io_marklin_init(marklin_server);
 
-  Create(3, &SensorServer);
-  Create(3, &SwitchServer);
+  Create(2, &SensorServer);
+  Create(2, &SwitchServer);
 
   Create(3, &PathFinderServer);
-  Create(3, &TrainSystemServer);
+  Create(2, &TrainSystemServer);
 
   // UI Task
   Create(5, &UITask);

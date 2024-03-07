@@ -11,13 +11,16 @@
 
 int last_send_tick = 0;
 
-void sensorNotiferMonitorTask() {
+void sensorNotiferMonitorTask()
+{
   int clock_server = WhoIs(ClockAddress);
   int marklin_server = WhoIs(MarklinIOAddress);
-  
-  for (;;) {
+
+  for (;;)
+  {
     int current_tick = Time(clock_server);
-    if (current_tick - last_send_tick > 100) {
+    if (current_tick - last_send_tick > 100)
+    {
       io_marklin_dump_sensors(marklin_server, 5);
       last_send_tick = current_tick;
     }
@@ -38,53 +41,46 @@ void sensorNotifierTask()
   for (;;)
   {
 
-    for (int sensor_index = 0; sensor_index < UNIT_COUNT; ++sensor_index)
+    io_marklin_dump_sensors(marklin_server, UNIT_COUNT);
+
+    int triggered_list[16];
+    int triggered_list_len = 0;
+    for (int i = 0; i < BYTE_COUNT; ++i)
     {
-      io_marklin_get_sensor(marklin_server, sensor_index+1);
+      uint8_t sensor_byte = Getc(marklin_server);
+      prev_sensor_state[i] = sensor_state[i];
+      sensor_state[i] = sensor_byte;
+      uint8_t triggered = ~(prev_sensor_state[i]) & sensor_state[i];
 
-      for (int byte_index = 0; byte_index < BYTE_PER_UNIT; ++byte_index)
+      for (int j = 0; j < 8; ++j)
       {
-
-        int i = sensor_index * 2 + byte_index;
-
-        int sensor_byte = Getc(marklin_server);
-        prev_sensor_state[i] = sensor_state[i];
-        sensor_state[i] = sensor_byte;
-        int triggered = ~(prev_sensor_state[i]) & sensor_state[i];
-
-        // send triggers in batches of 8 sensors
-        int triggered_list[9];
-        int triggered_list_len = 0;
-        for (int j = 0; j < 8; ++j)
+        if (((triggered >> j) & 0x1) == 1)
         {
-          if (((triggered >> j) & 0x1) == 1)
-          {
-            int index = (7 - j);
+          int index = (7 - j);
 
-            triggered_list[triggered_list_len] = i * 8 + index;
-            ++triggered_list_len;
-          }
-        }
-
-        // send to server task if we have sensors changed
-        if (triggered_list_len > 0)
-        {
-          triggered_list[triggered_list_len] = -1; // set element to be -1 terminated
-
-          triggered_list_len = 0;
-
-          SensorRequest request = (SensorRequest){
-              .type = SENSOR_TRIGGERED,
-              .ids_triggered = {0},
-          };
-          memcpy(request.ids_triggered, triggered_list, sizeof(triggered_list));
-          SensorResponse response;
-          Send(sensor_server, (const char *)&request, sizeof(SensorRequest), (char *)&response, sizeof(SensorResponse));
+          triggered_list[triggered_list_len] = i * 8 + index;
+          ++triggered_list_len;
         }
       }
     }
 
-    Delay(clock_server, 5);
+    // send to server task if we have sensors changed
+    if (triggered_list_len > 0)
+    {
+      triggered_list[triggered_list_len] = -1; // set element to be -1 terminated
+
+      triggered_list_len = 0;
+
+      SensorRequest request = (SensorRequest){
+          .type = SENSOR_TRIGGERED,
+          .ids_triggered = {0},
+      };
+      memcpy(request.ids_triggered, triggered_list, sizeof(triggered_list));
+      SensorResponse response;
+      Send(sensor_server, (const char *)&request, sizeof(SensorRequest), (char *)&response, sizeof(SensorResponse));
+    }
+
+    Delay(clock_server, 20);
   }
 
   Exit();

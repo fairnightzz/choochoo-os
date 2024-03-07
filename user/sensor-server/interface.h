@@ -16,7 +16,7 @@ typedef enum
 typedef struct
 {
   SensorRequestType type;
-  int ids_triggered[9]; // -1 terminated
+  int ids_triggered[17]; // -1 terminated
   int id_wait;
 } SensorRequest;
 
