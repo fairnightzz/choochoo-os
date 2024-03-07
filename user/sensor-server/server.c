@@ -80,6 +80,7 @@ void SensorServer()
   alloc_init(SENSOR_BUFFER_REQUEST, sizeof(SensorBufferRequest));
 
   Create(2, &sensorNotifierTask);
+  Create(5, &sensorNotiferMonitorTask);
 
   LList *sensor_requests = llist_new();
   BQueue sensor_triggered_queue = new_byte_queue();
@@ -106,7 +107,7 @@ void SensorServer()
       for (; *triggered != -1; ++triggered)
       {
         // push sensor to the buffer
-        push(&sensor_triggered_queue, *triggered);
+        // push(&sensor_triggered_queue, *triggered);
         // unblock all tasks that are waiting
         LListIter *it = llist_iter(sensor_requests);
         while (it->current)
