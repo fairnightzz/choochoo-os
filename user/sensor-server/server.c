@@ -3,14 +3,11 @@
 #include "user/io-server/interface.h"
 #include "user/nameserver.h"
 #include "lib/stdlib.h"
+#include "user/ui/render.h"
+#include "user/io-server/io_marklin.h"
 #define UNIT_COUNT 5
 #define BYTE_PER_UNIT 2
 #define BYTE_COUNT 10
-
-void marklin_get_bank(int io_server, int index)
-{
-  Putc(io_server, 192 + index);
-}
 
 // task for querying sensor states
 void sensorNotifierTask()
@@ -25,10 +22,9 @@ void sensorNotifierTask()
   for (;;)
   {
 
+    io_marklin_dump_sensors(marklin_server, 5);
     for (int sensor_index = 0; sensor_index < UNIT_COUNT; ++sensor_index)
     {
-
-      marklin_get_bank(marklin_server, sensor_index + 1);
 
       for (int byte_index = 0; byte_index < BYTE_PER_UNIT; ++byte_index)
       {
@@ -50,6 +46,7 @@ void sensorNotifierTask()
             int index = (7 - j);
 
             triggered_list[triggered_list_len] = i * 8 + index;
+            render_debug_log(i * 8 + index);
             ++triggered_list_len;
           }
         }
@@ -72,7 +69,7 @@ void sensorNotifierTask()
       }
     }
 
-    Delay(clock_server, 5);
+    Delay(clock_server, 15);
   }
 
   Exit();
@@ -86,6 +83,7 @@ void SensorServer()
   Create(2, &sensorNotifierTask);
 
   LList *sensor_requests = llist_new();
+  BQueue sensor_triggered_queue = new_byte_queue();
 
   SensorRequest request;
   SensorResponse response;
@@ -101,7 +99,6 @@ void SensorServer()
 
     switch (request.type)
     {
-
     case SENSOR_TRIGGERED:
     {
 
@@ -109,6 +106,8 @@ void SensorServer()
       int *triggered = request.ids_triggered;
       for (; *triggered != -1; ++triggered)
       {
+        // push sensor to the buffer
+        push(&sensor_triggered_queue, *triggered);
         // unblock all tasks that are waiting
         LListIter *it = llist_iter(sensor_requests);
         while (it->current)
@@ -137,10 +136,35 @@ void SensorServer()
       SensorBufferRequest *request_buffer = alloc(SENSOR_BUFFER_REQUEST);
       *request_buffer = (SensorBufferRequest){
           .tid = from_tid,
-          .sensor_id = request.id_wait};
+          .sensor_id = request.id_wait,
+      };
       // buffer the wait response
       llist_append(sensor_requests, request_buffer);
 
+      break;
+    }
+    case SENSOR_GET_RECENT:
+    {
+      int ids_triggered[9];
+      int current = 0;
+
+      // put the sensor ids into array
+      for (int i = 0; i < 9; i++)
+      {
+        if (!isEmpty(&sensor_triggered_queue))
+        {
+          ids_triggered[current] = pop(&sensor_triggered_queue);
+          current++;
+        }
+      }
+
+      ids_triggered[current] = -1;
+
+      SensorGetRecentResponse response = (SensorGetRecentResponse){
+          .ids_triggered = {0},
+      };
+      memcpy(response.ids_triggered, ids_triggered, sizeof(ids_triggered));
+      Reply(from_tid, (char *)&response, sizeof(SensorGetRecentResponse));
       break;
     }
     default:

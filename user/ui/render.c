@@ -37,13 +37,15 @@ void print(char *fmt, ...)
   {
     uint8_t ch = pop(&UIState.output_queue);
     Putc(UIState.console_server_tid, ch);
-    if (length(&UIState.output_queue) % 5 == 0) {
+    if (length(&UIState.output_queue) % 5 == 0)
+    {
       Delay(WhoIs(ClockAddress), 1);
     }
   }
 }
 
-void clear_screen() {
+void clear_screen()
+{
   uart_printf(CONSOLE, "%s%s%s", ANSI_CLEAR, ANSI_ORIGIN, ANSI_HIDE);
 }
 
@@ -75,6 +77,7 @@ void render_init()
   uart_printf(CONSOLE, "│╰─────────────────────────────────────────────────────────────────────────────╯│\r\n");
   uart_printf(CONSOLE, "│─[performance]─────────────────────────────────────────────────────────────────┤\r\n");
   uart_printf(CONSOLE, "│ Idle Task Execution Percentage:                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "╰───────────────────────────────────────────────────────────────────────────────╯\r\n");
 
   UIState = (TermUIState){
@@ -112,6 +115,11 @@ void render_time(int time)
 void render_perf_stats(int percentage)
 {
   print("\033[%u;%uH%d%%", 22, 35, percentage);
+}
+
+void render_debug_log(int message)
+{
+  uart_printf(CONSOLE, "\033[%u;%uH%d", 23, 35, message);
 }
 
 void render_char(unsigned char ch, int prompt_length)
@@ -185,7 +193,9 @@ void render_switch(int32_t switch_id, SwitchMode switch_mode)
   if (switch_mode == SWITCH_MODE_C)
   {
     out = "C";
-  } else if (switch_mode == SWITCH_MODE_UNKNOWN) {
+  }
+  else if (switch_mode == SWITCH_MODE_UNKNOWN)
+  {
     out = "X";
   }
   print("\033[%u;%uH%s", row, col, out);

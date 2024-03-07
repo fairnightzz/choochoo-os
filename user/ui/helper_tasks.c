@@ -51,7 +51,7 @@ string cres_to_string(CommandResult cres)
     {
       out_mode = "CURVED";
     }
-    render_switch(switch_id, switch_mode);
+    // render_switch(switch_id, switch_mode);
     return string_format("[sw]: Setting switch %u to %s mode", switch_id, out_mode);
   }
   case PATH_COMMAND:
@@ -71,8 +71,10 @@ string cres_to_string(CommandResult cres)
 void clockUITask()
 {
   int clock_server = WhoIs(ClockAddress);
-  while (1) {
-    if (trainsys_exited()) {
+  while (1)
+  {
+    if (trainsys_exited())
+    {
       break;
     }
     int cur_tick = Time(clock_server);
@@ -92,7 +94,8 @@ void promptTask()
   Putc(marklin_server, 192); // reset sensors
 
   trainsys_init_track(TRACK_A);
-  for (int i = 0; i < SWITCH_COUNT; i++) {
+  for (int i = 0; i < SWITCH_COUNT; i++)
+  {
     int switch_id = i + 1;
     if (switch_id > 18)
     {
@@ -101,7 +104,6 @@ void promptTask()
 
     render_switch(switch_id, TRACK_PLANS[TRACK_A][i]);
   }
- 
 
   while (1)
   {
@@ -139,11 +141,11 @@ void promptTask()
       render_prompt_clear();
 
       trainsys_execute_command(command_result); // todo make sure this fn exists and works
-      if (command_result.command_type == QUIT_COMMAND) {
+      if (command_result.command_type == QUIT_COMMAND)
+      {
         clear_screen();
         break;
       }
     }
   }
 }
-

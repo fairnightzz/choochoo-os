@@ -6,6 +6,7 @@
 string get_str(const char *command, uint32_t *it);
 void skip_whitespace(const char *command, uint32_t *it);
 int get_i(const char *command, uint32_t *it);
+int get_signed_number(const char *command, uint32_t *it);
 
 CommandResult
 parse_command(string *command)
@@ -165,6 +166,8 @@ parse_command(string *command)
 
     int speed = get_i(data, &it);
 
+    int offset = get_signed_number(data, &it);
+
     string dest_node = get_str(data, &it); // todo: check this
 
     if (speed > 14 || speed < 5 || !(train == 2 || train == 47))
@@ -180,6 +183,7 @@ parse_command(string *command)
             .path_args = {
                 .train = train,
                 .speed = speed,
+                .offset = offset,
                 .dest_node = dest_node,
             }}};
   }
@@ -230,6 +234,39 @@ int get_i(const char *command, uint32_t *it)
     ++(*it);
   }
   return number;
+}
+
+int get_signed_number(const char *command, uint32_t *it)
+{
+  int number = 0;
+  int sign = 1;
+  int char_ind = 0;
+  while (1)
+  {
+    char c = command[*it];
+
+    if (char_ind == 0 && c == '+')
+    {
+      sign = 1;
+    }
+    else if (char_ind == 0 && c == '-')
+    {
+      sign = -1;
+    }
+    else if (isdigit(c))
+    {
+      number = number * 10 + (c - '0');
+    }
+    else
+    {
+      // invalid char, don't parse
+      break;
+    }
+
+    ++(*it);
+    ++char_ind;
+  }
+  return number * sign;
 }
 
 void skip_whitespace(const char *command, uint32_t *it)

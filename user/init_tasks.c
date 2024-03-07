@@ -10,6 +10,7 @@
 #include "sensor-server/server.h"
 #include "trainsys-server/server.h"
 #include "switch-server/server.h"
+#include "user/io-server/io_marklin.h"
 
 void idleTask()
 {
@@ -56,7 +57,9 @@ void initTask()
   Create(5, &ConsoleIOServer);
 
   // Marklin IO Server
-  Create(5, &MarklinIOServer);
+  int marklin_server = Create(5, &MarklinIOServer);
+
+  io_marklin_init(marklin_server);
 
   Create(3, &SensorServer);
   Create(3, &SwitchServer);

@@ -49,6 +49,7 @@ typedef struct
     {
       uint32_t train;
       uint32_t speed;
+      int offset;
       string dest_node;
     } path_args;
   } command_args;

@@ -8,8 +8,9 @@
 
 typedef enum
 {
-  SENSOR_TRIGGERED = 1, // from notifier
-  SENSOR_WAITING        // from user
+  SENSOR_TRIGGERED = 1,  // from notifier
+  SENSOR_GET_RECENT = 2, // from user
+  SENSOR_WAITING         // from user
 } SensorRequestType;
 
 typedef struct
@@ -24,6 +25,11 @@ typedef struct
   SensorRequestType type;
   int triggered;
 } SensorResponse;
+
+typedef struct
+{
+  int ids_triggered[9]; // -1 terminated
+} SensorGetRecentResponse;
 
 typedef struct
 {

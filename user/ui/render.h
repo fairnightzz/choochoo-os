@@ -24,6 +24,7 @@ void render_prompt_clear();
 void render_switch(int32_t switch_id, SwitchMode switch_mode);
 void render_sensor(char bank, unsigned int sensor_number);
 void render_perf_stats(int percentage);
+void render_debug_log(int message);
 void clear_screen();
 
 /*
