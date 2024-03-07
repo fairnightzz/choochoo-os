@@ -50,40 +50,45 @@ void renderSensorTask()
   // While loop
   for (;;)
   {
-    Delay(clock_server, 50);
+    Delay(clock_server, 100);
     SensorGetRecentResponse response;
-    SensorRequest request = (SensorRequest){
-        .type = SENSOR_GET_RECENT,
-        .id_wait = -1,
-        .ids_triggered = {0},
-    };
+    // SensorRequest request = (SensorRequest){
+    //     .type = SENSOR_GET_RECENT,
+    //     .id_wait = -1,
+    //     .ids_triggered = {0},
+    // };
 
-    int ret = Send(sensor_server, (const char *)&request, sizeof(request), (char *)&response, sizeof(response));
-    if (ret < 0)
+    for (;;)
     {
-      LOG_WARN("[GetREcentSensor]: send errored");
-    }
-
-    for (int i = 0; i < 9; i++)
-    {
-      if (response.ids_triggered[i] == -1)
-      {
-        break;
-      }
-      int sensor_id = response.ids_triggered[i];
-      uint8_t sensor_group = sensor_id / 16;
-      uint8_t sensor_index = (sensor_id % 16) + 1;
+      int sensor_id;
+      sensor_id = WaitOnSensor(sensor_server, -1); // switch_id = -1 means any switch
+      int sensor_group = sensor_id / 16;
+      int sensor_index = (sensor_id % 16) + 1;
       render_sensor(sensor_group + 'A', sensor_index);
     }
+    // int ret = Send(sensor_server, (const char *)&request, sizeof(request), (char *)&response, sizeof(response));
+    // if (ret < 0)
+    // {
+    //   LOG_WARN("[GetREcentSensor]: send errored");
+    // }
+
+    // for (int i = 0; i < 16; i++)
+    // {
+    //   if (response.ids_triggered[i] == -1)
+    //   {
+    //     break;
+    //   }
+    //   int sensor_id = response.ids_triggered[i];
+    //   uint8_t sensor_group = sensor_id / 16;
+    //   uint8_t sensor_index = (sensor_id % 16) + 1;
+    //   render_sensor(sensor_group + 'A', sensor_index);
+    // }
   }
 }
 
 void UITask()
 {
   render_init();
-
-  // For printing performance idle
-  Create(15, &idlePerformanceTask);
 
   trainsys_init();
 
@@ -96,4 +101,7 @@ void UITask()
 
   // Prompt task
   Create(2, &promptTask);
+
+  // For printing performance idle
+  Create(15, &idlePerformanceTask);
 }
