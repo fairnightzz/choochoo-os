@@ -54,9 +54,9 @@ void trainsys_execute_command(CommandResult cres)
   }
   case PATH_COMMAND:
   {
-    uint32_t _train = cres.command_args.path_args.train;
-    uint32_t _speed = cres.command_args.path_args.speed;
-    string _dest_node = cres.command_args.path_args.dest_node;
+    uint32_t train = cres.command_args.path_args.train;
+    uint32_t speed = cres.command_args.path_args.speed;
+    string dest_node = cres.command_args.path_args.dest_node;
     // set_path(train, speed, dest_node);
     break;
   }

@@ -56,6 +56,7 @@ void SwitchServer() {
     int req_len = Receive(&from_tid, (char *)&request, sizeof(SwitchRequest));
     if (req_len < 0) {
       LOG_ERROR("[SwitchServer ERROR]: error on receive: %d", req_len);
+      continue;
     }
 
     switch (request.type) {

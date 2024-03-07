@@ -2,13 +2,7 @@
 
 #include "track_data.h"
 
-static void *memset(void *s, int c, unsigned int n) {
-  unsigned char *p = s;
-  while(n --> 0) { *p++ = (unsigned char)c; }
-  return s;
-}
-
-void init_tracka(track_node *track) {
+void init_tracka(track_node *track, HashMap *nodeMap) {
   memset(track, 0, TRACK_MAX*sizeof(track_node));
   track[0].name = "A1";
   track[0].type = NODE_SENSOR;
@@ -1190,9 +1184,13 @@ void init_tracka(track_node *track) {
   track[143].name = "EX10";
   track[143].type = NODE_EXIT;
   track[143].reverse = &track[142];
+
+  for (int i = 0; i < TRACK_A_SIZE; ++i) {
+    hashmap_insert(nodeMap, track[i].name, (void *)(intptr_t)i);
+  }
 }
 
-void init_trackb(track_node *track) {
+void init_trackb(track_node *track, HashMap *nodeMap) {
   memset(track, 0, TRACK_MAX*sizeof(track_node));
   track[0].name = "A1";
   track[0].type = NODE_SENSOR;
@@ -2354,4 +2352,8 @@ void init_trackb(track_node *track) {
   track[139].name = "EX10";
   track[139].type = NODE_EXIT;
   track[139].reverse = &track[138];
+
+  for (int i = 0; i < TRACK_A_SIZE; ++i) {
+    hashmap_insert(nodeMap, track[i].name, (void *)(intptr_t)i);
+  }
 }
