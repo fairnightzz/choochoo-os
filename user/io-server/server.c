@@ -11,10 +11,9 @@ int SendReceiveEvent(int io_server)
   IORequest request = (IORequest){
       .type = IO_RECEIVE_EVENT,
       .data = {
-        .putc = {
-          .ch = 0, // ignore 
-        }
-      },
+          .putc = {
+              .ch = 0, // ignore
+          }},
   };
 
   int ret = Send(io_server, (const char *)&request, sizeof(IORequest), (char *)&response, sizeof(IOResponse));
@@ -40,10 +39,9 @@ int SendSendEvent(int io_server)
   IORequest request = (IORequest){
       .type = IO_SEND_EVENT,
       .data = {
-        .putc = {
-          .ch = 0, // ignore 
-        }
-      },
+          .putc = {
+              .ch = 0, // ignore
+          }},
   };
 
   int ret = Send(io_server, (const char *)&request, sizeof(IORequest), (char *)&response, sizeof(IOResponse));
@@ -170,20 +168,23 @@ void IOServer(size_t line)
 
       break;
     }
-    case IO_PUTS: {
+    case IO_PUTS:
+    {
       LOG_DEBUG("[IOServer] Line %d PUTS request from %d", line, from_tid);
-      unsigned char *s = request.data.puts.chs;
-      for (int i = 0; i < min(PUTS_BLOCK_SIZE, request.data.puts.chs_len); i++) {
-        if (i == 0 && clearToSend) {
-          uart_putc(line, s[i]);
+      char *s = request.data.puts.chs;
+      for (int i = 0; i < min(PUTS_BLOCK_SIZE, request.data.puts.chs_len); i++)
+      {
+        if (i == 0 && clearToSend)
+        {
+          uart_putc(line, (unsigned char)s[i]);
           clearToSend = false;
           continue;
         }
         llist_append(putc_tasks, (void *)(uintptr_t)s[i]);
       }
       response = (IOResponse){
-        .type = IO_PUTS,
-        .data = 0};
+          .type = IO_PUTS,
+          .data = 0};
       Reply(from_tid, (char *)&response, sizeof(IOResponse));
       break;
     }
@@ -222,11 +223,25 @@ void IOServer(size_t line)
       };
       Reply(from_tid, (char *)&response, sizeof(IOResponse));
 
-      while (llist_length(putc_tasks) > 0 && uart_try_putc(line, (unsigned char)(uintptr_t)llist_front(putc_tasks)))
+      if (line == MARKLIN)
       {
-        llist_pop_front(putc_tasks);
+        if (llist_length(putc_tasks) > 0)
+        {
+          uart_putc(line, (unsigned char)(uintptr_t)llist_pop_front(putc_tasks));
+        }
+        else
+        {
+          clearToSend = true;
+        }
       }
-      clearToSend = (llist_length(putc_tasks) == 0);
+      else
+      {
+        while (llist_length(putc_tasks) > 0 && uart_try_putc(line, (unsigned char)(uintptr_t)llist_front(putc_tasks)))
+        {
+          llist_pop_front(putc_tasks);
+        }
+        clearToSend = (llist_length(putc_tasks) == 0);
+      }
       break;
     }
     default:

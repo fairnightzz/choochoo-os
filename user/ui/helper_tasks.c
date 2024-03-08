@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include "user/ui/render.h"
 #include "user/trainsys/trainsys.h"
+#include "user/io-server/io_marklin.h"
 
 #define ENTER_CHARACTER 0x0d
 #define BACKSPACE_CHARACTER 0x08
@@ -142,7 +143,10 @@ void promptTask()
       if (command_result.command_type == QUIT_COMMAND)
       {
         clear_screen();
-        break;
+       
+      }
+      else if (command_result.command_type == ERROR_COMMAND){
+        // io_marklin_dump_sensors(WhoIs(MarklinIOAddress), 5);
       }
     }
   }

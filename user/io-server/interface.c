@@ -40,7 +40,7 @@ int Putc(int tid, unsigned char ch)
   return 0;
 }
 
-int Puts(int tid, unsigned char *ch, int len) {
+int Puts(int tid, char *ch, int len) {
   IOResponse response;
   IORequest request = (IORequest) {
     .type = IO_PUTS,

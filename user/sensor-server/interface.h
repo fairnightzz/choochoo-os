@@ -6,7 +6,7 @@
 
 #define SensorAddress "SENSOR-SERVER"
 
-#define MAX_TRIGGERED 16
+#define MAX_TRIGGERED 8
 
 typedef enum
 {

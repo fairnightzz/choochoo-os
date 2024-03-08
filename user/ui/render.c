@@ -25,23 +25,24 @@ void print(char *fmt, ...)
 
   // uart_printf(CONSOLE, formattedString.data);
 
-  for (int i = 0; i < str_length(&formattedString); i++)
-  {
-    if (!push(&UIState.output_queue, formattedString.data[i]))
-    {
-      PRINT("BUFFER OVERFLOW");
-    }
-  }
+  // for (int i = 0; i < str_length(&formattedString); i++)
+  // {
+  //   if (!push(&UIState.output_queue, formattedString.data[i]))
+  //   {
+  //     PRINT("BUFFER OVERFLOW");
+  //   }
+  // }
 
-  while (!isEmpty(&UIState.output_queue))
-  {
-    uint8_t ch = pop(&UIState.output_queue);
-    Putc(UIState.console_server_tid, ch);
-    if (length(&UIState.output_queue) % 5 == 0)
-    {
-      Delay(WhoIs(ClockAddress), 1);
-    }
-  }
+  // while (!isEmpty(&UIState.output_queue))
+  // {
+  //   uint8_t ch = pop(&UIState.output_queue);
+  //   Putc(UIState.console_server_tid, ch);
+  //   if (length(&UIState.output_queue) % 5 == 0)
+  //   {
+  //     Delay(WhoIs(ClockAddress), 1);
+  //   }
+  // }
+  Puts(UIState.console_server_tid, formattedString.data, formattedString.length);
 }
 
 void clear_screen()
@@ -87,8 +88,6 @@ void render_init()
   uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│╭─────────────────────────────────────────────────────────────────────────────╮│\r\n");
   uart_printf(CONSOLE, "││>                                                                            ││\r\n");
   uart_printf(CONSOLE, "│╰─────────────────────────────────────────────────────────────────────────────╯│\r\n");
@@ -97,7 +96,7 @@ void render_init()
   uart_printf(CONSOLE, "│─[train-system]────────────────────────────────────────────────────────────────┤\r\n");
   uart_printf(CONSOLE, "│   Train #  │  Current Sensor  │  Next Sensor  │  Time Err.  │  Distance Err.  │\r\n");
   uart_printf(CONSOLE, "│───────────────────────────────────────────────────────────────────────────────│\r\n");
-  uart_printf(CONSOLE, "│     03              A0               A0               ticks            mm     │\r\n");
+  uart_printf(CONSOLE, "│                                                       ticks            mm     │\r\n");
   uart_printf(CONSOLE, "╰───────────────────────────────────────────────────────────────────────────────╯\r\n");
 
   UIState = (TermUIState){
@@ -186,8 +185,19 @@ void render_predict_next_sensor(int sensor_id)
 }
 void render_predict_error(int terr, int derr)
 {
-  print("\033[%u;%uH %d ", 26 + 15, 53, terr);
-  print("\033[%u;%uH %d ", 26 + 15, 68, derr);
+
+  char tstring[10];
+  i2a(terr, tstring);
+  char dstring[10];
+  i2a(derr, dstring);
+
+  string toffset = to_string(tstring);
+  string doffset = to_string(dstring);
+
+  print("\033[%u;%uH    ", 26 + 15, 52, terr);
+  print("\033[%u;%uH    ", 26 + 15, 69, derr);
+  print("\033[%u;%uH%d", 26 + 15, 56 - toffset.length, terr);
+  print("\033[%u;%uH%d", 26 + 15, 73 - doffset.length, derr);
 }
 
 void render_debug_log(int message)

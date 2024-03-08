@@ -54,6 +54,9 @@ void PathFinderServer()
     io_marklin_set_train(io_server, request.train, request.speed);
 
     int start_sensor = WaitOnSensor(sensor_server, -1);
+
+    // io_marklin_set_train(io_server, request.train, 0);
+
     if (start_sensor < 0)
     {
       LOG_ERROR("[PathFinderServer ERROR]: error on getting starting sensor: %d", start_sensor);
@@ -242,6 +245,9 @@ void do_train_course(track_node *track, int io_server, int sensor_server, int sw
       }
     }
   }
+
+  // io_marklin_set_train(io_server, train, train_speed);
+
   string command_life = string_format("[PathFinderServer INFO]: waiting on sensor %s", track[waiting_sensor->num].name);
   render_command(&command_life);
 

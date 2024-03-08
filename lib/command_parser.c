@@ -168,11 +168,11 @@ parse_command(string *command)
 
     skip_whitespace(data, &it);
 
-    int offset = get_signed_number(data, &it);
-    
+    string dest_node = get_str(data, &it); // todo: check this
+
     skip_whitespace(data, &it);
 
-    string dest_node = get_str(data, &it); // todo: check this
+    int offset = get_signed_number(data, &it);
 
     if (speed > 14 || speed < 5 || !(train == 2 || train == 47))
     {
