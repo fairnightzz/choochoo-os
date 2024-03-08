@@ -8,7 +8,10 @@
 
 #define TRAINS_COUNT 81
 #define TRAIN_SPEED_MASK 0xF
-#define TRAIN_LIGHTS_MASK 0x10a
+#define TRAIN_LIGHTS_MASK 0x10
+#define REV_STOP_DELAY 300
+#define REV_DELAY 100
+
 
 typedef enum
 {

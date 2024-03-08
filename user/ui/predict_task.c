@@ -6,8 +6,10 @@
 #include "user/clock-server/interface.h"
 #include "user/trainsys-server/interface.h"
 #include "user/trainsys/trainsys.h"
+#include "user/ui/render.h"
+#include "user/traindata/train_data.h"
 
-track_node track[TRACK_MAX];
+track_node traintrack[TRACK_MAX];
 
 void predictTask() {
 
@@ -17,9 +19,8 @@ void predictTask() {
   int trainsys_server = WhoIs(TrainSystemAddress);
   
   HashMap *NodeIndexMap = hashmap_new();
-  init_tracka(track, NodeIndexMap);
+  init_tracka(traintrack, NodeIndexMap);
 
-  int next_sensor_id = -1;
   int last_sensor_time = -1;
   int predicted_sensor_time = -1;
 
@@ -48,32 +49,32 @@ void predictTask() {
     int dist_to_next = 0;
 
     do {
-      if (track[cur_node_idx].type == NODE_EXIT || track[cur_node_idx].type == NODE_NONE) {
+      if (traintrack[cur_node_idx].type == NODE_EXIT || traintrack[cur_node_idx].type == NODE_NONE) {
         is_unknown = true;
         break;
       }
 
-      if (track[cur_node_idx].type == NODE_BRANCH) {
-        SwitchMode sw_mode = SwitchGet(switch_server, track[cur_node_idx].num);
+      if (traintrack[cur_node_idx].type == NODE_BRANCH) {
+        SwitchMode sw_mode = SwitchGet(switch_server, traintrack[cur_node_idx].num);
         if (sw_mode == SWITCH_MODE_UNKNOWN) {
           is_unknown = true;
           break;
         } else if (sw_mode == SWITCH_MODE_C) {
-          dist_to_next += track[cur_node_idx].edge[DIR_CURVED].dist;
-          cur_node_idx = track[cur_node_idx].edge[DIR_CURVED].dest - track;
+          dist_to_next += traintrack[cur_node_idx].edge[DIR_CURVED].dist;
+          cur_node_idx = traintrack[cur_node_idx].edge[DIR_CURVED].dest - traintrack;
         } else {
-          dist_to_next += track[cur_node_idx].edge[DIR_STRAIGHT].dist;
-          cur_node_idx = track[cur_node_idx].edge[DIR_STRAIGHT].dest - track;
+          dist_to_next += traintrack[cur_node_idx].edge[DIR_STRAIGHT].dist;
+          cur_node_idx = traintrack[cur_node_idx].edge[DIR_STRAIGHT].dest - traintrack;
         }
       } else {
-        dist_to_next += track[cur_node_idx].edge[DIR_AHEAD].dist;
-        cur_node_idx = track[cur_node_idx].edge[DIR_AHEAD].dest - track;
+        dist_to_next += traintrack[cur_node_idx].edge[DIR_AHEAD].dist;
+        cur_node_idx = traintrack[cur_node_idx].edge[DIR_AHEAD].dest - traintrack;
       }
-    } while (track[cur_node_idx].type != NODE_SENSOR);
+    } while (traintrack[cur_node_idx].type != NODE_SENSOR);
 
 
     if (!is_unknown) {
-      render_predict_next_sensor(track[cur_node_idx].num);
+      render_predict_next_sensor(traintrack[cur_node_idx].num);
     } else {
       continue;
     }
@@ -81,7 +82,7 @@ void predictTask() {
     if (train == -1) {
       continue;
     }
-    int train_speed = TrainstateGet(trainsys_server, train) & TRAIN_SPEED_MASK;
+    int train_speed = TrainSystemGetTrainState(trainsys_server, train) & TRAIN_SPEED_MASK;
     int train_vel = train_data_vel(train, train_speed);
 
     int curr_time = Time(clock_server);
