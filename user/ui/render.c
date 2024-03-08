@@ -194,10 +194,10 @@ void render_predict_error(int terr, int derr)
   string toffset = to_string(tstring);
   string doffset = to_string(dstring);
 
-  print("\033[%u;%uH     ", 26 + 15, 51, terr);
-  print("\033[%u;%uH     ", 26 + 15, 68, derr);
-  print("\033[%u;%uH%d", 26 + 15, 56 - toffset.length, terr);
-  print("\033[%u;%uH%d", 26 + 15, 73 - doffset.length, derr);
+  // print("\033[%u;%uH     ", 26 + 15, 51, terr);
+  // print("\033[%u;%uH     ", 26 + 15, 68, derr);
+  print("\033[%u;%uH   %d ticks", 26 + 15, 53 - toffset.length, terr);
+  print("\033[%u;%uH   %d mm", 26 + 15, 70 - doffset.length, derr);
 }
 
 void render_debug_log(int message)
