@@ -49,6 +49,8 @@ void PathFinderServer()
       continue;
     }
     response = (PathFinderResponse){.success = true};
+    bool success2;
+    int end_node_index = (int)(intptr_t)hashmap_get(NodeIndexMap, request.destination, &success2);
     Reply(from_tid, (char *)&response, sizeof(PathFinderResponse));
 
     io_marklin_set_train(io_server, request.train, request.speed);
@@ -66,12 +68,11 @@ void PathFinderServer()
     char letter[2] = {'A' + start_sensor / 16, '\0'};
     string start_str = string_format("%s%d", letter, (start_sensor % 16) + 1);
 
-    bool success, success2;
+    bool success;
     int start_node_index = (int)(intptr_t)hashmap_get(NodeIndexMap, start_str.data, &success);
-    int end_node_index = (int)(intptr_t)hashmap_get(NodeIndexMap, request.destination, &success2);
     if (!success || !success2)
     {
-      render_command("[PathFinderServer ERROR]hashmap error: start node = %s, dest node = %s", start_str.data, request.destination);
+      render_command("[PathFinderServer ERROR] hashmap: src = %s, dest = %s", start_str.data, end_node_index);
       continue;
     }
 

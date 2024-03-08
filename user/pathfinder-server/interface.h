@@ -11,7 +11,7 @@ typedef struct
   int train;
   int speed;
   int offset; /* offset in millimeters from sensor */
-  char destination[3];
+  char *destination;
 } PathFinderRequest;
 
 typedef struct
@@ -19,6 +19,6 @@ typedef struct
   bool success;
 } PathFinderResponse;
 
-int FindPath(int pathfinder_server, int train, int speed, int offset, char destination[3]);
+int FindPath(int pathfinder_server, int train, int speed, int offset, char *destination);
 
 #endif // __PATHFINDER_INTERFACE_H__
