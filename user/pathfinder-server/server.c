@@ -45,7 +45,7 @@ void PathFinderServer()
     int req_len = Receive(&from_tid, (char *)&request, sizeof(PathFinderRequest));
     if (req_len < 0)
     {
-      LOG_ERROR("[PathFinderServer ERROR]: error on receive: %d", req_len);
+      render_command("[PathFinderServer ERROR]: error on receive: %d", req_len);
       continue;
     }
     response = (PathFinderResponse){.success = true};
@@ -59,7 +59,7 @@ void PathFinderServer()
 
     if (start_sensor < 0)
     {
-      LOG_ERROR("[PathFinderServer ERROR]: error on getting starting sensor: %d", start_sensor);
+      render_command("[PathFinderServer ERROR]: error on getting starting sensor: %d", start_sensor);
       continue;
     }
 
@@ -71,7 +71,7 @@ void PathFinderServer()
     int end_node_index = (int)(intptr_t)hashmap_get(NodeIndexMap, request.destination, &success2);
     if (!success || !success2)
     {
-      LOG_ERROR("[PathFinderServer ERROR]: error on getting sensor index from hashmap: start node = %s, dest node = %s", start_str.data, request.destination);
+      render_command("[PathFinderServer ERROR]: error on getting sensor index from hashmap: start node = %s, dest node = %s", start_str.data, request.destination);
       continue;
     }
 
@@ -92,7 +92,7 @@ int do_edge_trace(int cur_node, int src_node, int src_rev_node, int iter_count)
   }
   else if (iter_count > 130)
   {
-    LOG_ERROR("[PathfinderServer ERROR] cannot form edge graph through trace");
+    render_command("[PathfinderServer ERROR] cannot form edge graph through trace");
     return -1;
   }
   int tot_iterations = do_edge_trace(prev[cur_node], src_node, src_rev_node, iter_count + 1);
@@ -186,29 +186,34 @@ void do_train_course(track_node *track, int io_server, int sensor_server, int sw
   int edges_in_path = do_djikstra(track, src, dest);
   if (edges_in_path == -1)
   {
-    LOG_ERROR("[PathfinderServer]: could not find path in do_train_course");
+    render_command("[PathfinderServer]: could not find path in do_train_course");
     return;
   }
   track_node dest_node = track[dest];
   if (offset != 0 && dest_node.type != NODE_SENSOR)
   {
-    LOG_ERROR("[PathfinderServer] can't use offset from node other than sensor");
+    render_command("[PathfinderServer] can't use offset from node other than sensor");
     return;
   }
   int max_fwd_dist = dest_node.edge[DIR_AHEAD].dist;
   if (offset > 0 && offset > max_fwd_dist)
   {
-    LOG_ERROR("[PathfinderServer] forward offset too large (max value for node %s is %d)", dest_node.name, max_fwd_dist);
+    render_command("[PathfinderServer] forward offset too large (max value for node %s is %d)", dest_node.name, max_fwd_dist);
     return;
   }
 
   int max_bck_dist = dest_node.reverse->edge[DIR_AHEAD].dist;
   if (offset < 0 && -offset > max_bck_dist)
   {
-    LOG_ERROR("[PathfinderServer] backward offset too large (max value for node %s is %d)", dest_node.name, max_bck_dist);
+    render_command("[PathfinderServer] backward offset too large (max value for node %s is %d)", dest_node.name, max_bck_dist);
     return;
   }
 
+  if (get_train_index(train) == -1 || get_speed_index(train_speed) == -1)
+  {
+    render_command("[PathfinderServer] un calibrated train speed %d on train %d", train_speed, train);
+    return;
+  }
   int stopping_distance = train_data_stop_dist(train, train_speed) - offset;
   int train_vel = train_data_vel(train, train_speed);
 
@@ -226,7 +231,7 @@ void do_train_course(track_node *track, int io_server, int sensor_server, int sw
   int distance_from_sensor = -stopping_distance;
   if (waiting_sensor == 0)
   {
-    LOG_ERROR("[PathfinderServer] could not find usable sensor");
+    render_command("[PathfinderServer] could not find usable sensor");
     return;
   }
 
@@ -249,11 +254,11 @@ void do_train_course(track_node *track, int io_server, int sensor_server, int sw
   // io_marklin_set_train(io_server, train, train_speed);
 
   string command_life = string_format("[PathFinderServer INFO]: waiting on sensor %s", track[waiting_sensor->num].name);
-  render_command(&command_life);
+  render_command(command_life.data);
 
   WaitOnSensor(sensor_server, waiting_sensor->num);
   string new_command_life = to_string("[PathFinderServer INFO]: hit target waiting sensor");
-  render_command(&new_command_life);
+  render_command(new_command_life.data);
 
   int delay_ticks = distance_from_sensor * 100 / train_vel;
   Delay(clock_server, delay_ticks);

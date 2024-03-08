@@ -240,15 +240,20 @@ void clear_console()
   }
 }
 
-void render_command(string *command)
+void render_command(char *fmt, ...)
 {
+
+  va_list va;
+  va_start(va, fmt);
+  string command = _string_format(fmt, va);
+  va_end(va);
   if (UIState.cmd_line_history >= COMMAND_LINE_HISTORY)
   {
     clear_console();
     UIState.cmd_line_history = 0;
   }
 
-  print("\033[%u;3H%s", 10 + UIState.cmd_line_history, command->data);
+  print("\033[%u;3H%s", 10 + UIState.cmd_line_history, command.data);
 
   UIState.cmd_line_history += 1;
 }

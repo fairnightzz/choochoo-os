@@ -17,7 +17,7 @@ typedef struct
 
 void render_init();
 void render_time(int time);
-void render_command(string *line);
+void render_command(char *fmt, ...);
 void render_char(unsigned char ch, int prompt_length);
 void render_backspace(int prompt_length);
 void render_prompt_clear();

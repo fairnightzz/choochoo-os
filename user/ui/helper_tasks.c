@@ -135,7 +135,7 @@ void promptTask()
 
       CommandResult command_result = parse_command(&prompt);
       string console_string = cres_to_string(command_result);
-      render_command(&console_string);
+      render_command(console_string.data);
       str_clear(&prompt);
       render_prompt_clear();
 
@@ -143,9 +143,9 @@ void promptTask()
       if (command_result.command_type == QUIT_COMMAND)
       {
         clear_screen();
-       
       }
-      else if (command_result.command_type == ERROR_COMMAND){
+      else if (command_result.command_type == ERROR_COMMAND)
+      {
         // io_marklin_dump_sensors(WhoIs(MarklinIOAddress), 5);
       }
     }
