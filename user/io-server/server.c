@@ -241,15 +241,15 @@ void IOServer(size_t line)
 void MarklinIOServer()
 {
   RegisterAs(MarklinIOAddress);
-  Create(5, &marklinReceiveNotifier);
-  Create(5, &marklinSendNotifier);
+  Create(2, &marklinReceiveNotifier);
+  Create(2, &marklinSendNotifier);
   IOServer(MARKLIN);
 }
 
 void ConsoleIOServer()
 {
   RegisterAs(ConsoleIOAddress);
-  Create(5, &consoleReceiveNotifier);
-  Create(5, &consoleSendNotifier);
+  Create(2, &consoleReceiveNotifier);
+  Create(2, &consoleSendNotifier);
   IOServer(CONSOLE);
 }

@@ -6,6 +6,8 @@
 
 #define SensorAddress "SENSOR-SERVER"
 
+#define MAX_TRIGGERED 16
+
 typedef enum
 {
   SENSOR_TRIGGERED = 1,  // from notifier
@@ -16,7 +18,7 @@ typedef enum
 typedef struct
 {
   SensorRequestType type;
-  int ids_triggered[17]; // -1 terminated
+  int ids_triggered[MAX_TRIGGERED + 1]; // -1 terminated
   int id_wait;
 } SensorRequest;
 

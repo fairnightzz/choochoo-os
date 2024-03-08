@@ -52,23 +52,23 @@ void initTask()
   NameServerTaskInit(); // todo: consider making it like clockserver
 
   // Initialize clockserver
-  Create(2, &ClockServer);
+  Create(1, &ClockServer);
 
   // Console IO Server
-  Create(5, &ConsoleIOServer);
+  Create(2, &ConsoleIOServer);
 
   // Marklin IO Server
-  int marklin_server = Create(5, &MarklinIOServer);
+  int marklin_server = Create(2, &MarklinIOServer);
 
   io_marklin_init(marklin_server);
 
   Create(2, &SensorServer);
   Create(2, &SwitchServer);
 
-  Create(3, &PathFinderServer);
-  Create(2, &TrainSystemServer);
+  Create(4, &PathFinderServer);
+  Create(4, &TrainSystemServer);
 
   // UI Task
-  Create(5, &UITask);
+  Create(4, &UITask);
   // Create(5, &putcTestTask);
 }
