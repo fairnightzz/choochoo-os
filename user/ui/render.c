@@ -75,25 +75,21 @@ void render_init()
   uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│╭─────────────────────────────────────────────────────────────────────────────╮│\r\n");
   uart_printf(CONSOLE, "││>                                                                            ││\r\n");
   uart_printf(CONSOLE, "│╰─────────────────────────────────────────────────────────────────────────────╯│\r\n");
   uart_printf(CONSOLE, "│─[performance]─────────────────────────────────────────────────────────────────┤\r\n");
   uart_printf(CONSOLE, "│ Idle Task Execution Percentage:                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│─[train-system]────────────────────────────────────────────────────────────────┤\r\n");
+  uart_printf(CONSOLE, "│   Train #  │  Current Sensor  │  Next Sensor  │  Time Err.  │  Distance Err.  │\r\n");
+  uart_printf(CONSOLE, "│───────────────────────────────────────────────────────────────────────────────│\r\n");
+  uart_printf(CONSOLE, "│         1                                                                     │\r\n");
+  uart_printf(CONSOLE, "│         2                                                                     │\r\n");
+  uart_printf(CONSOLE, "│        24                                                                     │\r\n");
+  uart_printf(CONSOLE, "│        47                                                                     │\r\n");
+  uart_printf(CONSOLE, "│        54                                                                     │\r\n");
+  uart_printf(CONSOLE, "│        58                                                                     │\r\n");
+  uart_printf(CONSOLE, "│        77                                                                     │\r\n");
   uart_printf(CONSOLE, "╰───────────────────────────────────────────────────────────────────────────────╯\r\n");
 
   UIState = (TermUIState){
