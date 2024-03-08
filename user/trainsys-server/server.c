@@ -3,10 +3,6 @@
 #include "user/nameserver.h"
 #include "user/io-server/io_marklin.h"
 
-#define TRAINS_COUNT 81
-#define TRAIN_SPEED_MASK 0xF
-#define TRAIN_LIGHTS_MASK 0x10
-
 void TrainSystemServer() {
   RegisterAs(TrainSystemAddress);
 

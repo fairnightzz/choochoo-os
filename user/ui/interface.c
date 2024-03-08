@@ -7,6 +7,7 @@
 #include "user/trainsys/trainsys.h"
 #include "user/switch-server/interface.h"
 #include "user/sensor-server/interface.h"
+#include "user/ui/predict_task.h"
 
 void idlePerformanceTask()
 {
@@ -101,6 +102,7 @@ void UITask()
 
   // Prompt task
   Create(2, &promptTask);
+  Create(4, &predictTask);
 
   // For printing performance idle
   Create(15, &idlePerformanceTask);

@@ -6,6 +6,10 @@
 
 #define TrainSystemAddress "CHOOCHOO-TRAIN-SYSTEM"
 
+#define TRAINS_COUNT 81
+#define TRAIN_SPEED_MASK 0xF
+#define TRAIN_LIGHTS_MASK 0x10a
+
 typedef enum
 {
   SYSTEM_SET_SPEED = 1,
