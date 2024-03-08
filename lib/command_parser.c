@@ -174,7 +174,7 @@ parse_command(string *command)
 
     int offset = get_signed_number(data, &it);
 
-    if (speed > 14 || speed < 5 || !(train == 2 || train == 47))
+    if (speed > 14 || speed < 5)
     {
       return (CommandResult){
           .command_type = ERROR_COMMAND,
