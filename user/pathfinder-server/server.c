@@ -71,7 +71,7 @@ void PathFinderServer()
     int end_node_index = (int)(intptr_t)hashmap_get(NodeIndexMap, request.destination, &success2);
     if (!success || !success2)
     {
-      render_command("[PathFinderServer ERROR]: error on getting sensor index from hashmap: start node = %s, dest node = %s", start_str.data, request.destination);
+      render_command("[PathFinderServer ERROR]hashmap error: start node = %s, dest node = %s", start_str.data, request.destination);
       continue;
     }
 
