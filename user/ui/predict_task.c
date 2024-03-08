@@ -83,6 +83,9 @@ void predictTask() {
       continue;
     }
     int train_speed = TrainSystemGetTrainState(trainsys_server, train) & TRAIN_SPEED_MASK;
+    if (get_train_index(train) == -1 || get_speed_index(train_speed) == -1) {
+      continue;
+    }
     int train_vel = train_data_vel(train, train_speed);
 
     int curr_time = Time(clock_server);

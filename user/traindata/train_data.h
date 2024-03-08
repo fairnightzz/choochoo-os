@@ -24,5 +24,7 @@ static const uint32_t TRAIN_DATA_STOP_DIST[TRAIN_DATA_TRAIN_COUNT][TRAIN_DATA_SP
 
 uint32_t train_data_vel(uint32_t train, uint32_t speed);
 uint32_t train_data_stop_dist(uint32_t train, uint32_t speed);
+int get_train_index(uint32_t train);
+int get_speed_index(uint32_t speed);
 
 #endif // __TRAIN_DATA_H__
