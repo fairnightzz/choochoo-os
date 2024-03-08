@@ -86,7 +86,7 @@ void clockUITask()
 void promptTask()
 {
   int io_server = WhoIs(ConsoleIOAddress);
-  int marklin_server = WhoIs(MarklinIOAddress);
+  // int marklin_server = WhoIs(MarklinIOAddress);
   int clock_server = WhoIs(ClockAddress);
 
   string prompt = new_string();

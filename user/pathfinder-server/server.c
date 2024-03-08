@@ -72,7 +72,7 @@ void PathFinderServer()
       continue;
     }
 
-    string new_string_life = string_format("start node %s, index = %d, len = %d, dest node %s, index = %d", start_str.data, start_node_index, start_str.length, request.destination, end_node_index);
+    // string new_string_life = string_format("start node %s, index = %d, len = %d, dest node %s, index = %d", start_str.data, start_node_index, start_str.length, request.destination, end_node_index);
     // render_command(&new_string_life);
 
     do_train_course(track, io_server, sensor_server, switch_server, clock_server, start_node_index, end_node_index, request.train, request.speed, request.offset);
@@ -94,7 +94,7 @@ int do_edge_trace(int cur_node, int src_node, int src_rev_node, int iter_count)
   }
   int tot_iterations = do_edge_trace(prev[cur_node], src_node, src_rev_node, iter_count + 1);
   route_edges[tot_iterations - iter_count] = edges[cur_node];
-  string render_string = string_format("edge trace: tot_iterations - iter_count: %d, src: %s, dest: %s, dist: %d", tot_iterations - iter_count, edges[cur_node]->src->name, edges[cur_node]->dest->name, edges[cur_node]->dist);
+  // string render_string = string_format("edge trace: tot_iterations - iter_count: %d, src: %s, dest: %s, dist: %d", tot_iterations - iter_count, edges[cur_node]->src->name, edges[cur_node]->dest->name, edges[cur_node]->dist);
   // render_command(&render_string);
   return tot_iterations;
 }

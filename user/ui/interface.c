@@ -51,7 +51,7 @@ void renderSensorTask()
   for (;;)
   {
     Delay(clock_server, 100);
-    SensorGetRecentResponse response;
+    // SensorGetRecentResponse response;
     // SensorRequest request = (SensorRequest){
     //     .type = SENSOR_GET_RECENT,
     //     .id_wait = -1,

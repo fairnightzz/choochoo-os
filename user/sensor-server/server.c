@@ -74,7 +74,7 @@ void SensorServer()
   // Create(5, &sensorNotiferMonitorTask);
 
   LList *sensor_requests = llist_new();
-  BQueue sensor_triggered_queue = new_byte_queue();
+  // BQueue sensor_triggered_queue = new_byte_queue();
 
   SensorRequest request;
   SensorResponse response;

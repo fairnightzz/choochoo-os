@@ -42,7 +42,6 @@ void print(char *fmt, ...)
       Delay(WhoIs(ClockAddress), 1);
     }
   }
-
 }
 
 void clear_screen()
@@ -75,6 +74,21 @@ void render_init()
   uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│╭─────────────────────────────────────────────────────────────────────────────╮│\r\n");
   uart_printf(CONSOLE, "││>                                                                            ││\r\n");
   uart_printf(CONSOLE, "│╰─────────────────────────────────────────────────────────────────────────────╯│\r\n");
@@ -83,13 +97,7 @@ void render_init()
   uart_printf(CONSOLE, "│─[train-system]────────────────────────────────────────────────────────────────┤\r\n");
   uart_printf(CONSOLE, "│   Train #  │  Current Sensor  │  Next Sensor  │  Time Err.  │  Distance Err.  │\r\n");
   uart_printf(CONSOLE, "│───────────────────────────────────────────────────────────────────────────────│\r\n");
-  uart_printf(CONSOLE, "│         1                                                                     │\r\n");
-  uart_printf(CONSOLE, "│         2                                                                     │\r\n");
-  uart_printf(CONSOLE, "│        24                                                                     │\r\n");
-  uart_printf(CONSOLE, "│        47                                                                     │\r\n");
-  uart_printf(CONSOLE, "│        54                                                                     │\r\n");
-  uart_printf(CONSOLE, "│        58                                                                     │\r\n");
-  uart_printf(CONSOLE, "│        77                                                                     │\r\n");
+  uart_printf(CONSOLE, "│     03              A0                                                          │\r\n");
   uart_printf(CONSOLE, "╰───────────────────────────────────────────────────────────────────────────────╯\r\n");
 
   UIState = (TermUIState){
@@ -126,12 +134,45 @@ void render_time(int time)
 
 void render_perf_stats(int percentage)
 {
-  print("\033[%u;%uH%d%%", 22+15, 35, percentage);
+  print("\033[%u;%uH%d%%", 22 + 15, 35, percentage);
+}
+
+void render_train_system_train(int train)
+{
+  string trainString;
+  if (train < 10)
+  {
+    trainString = string_format("0%d", train);
+  }
+  else
+  {
+    trainString = string_format("%d", train);
+  }
+
+  print("\033[%u;%uH%s", 26 + 15, 6, trainString);
+}
+
+void render_predict_current_sensor(int sensor_id)
+{
+  int sensor_group = sensor_id / 16;
+  int sensor_index = (sensor_id % 16) + 1;
+  render_sensor(sensor_group + 'A', sensor_index);
+}
+void render_predict_next_sensor(int sensor_id)
+{
+  int sensor_group = sensor_id / 16;
+  int sensor_index = (sensor_id % 16) + 1;
+  int row = 4 + UIState.sensor_count / 6;
+  int col = 47 + (UIState.sensor_count % 6) * 6;
+  // print("\033[%u;%uH%s", row, col, sensorString);
+}
+void render_predict_error(int terr, int derr)
+{
 }
 
 void render_debug_log(int message)
 {
-  uart_printf(CONSOLE, "\033[%u;%uH%d", 23+15, 35, message);
+  uart_printf(CONSOLE, "\033[%u;%uH%d", 23 + 15, 35, message);
 }
 
 void render_char(unsigned char ch, int prompt_length)
@@ -165,7 +206,7 @@ void clear_console()
 {
   for (int i = 0; i < COMMAND_LINE_HISTORY; ++i)
   {
-    print("\033[%u;2H                                                                           ", 10 + i);
+    print("\033[%u;2H                                                                             ", 10 + i);
   }
 }
 

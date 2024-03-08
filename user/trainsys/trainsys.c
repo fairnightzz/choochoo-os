@@ -9,8 +9,16 @@
 
 static TrainSystemState SystemState;
 
-#define SPEED_STOP     0
+#define SPEED_STOP 0
 #define SPEED_REVERSE 15
+
+uint32_t trainsys_get_moving_train() {
+  return SystemState.moving_train;
+}
+
+void trainsys_set_moving_train(int train) {
+  SystemState.moving_train = train;
+}
 
 void trainsys_execute_command(CommandResult cres)
 {
@@ -20,6 +28,14 @@ void trainsys_execute_command(CommandResult cres)
   {
     uint32_t train = cres.command_args.train_speed_args.train;
     uint32_t speed = cres.command_args.train_speed_args.speed;
+    if (speed > 0)
+    {
+      render_train_system_train(train);
+      trainsys_set_moving_train(train);
+    } else if (train == trainsys_get_moving_train()) {
+      trainsys_set_moving_train(-1);
+      render_train_system_train(-1);
+    }
     TrainSystemSetSpeed(SystemState.system_tid, train, speed);
     break;
   }
@@ -35,7 +51,7 @@ void trainsys_execute_command(CommandResult cres)
     uint32_t train = cres.command_args.reverse_args.train;
     int old_speed = TrainSystemGetTrainState(SystemState.system_tid, train) & TRAIN_SPEED_MASK;
     TrainSystemSetSpeed(SystemState.system_tid, train, SPEED_STOP);
-    Delay(SystemState.clock_tid, REV_STOP_DELAY); 
+    Delay(SystemState.clock_tid, REV_STOP_DELAY);
     TrainSystemSetSpeed(SystemState.system_tid, train, SPEED_REVERSE);
     Delay(SystemState.clock_tid, REV_DELAY);
     TrainSystemSetSpeed(SystemState.system_tid, train, old_speed);
@@ -47,8 +63,8 @@ void trainsys_execute_command(CommandResult cres)
     SwitchMode switch_mode = cres.command_args.switch_args.switch_mode;
     SwitchSet(SystemState.switch_tid, switch_id, switch_mode);
     break;
-  } 
-  case QUIT_COMMAND: 
+  }
+  case QUIT_COMMAND:
   {
     SystemState.exited = true;
     break;
@@ -80,6 +96,7 @@ void trainsys_init()
       .clock_tid = clock_tid,
       .switch_tid = switch_tid,
       .pathfinder_tid = pathfinder_tid,
+      .moving_train = -1,
   };
 }
 

@@ -25,6 +25,10 @@ void render_switch(int32_t switch_id, SwitchMode switch_mode);
 void render_sensor(char bank, unsigned int sensor_number);
 void render_perf_stats(int percentage);
 void render_debug_log(int message);
+void render_train_system_train(int train);
+void render_predict_current_sensor(int sensor_id);
+void render_predict_next_sensor(int sensor_id);
+void render_predict_error(int terr, int derr); // terr in ticks, derr in mm
 void clear_screen();
 
 /*
