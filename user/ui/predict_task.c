@@ -11,13 +11,14 @@
 
 track_node traintrack[TRACK_MAX];
 
-void predictTask() {
+void predictTask()
+{
 
   int clock_server = WhoIs(ClockAddress);
   int sensor_server = WhoIs(SensorAddress);
   int switch_server = WhoIs(SwitchAddress);
   int trainsys_server = WhoIs(TrainSystemAddress);
-  
+
   HashMap *NodeIndexMap = hashmap_new();
   init_tracka(traintrack, NodeIndexMap);
 
@@ -26,7 +27,8 @@ void predictTask() {
 
   Delay(clock_server, 30);
 
-  while (1) {
+  while (1)
+  {
     int sensor_id = WaitOnSensor(sensor_server, -1);
     if (sensor_id < 0)
     {
@@ -40,50 +42,65 @@ void predictTask() {
 
     bool success;
     int cur_node_idx = (int)(intptr_t)hashmap_get(NodeIndexMap, sensor_str.data, &success);
-    if (!success) {
-      LOG_ERROR("[predictTask ERROR]: error on getting sensor from hashmap: %s", sensor_str.data);
+    if (!success)
+    {
+      render_command("[predictTask ERROR]: error on getting sensor from hashmap: %s", sensor_str.data);
       continue;
     }
 
     bool is_unknown = false;
     int dist_to_next = 0;
 
-    do {
-      if (traintrack[cur_node_idx].type == NODE_EXIT || traintrack[cur_node_idx].type == NODE_NONE) {
+    do
+    {
+      if (traintrack[cur_node_idx].type == NODE_EXIT || traintrack[cur_node_idx].type == NODE_NONE)
+      {
         is_unknown = true;
         break;
       }
 
-      if (traintrack[cur_node_idx].type == NODE_BRANCH) {
+      if (traintrack[cur_node_idx].type == NODE_BRANCH)
+      {
         SwitchMode sw_mode = SwitchGet(switch_server, traintrack[cur_node_idx].num);
-        if (sw_mode == SWITCH_MODE_UNKNOWN) {
+        if (sw_mode == SWITCH_MODE_UNKNOWN)
+        {
           is_unknown = true;
           break;
-        } else if (sw_mode == SWITCH_MODE_C) {
+        }
+        else if (sw_mode == SWITCH_MODE_C)
+        {
           dist_to_next += traintrack[cur_node_idx].edge[DIR_CURVED].dist;
           cur_node_idx = traintrack[cur_node_idx].edge[DIR_CURVED].dest - traintrack;
-        } else {
+        }
+        else
+        {
           dist_to_next += traintrack[cur_node_idx].edge[DIR_STRAIGHT].dist;
           cur_node_idx = traintrack[cur_node_idx].edge[DIR_STRAIGHT].dest - traintrack;
         }
-      } else {
+      }
+      else
+      {
         dist_to_next += traintrack[cur_node_idx].edge[DIR_AHEAD].dist;
         cur_node_idx = traintrack[cur_node_idx].edge[DIR_AHEAD].dest - traintrack;
       }
     } while (traintrack[cur_node_idx].type != NODE_SENSOR);
 
-
-    if (!is_unknown) {
+    if (!is_unknown)
+    {
       render_predict_next_sensor(traintrack[cur_node_idx].num);
-    } else {
+    }
+    else
+    {
       continue;
     }
     int train = trainsys_get_moving_train();
-    if (train == -1) {
+    if (train == -1)
+    {
       continue;
     }
     int train_speed = TrainSystemGetTrainState(trainsys_server, train) & TRAIN_SPEED_MASK;
-    if (get_train_index(train) == -1 || get_speed_index(train_speed) == -1) {
+    if (get_train_index(train) == -1 || get_speed_index(train_speed) == -1)
+    {
       continue;
     }
     int train_vel = train_data_vel(train, train_speed);
@@ -92,12 +109,13 @@ void predictTask() {
     int elapsed = curr_time - last_sensor_time;
     last_sensor_time = curr_time;
 
-    if (predicted_sensor_time != -1) {
+    if (predicted_sensor_time != -1)
+    {
       int t_err = elapsed - predicted_sensor_time;
-      int d_err = (t_err*train_vel)/100;
+      int d_err = (t_err * train_vel) / 100;
       render_predict_error(t_err, d_err);
     }
 
-    predicted_sensor_time = (dist_to_next/train_vel)*100; // in ticks
+    predicted_sensor_time = (dist_to_next / train_vel) * 100; // in ticks
   }
-} 
+}

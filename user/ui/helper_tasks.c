@@ -114,7 +114,7 @@ void promptTask()
       continue;
     }
     unsigned char ch = c;
-    if (isalnum(ch) || isblank(ch))
+    if (isalnum(ch) || isblank(ch) || ch == '-')
     {
       render_char(ch, str_length(&prompt));
       push_char(&prompt, ch);
