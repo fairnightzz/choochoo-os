@@ -29,6 +29,7 @@ void sensorNotifierTask()
     for (int i = 0; i < BYTE_COUNT; ++i)
     {
       uint8_t sensor_byte = Getc(marklin_server);
+      Delay(clock_server, 1);
       prev_sensor_state[i] = sensor_state[i];
       sensor_state[i] = sensor_byte;
       uint8_t triggered = ~(prev_sensor_state[i]) & sensor_state[i];
@@ -61,7 +62,7 @@ void sensorNotifierTask()
       Send(sensor_server, (const char *)&request, sizeof(SensorRequest), (char *)&response, sizeof(SensorResponse));
     }
 
-    Delay(clock_server, 20);
+    Delay(clock_server, 10);
   }
 }
 
