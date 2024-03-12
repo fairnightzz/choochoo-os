@@ -9,6 +9,8 @@
 #define M_WRITE 10
 #define SENSOR_READ 1
 #define SENSOR_BYTE_READ 1
+#define SPEED_STOP 0
+#define SPEED_REVERSE 15
 
 typedef struct
 {

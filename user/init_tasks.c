@@ -65,8 +65,8 @@ void initTask()
   Create(2, &SensorServer);
   Create(2, &SwitchServer);
 
-  Create(4, &PathFinderServer);
   Create(4, &TrainSystemServer);
+  Create(4, &PathFinderServer);
 
   // UI Task
   Create(4, &UITask);

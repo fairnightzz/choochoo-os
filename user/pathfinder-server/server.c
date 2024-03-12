@@ -8,6 +8,8 @@
 #include "user/io-server/io_marklin.h"
 #include "user/traindata/train_data.h"
 #include "user/ui/render.h"
+#include "user/trainsys-server/interface.h"
+#include "user/trainsys/trainsys.h"
 
 #define INF 2147483647
 #define NONE 2147483646
@@ -21,7 +23,7 @@ track_edge *route_edges[TRACK_MAX];
 track_node track[TRACK_MAX];
 
 int do_djikstra(track_node *track, int source_node, int dest_node);
-void do_train_course(track_node *track, int io_server, int sensor_server, int switch_server, int clock_server, int src, int dest, int train, int train_speed, int offset);
+void do_train_course(track_node *track, int trainsys_server, int sensor_server, int switch_server, int clock_server, int src, int dest, int train, int train_speed, int offset);
 
 void PathFinderServer()
 {
@@ -29,8 +31,9 @@ void PathFinderServer()
 
   int sensor_server = WhoIs(SensorAddress);
   int switch_server = WhoIs(SwitchAddress);
-  int io_server = WhoIs(MarklinIOAddress);
   int clock_server = WhoIs(ClockAddress);
+  // int io_server = WhoIs(MarklinIOAddress);
+  int trainsys_tid = WhoIs(TrainSystemAddress);
 
   HashMap *NodeIndexMap = hashmap_new();
 
@@ -53,9 +56,13 @@ void PathFinderServer()
     int end_node_index = (int)(intptr_t)hashmap_get(NodeIndexMap, request.destination, &success2);
     Reply(from_tid, (char *)&response, sizeof(PathFinderResponse));
 
-    io_marklin_set_train(io_server, request.train, request.speed);
+    TrainSystemSetSpeed(trainsys_tid, request.train, request.speed);
 
     int start_sensor = WaitOnSensor(sensor_server, -1);
+    if (start_sensor == track[start_sensor].num)
+    {
+      start_sensor = WaitOnSensor(sensor_server, -1);
+    }
 
     // io_marklin_set_train(io_server, request.train, 0);
 
@@ -79,7 +86,7 @@ void PathFinderServer()
     // string new_string_life = string_format("start node %s, index = %d, len = %d, dest node %s, index = %d", start_str.data, start_node_index, start_str.length, request.destination, end_node_index);
     // render_command(&new_string_life);
 
-    do_train_course(track, io_server, sensor_server, switch_server, clock_server, start_node_index, end_node_index, request.train, request.speed, request.offset);
+    do_train_course(track, trainsys_tid, sensor_server, switch_server, clock_server, start_node_index, end_node_index, request.train, request.speed, request.offset);
   }
 
   Exit();
@@ -182,7 +189,7 @@ int do_djikstra(track_node *track, int source_node, int dest_node)
   return do_edge_trace(dest_node, source_node, source_rev_node, 0);
 }
 
-void do_train_course(track_node *track, int io_server, int sensor_server, int switch_server, int clock_server, int src, int dest, int train, int train_speed, int offset)
+void do_train_course(track_node *track, int trainsys_server, int sensor_server, int switch_server, int clock_server, int src, int dest, int train, int train_speed, int offset)
 {
   int edges_in_path = do_djikstra(track, src, dest);
   if (edges_in_path == -1)
@@ -264,5 +271,5 @@ void do_train_course(track_node *track, int io_server, int sensor_server, int sw
   int delay_ticks = distance_from_sensor * 100 / train_vel;
   Delay(clock_server, delay_ticks);
 
-  io_marklin_set_train(io_server, train, 0);
+  TrainSystemSetSpeed(trainsys_server, train, SPEED_STOP);
 }

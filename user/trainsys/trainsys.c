@@ -9,9 +9,6 @@
 
 static TrainSystemState SystemState;
 
-#define SPEED_STOP 0
-#define SPEED_REVERSE 15
-
 uint32_t trainsys_get_moving_train()
 {
   return SystemState.moving_train;
