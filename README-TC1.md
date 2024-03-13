@@ -34,6 +34,9 @@ path <train_number> <train_speed> <sensor_destination> <optional: offset>
 
 Our calibration data is in `calibration-data/` folder in main directory.
 
+Demo: Many trains on the essential speeds of 5, 8, 11, 14 due to presentation time constraints. Our train order is this:
+B1, C10, E5, C3, RV, C13/E7, E1, D1
+
 # 4 Measurements & Calibration (`measurements/`) (`calibration-data/`)
 We decided to measure and calibrate 5 trains. The values we decided to measure are the constant velocities at each speed (5-14) and the stopping times at each speed (5-14). 
 
