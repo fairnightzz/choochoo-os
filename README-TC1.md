@@ -15,7 +15,7 @@ Run the following on a `linux.student.cs` environment:
 ```bash
 git clone https://git.uwaterloo.ca/z2252zha/choochoo-os.git
 cd choochoo-os
-git checkout f43e3bdedcd8323880ce8c92d99f6ca1114773b9
+git checkout f93496240b4d8f73f6b24f8c1da7d03fce8c1d34
 make
 ```
 
@@ -38,7 +38,7 @@ Demo: Many trains on the essential speeds of 5, 8, 11, 14 due to presentation ti
 B1, C10, E5, C3, RV, C13/E7, E1, D1
 
 # 4 Measurements & Calibration (`measurements/`) (`calibration-data/`)
-We decided to measure and calibrate 5 trains. The values we decided to measure are the constant velocities at each speed (5-14) and the stopping times at each speed (5-14). 
+We decided to measure and calibrate 5 trains. The values we decided to measure are the constant velocities at each speed (5-14) and the stopping times at each speed (5-14). Our code is a tight polling loop in `measurements/`
 
 Our method of taking measurements for velocity is by running the train in the inner loop of the track 20 times. Everytime it triggers a sensor, we figure out the time it took to trigger a sensor to find the velocity (`dist between sensors/time`). We leave this value as micrometers per second to avoid integer division until the very end. This value gets accumulated between each switch where after 20 iterations, we sum all the velocities together to find the average. This way, in the future if we want to be even more specific (velocities within between sensors), we can be varying.
 
