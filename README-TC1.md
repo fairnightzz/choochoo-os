@@ -33,6 +33,8 @@ path <train_number> <train_speed> <sensor_destination> <optional: offset>
 - Optional `offset` meant only for testing and debugging purposes (how many millimeters offset from node) -> defaults to 0.
 
 # 4 Measurements & Calibration
+We decided to measure and calibrate 5 trains. The values we decided to measure are the constant velocities at each speed (5-14) and the stopping time ()
+
 
 # 5 Train Modeling
 

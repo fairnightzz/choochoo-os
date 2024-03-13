@@ -22,8 +22,9 @@ static const uint32_t TRAIN_DATA_VEL[TRAIN_DATA_TRAIN_COUNT][TRAIN_DATA_SPEED_CO
 };
 
 static const uint32_t TRAIN_DATA_STOP_DIST[TRAIN_DATA_TRAIN_COUNT][TRAIN_DATA_SPEED_COUNT] = {
-    {258, 348, 455, 512, 589, 675, 762, 855, 976, 959},   // 2
-    {293, 319, 421, 490, 549, 615, 703, 790, 864, 882},   // 47 tested 5?
+    {290, 348, 455, 532, 589, 675, 810, 855, 976, 1040}, // 2 number is on back, for T2 speed 14 C10->B3 and C13->E7
+    // For higher speeds 11 + , change C13 to E7
+    {293, 319, 421, 490, 549, 615, 803, 790, 864, 882},   // 47 tested 5?
     {271, 109, 126, 202, 281, 237, 381, 587, 760, 1000},  // 55
     {42, 93, 164, 359, 319, 490, 550, 726, 945, 1245},    // 58 tested 14-10
     {151, 235, 205, 452, 604, 427, 779, 1042, 1370, 1700} // 77 tested 14?
