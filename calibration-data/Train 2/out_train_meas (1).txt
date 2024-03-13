@@ -1,0 +1,430 @@
+ÿ
+RPi: BOOTLOADER release VERSION:8ba17717 DATE: 2023/01/11 TIME: 17:40:52
+BOOTMODE: 0x06 partition 0 build-ts BUILD_TIMESTAMP=1673458852 serial 820a0693 boardrev c03115 stc 421476
+PM_RSTS: 0x00001000
+part 00000000 reset_info 00000000
+uSD voltage 3.3V
+Initialising SDRAM 'Samsung' 16Gb x2 total-size: 32 Gbit 3200
+DDR 3200 1 0 32 152
+
+XHCI-STOP
+xHC ver: 256 HCS: 05000420 fc000031 00e70004 HCC: 002841eb
+USBSTS 11
+xHC ver: 256 HCS: 05000420 fc000031 00e70004 HCC: 002841eb
+xHC ports 5 slots 32 intrs 4
+Boot mode: SD (01) order f24
+USB2[1] 400202e1 connected
+USB2 root HUB port 1 init
+DEV [01:00] 2.16 000000:01 class 9 VID 2109 PID 3431
+HUB init [01:00] 2.16 000000:01
+SD HOST: 200000000 CTL0: 0x00800000 BUS: 400000 Hz actual: 390625 HZ div: 512 (256) status: 0x1fff0000 delay: 276
+SD HOST: 200000000 CTL0: 0x00800f00 BUS: 400000 Hz actual: 390625 HZ div: 512 (256) status: 0x1fff0000 delay: 276
+EMMC
+SD retry 1 oc 0
+SD HOST: 200000000 CTL0: 0x00800000 BUS: 400000 Hz actual: 390625 HZ div: 512 (256) status: 0x1fff0000 delay: 276
+SD retry 2 oc 0
+SD HOST: 200000000 CTL0: 0x00800000 BUS: 400000 Hz actual: 390625 HZ div: 512 (256) status: 0x1fff0000 delay: 276
+SDV1
+SD CMD: 0x371a0010 (55) 0x0 0x1fff0001
+Failed to open device: 'sdcard' (cmd 371a0010 status 1fff0001)
+Retry SD 1
+SD HOST: 200000000 CTL0: 0x00800000 BUS: 400000 Hz actual: 390625 HZ div: 512 (256) status: 0x1fff0000 delay: 276
+SD HOST: 200000000 CTL0: 0x00800f00 BUS: 400000 Hz actual: 390625 HZ div: 512 (256) status: 0x1fff0000 delay: 276
+EMMC
+SD retry 1 oc 0
+SD HOST: 200000000 CTL0: 0x00800000 BUS: 400000 Hz actual: 390625 HZ div: 512 (256) status: 0x1fff0000 delay: 276
+SD retry 2 oc 0
+SD HOST: 200000000 CTL0: 0x00800000 BUS: 400000 Hz actual: 390625 HZ div: 512 (256) status: 0x1fff0000 delay: 276
+SDV1
+SD CMD: 0x371a0010 (55) 0x0 0x1fff0001
+Failed to open device: 'sdcard' (cmd 371a0010 status 1fff0001)
+Boot mode: USB-MSD (04) order f2
+XHCI-STOP
+xHC ver: 256 HCS: 05000420 fc000031 00e70004 HCC: 002841eb
+USBSTS 18
+XHCI-STOP
+xHC ver: 256 HCS: 05000420 fc000031 00e70004 HCC: 002841eb
+USBSTS 19
+xHC ver: 256 HCS: 05000420 fc000031 00e70004 HCC: 002841eb
+xHC ports 5 slots 32 intrs 4
+USB2[1] 400202e1 connected
+USB2 root HUB port 1 init
+DEV [01:00] 2.16 000000:01 class 9 VID 2109 PID 3431
+HUB init [01:00] 2.16 000000:01
+USB MSD stopped. Timeout: 5 seconds
+Boot mode: NETWORK (02) order f
+GENET: RESET_PHY 0
+CTL 1140 PHY ID 600d 84a2
+MII_CONTROL 1140
+MII APD 0001 SCTL3 0001 IDDQ 0000
+
+NETWORK: d8:3a:dd:1b:38:6c wait for link TFTP: 0.0.0.0
+LINK STATUS: speed: 1000 full duplex
+Link ready
+GENET START: 64 16 32
+GENET: UMAC_START 0xd83add1b 0x386c0000
+RX: 0 IP: 0 IPV4: 0 MAC: 0 UDP: 0 UDP RECV: 0 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+DHCP src: cc:98:91:91:cf:6c 129.97.34.193
+YI_ADDR 129.97.34.246
+SI_ADDR 172.19.167.29
+OPTIONS:-
+	op: 53 len:   1 DHCP recv OFFER (2) expect OFFER
+	op: 54 len:   4 129.97.129.9
+	op: 51 len:   4 
+	op:  1 len:   4 255.255.255.192
+	op:  3 len:   4 129.97.34.193
+	op: 66 len:  13 129.97.167.60[66]: 129.97.167.60
+
+DHCP src: cc:98:91:91:cf:6c 129.97.34.193
+YI_ADDR 129.97.34.246
+SI_ADDR 172.19.167.29
+OPTIONS:-
+	op: 53 len:   1 DHCP recv OFFER (2) expect ACK
+	op: 54 len:   4 129.97.128.9
+	op: 51 len:   4 
+	op:  1 len:   4 255.255.255.192
+	op:  3 len:   4 129.97.34.193
+	op: 66 len:  13 129.97.167.60[66]: 129.97.167.60
+
+NET 129.97.34.246 255.255.255.192 gw 129.97.34.193 tftp 129.97.167.60
+DHCP src: cc:98:91:91:cf:6c 129.97.34.193
+YI_ADDR 129.97.34.246
+SI_ADDR 172.19.167.29
+OPTIONS:-
+	op: 53 len:   1 DHCP recv OFFER (2) expect ACK
+	op: 54 len:   4 129.97.128.9
+	op: 51 len:   4 
+	op:  1 len:   4 255.255.255.192
+	op:  3 len:   4 129.97.34.193
+	op: 66 len:  13 129.97.167.60[66]: 129.97.167.60
+
+DHCP src: cc:98:91:91:cf:6c 129.97.34.193
+YI_ADDR 129.97.34.246
+SI_ADDR 172.19.167.29
+OPTIONS:-
+	op: 53 len:   1 DHCP recv OFFER (2) expect ACK
+	op: 54 len:   4 129.97.129.9
+	op: 51 len:   4 
+	op:  1 len:   4 255.255.255.192
+	op:  3 len:   4 129.97.34.193
+	op: 66 len:  13 129.97.167.60[66]: 129.97.167.60
+
+DHCP src: cc:98:91:91:cf:6c 129.97.34.193
+YI_ADDR 129.97.34.246
+SI_ADDR 172.19.167.29
+OPTIONS:-
+	op: 53 len:   1 DHCP recv ACK (5) expect ACK
+	op: 54 len:   4 129.97.128.9
+	op: 51 len:   4 
+	op:  1 len:   4 255.255.255.192
+	op:  3 len:   4 129.97.34.193
+	op:  6 len:   8 129.97.2.1129.97.2.1
+	op: 12 len:   8 
+	op: 252 len:  34 
+	op: 66 len:  13 129.97.167.60[66]: 129.97.167.60
+
+	op:  4 len:   8 
+	op: 119 len:  29 
+	op: 42 len:  16 
+	op: 15 len:  23 
+DHCP src: cc:98:91:91:cf:6c 129.97.34.193
+YI_ADDR 129.97.34.246
+SI_ADDR 172.19.167.29
+OPTIONS:-
+	op: 53 len:   1 DHCP recv ACK (5) expect ACK
+	op: 54 len:   4 129.97.129.9
+	op: 51 len:   4 
+	op:  1 len:   4 255.255.255.192
+	op:  3 len:   4 129.97.34.193
+	op:  6 len:   8 129.97.2.1129.97.2.1
+	op: 12 len:   8 
+	op: 252 len:  34 
+	op: 66 len:  13 129.97.167.60[66]: 129.97.167.60
+
+	op:  4 len:   8 
+	op: 119 len:  29 
+	op: 42 len:  16 
+	op: 15 len:  23 
+DHCP src: cc:98:91:91:cf:6c 129.97.34.193
+YI_ADDR 129.97.34.246
+SI_ADDR 172.19.167.29
+OPTIONS:-
+	op: 53 len:   1 DHCP recv ACK (5) expect ACK
+	op: 54 len:   4 129.97.128.9
+	op: 51 len:   4 
+	op:  1 len:   4 255.255.255.192
+	op:  3 len:   4 129.97.34.193
+	op:  6 len:   8 129.97.2.1129.97.2.1
+	op: 12 len:   8 
+	op: 252 len:  34 
+	op: 66 len:  13 129.97.167.60[66]: 129.97.167.60
+
+	op:  4 len:   8 
+	op: 119 len:  29 
+	op: 42 len:  16 
+	op: 15 len:  23 
+DHCP src: cc:98:91:91:cf:6c 129.97.34.193
+YI_ADDR 129.97.34.246
+SI_ADDR 172.19.167.29
+OPTIONS:-
+	op: 53 len:   1 DHCP recv ACK (5) expect ACK
+	op: 54 len:   4 129.97.129.9
+	op: 51 len:   4 
+	op:  1 len:   4 255.255.255.192
+	op:  3 len:   4 129.97.34.193
+	op:  6 len:   8 129.97.2.1129.97.2.1
+	op: 12 len:   8 
+	op: 252 len:  34 
+	op: 66 len:  13 129.97.167.60[66]: 129.97.167.60
+
+	op:  4 len:   8 
+	op: 119 len:  29 
+	op: 42 len:  16 
+	op: 15 len:  23 
+ARP 129.97.34.193 cc:98:91:91:cf:6c
+NET 129.97.34.246 255.255.255.192 gw 129.97.34.193 tftp 129.97.167.60
+RX: 23 IP: 0 IPV4: 9 MAC: 8 UDP: 8 UDP RECV: 8 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+TFTP_GET: cc:98:91:91:cf:6c 129.97.167.60 d8-3a-dd-1b-38-6c/start4.elf
+
+RX: 23 IP: 0 IPV4: 9 MAC: 8 UDP: 8 UDP RECV: 8 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+RX: 24 IP: 0 IPV4: 10 MAC: 9 UDP: 9 UDP RECV: 9 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+TFTP_GET: cc:98:91:91:cf:6c 129.97.167.60 d8-3a-dd-1b-38-6c/config.txt
+
+RX: 24 IP: 0 IPV4: 10 MAC: 9 UDP: 9 UDP RECV: 9 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+TFTP: complete 2208
+RX: 27 IP: 0 IPV4: 13 MAC: 12 UDP: 12 UDP RECV: 12 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+Read d8-3a-dd-1b-38-6c/config.txt bytes     2208 hnd 0x0
+TFTP_GET: cc:98:91:91:cf:6c 129.97.167.60 d8-3a-dd-1b-38-6c/pieeprom.sig
+
+RX: 27 IP: 0 IPV4: 13 MAC: 12 UDP: 12 UDP RECV: 12 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+TFTP 1: File not found 
+RX: 28 IP: 0 IPV4: 14 MAC: 13 UDP: 13 UDP RECV: 13 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+Read d8-3a-dd-1b-38-6c/pieeprom.upd failed
+TFTP_GET: cc:98:91:91:cf:6c 129.97.167.60 d8-3a-dd-1b-38-6c/recover4.elf
+
+RX: 28 IP: 0 IPV4: 14 MAC: 13 UDP: 13 UDP RECV: 13 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+TFTP 1: File not found 
+RX: 29 IP: 0 IPV4: 15 MAC: 14 UDP: 14 UDP RECV: 14 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+Read d8-3a-dd-1b-38-6c/recover4.elf failed
+TFTP_GET: cc:98:91:91:cf:6c 129.97.167.60 d8-3a-dd-1b-38-6c/recovery.elf
+
+RX: 29 IP: 0 IPV4: 15 MAC: 14 UDP: 14 UDP RECV: 14 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+TFTP 1: File not found 
+RX: 30 IP: 0 IPV4: 16 MAC: 15 UDP: 15 UDP RECV: 15 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+Read d8-3a-dd-1b-38-6c/recovery.elf failed
+TFTP_GET: cc:98:91:91:cf:6c 129.97.167.60 d8-3a-dd-1b-38-6c/start4.elf
+
+RX: 31 IP: 0 IPV4: 16 MAC: 15 UDP: 15 UDP RECV: 15 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+TFTP: complete 2251392
+RX: 32 IP: 0 IPV4: 16 MAC: 14 UDP: 14 UDP RECV: 14 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+Read d8-3a-dd-1b-38-6c/start4.elf bytes  2251392 hnd 0x0
+TFTP_GET: cc:98:91:91:cf:6c 129.97.167.60 d8-3a-dd-1b-38-6c/fixup4.dat
+
+RX: 32 IP: 0 IPV4: 16 MAC: 14 UDP: 14 UDP RECV: 14 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+TFTP: complete 5399
+RX: 37 IP: 0 IPV4: 21 MAC: 19 UDP: 19 UDP RECV: 19 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+Read d8-3a-dd-1b-38-6c/fixup4.dat bytes     5399 hnd 0x0
+0x00c03115 0x00000000 0x00001fff
+MEM GPU: 76 ARM: 948 TOTAL: 1024
+Firmware: 82f3750a65fadae9a38077e3c2e217ad158c8d54 Mar 17 2023 10:50:39
+Starting start4.elf @ 0xfec00200 partition -1
+Stopping network
+RX: 37 IP: 0 IPV4: 21 MAC: 19 UDP: 19 UDP RECV: 19 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+RX: 37 IP: 0 IPV4: 21 MAC: 19 UDP: 19 UDP RECV: 19 IP_CSUM_ERR: 0 UDP_CSUM_ERR: 0
+GENET STOP: 0
+XHCI-STOP
+xHC ver: 256 HCS: 05000420 fc000031 00e70004 HCC: 002841eb
+USBSTS 18
++
+
+MESS:00:00:23.557686:0: genet: LINK STATUS: speed: 1000 full duplex
+MESS:00:00:23.560922:0: genet: GENET START: 128 8 8
+MESS:00:00:23.567545:0: genet: GENET: UMAC_START 0xd83add1b 0x386c0000
+MESS:00:00:23.578539:0: brfs: File read: /mfs/sd/config.txt
+MESS:00:00:23.581995:0: brfs: File read: 2208 bytes
+MESS:00:00:23.608141:0: HDMI0:EDID error reading EDID block 0 attempt 0
+MESS:00:00:23.612645:0: HDMI0:EDID giving up on reading EDID block 0
+MESS:00:00:23.629486:0: HDMI1:EDID error reading EDID block 0 attempt 0
+MESS:00:00:23.633993:0: HDMI1:EDID giving up on reading EDID block 0
+MESS:00:00:23.645823:0: brfs: File read: /mfs/sd/config.txt
+MESS:00:00:24.451155:0: gpioman: gpioman_get_pin_num: pin DISPLAY_DSI_PORT not defined
+MESS:00:00:24.458475:0: *** Restart logging
+MESS:00:00:24.459878:0: brfs: File read: 2208 bytes
+MESS:00:00:24.471714:0: hdmi: HDMI0:EDID error reading EDID block 0 attempt 0
+MESS:00:00:24.476745:0: hdmi: HDMI0:EDID giving up on reading EDID block 0
+MESS:00:00:24.487370:0: hdmi: HDMI0:EDID error reading EDID block 0 attempt 0
+MESS:00:00:24.492395:0: hdmi: HDMI0:EDID giving up on reading EDID block 0
+MESS:00:00:24.509464:0: hdmi: HDMI1:EDID error reading EDID block 0 attempt 0
+MESS:00:00:24.514495:0: hdmi: HDMI1:EDID giving up on reading EDID block 0
+MESS:00:00:24.530391:0: hdmi: HDMI1:EDID error reading EDID block 0 attempt 0
+MESS:00:00:24.535461:0: hdmi: HDMI1:EDID giving up on reading EDID block 0
+MESS:00:00:24.548939:0: HDMI0: hdmi_pixel_encoding: 300000000
+MESS:00:00:24.551574:0: HDMI1: hdmi_pixel_encoding: 300000000
+MESS:00:00:24.557759:0: kernel=
+MESS:00:00:24.570863:0: dtb_file 'bcm2711-rpi-4-b.dtb'
+MESS:00:00:24.584484:0: brfs: File read: /mfs/sd/bcm2711-rpi-4-b.dtb
+MESS:00:00:24.587728:0: Loaded 'bcm2711-rpi-4-b.dtb' to 0x100 size 0xcd71
+MESS:00:00:24.607564:0: brfs: File read: 52593 bytes
+MESS:00:00:24.614751:0: brfs: File read: /mfs/sd/overlays/overlay_map.dtb
+MESS:00:00:24.695665:0: brfs: File read: 2347 bytes
+MESS:00:00:24.703147:0: brfs: File read: /mfs/sd/config.txt
+MESS:00:00:24.706062:0: dtparam: audio=on
+MESS:00:00:24.713936:0: brfs: File read: 2208 bytes
+MESS:00:00:24.719846:0: brfs: File read: /mfs/sd/overlays/vc4-kms-v3d-pi4.dtbo
+MESS:00:00:24.866710:0: Loaded overlay 'vc4-kms-v3d'
+MESS:00:00:25.246763:0: brfs: File read: 3913 bytes
+MESS:00:00:25.253507:0: brfs: File read: /mfs/sd/overlays/disable-bt.dtbo
+MESS:00:00:25.294375:0: Loaded overlay 'disable-bt'
+MESS:00:00:25.400768:0: brfs: File read: 1073 bytes
+MESS:00:00:25.406607:0: brfs: File read: /mfs/sd/cmdline.txt
+MESS:00:00:25.409232:0: Read command line from file 'cmdline.txt':
+MESS:00:00:25.415094:0: 'console=serial0,115200 console=tty1 root=PARTUUID=a6c70ba9-02 rootfstype=ext4 fsck.repair=yes rootwait'
+MESS:00:00:25.735341:0: brfs: File read: 103 bytes
+MESS:00:00:25.744842:0: brfs: File read: /mfs/sd/kernel8.img
+MESS:00:00:25.747431:0: Loaded 'kernel8.img' to 0x80000 size 0x1b90
+MESS:00:00:25.753432:0: Device tree loaded to 0x2eff2b00 (size 0xd4f0)
+MESS:00:00:25.763053:0: uart: Set PL011 baud rate to 103448.300000 Hz
+MESS:00:00:25.769378:0: uart: Baud rate change done...
+MESS:00:00:25.771438:0: uart: Baud rate change done...
+MESS:00:00:25.789832:0: genet: GENET STOP: 0
+Calculating train velocity for train 2 speed 5
+Average speed (section 0): 220344
+Average speed (section 1): 220829
+Average speed (section 2): 226792
+Average speed (section 3): 296364
+Average speed (section 4): 224830
+Average speed (section 5): 295162
+Average speed (section 6): 225015
+Average speed (section 7): 220239
+Average speed (section 8): 219304
+Average speed (section 9): 215578
+Average speed (section 10): 227051
+Average speed (section 11): 221104
+Speed: 5 Average speed (overall): 234384
+Calculating train velocity for train 2 speed 6
+Average speed (section 0): 270149
+Average speed (section 1): 274054
+Average speed (section 2): 279346
+Average speed (section 3): 363917
+Average speed (section 4): 276380
+Average speed (section 5): 367339
+Average speed (section 6): 278402
+Average speed (section 7): 269248
+Average speed (section 8): 269912
+Average speed (section 9): 266696
+Average speed (section 10): 281228
+Average speed (section 11): 272614
+Speed: 6 Average speed (overall): 289107
+Calculating train velocity for train 2 speed 7
+Average speed (section 0): 327891
+Average speed (section 1): 332674
+Average speed (section 2): 342597
+Average speed (section 3): 446353
+Average speed (section 4): 334902
+Average speed (section 5): 448970
+Average speed (section 6): 337060
+Average speed (section 7): 326204
+Average speed (section 8): 331747
+Average speed (section 9): 323201
+Average speed (section 10): 343047
+Average speed (section 11): 328892
+Speed: 7 Average speed (overall): 351962
+Calculating train velocity for train 2 speed 8
+Average speed (section 0): 378824
+Average speed (section 1): 385512
+Average speed (section 2): 397693
+Average speed (section 3): 513474
+Average speed (section 4): 388519
+Average speed (section 5): 520195
+Average speed (section 6): 389512
+Average speed (section 7): 383679
+Average speed (section 8): 382076
+Average speed (section 9): 372464
+Average speed (section 10): 397145
+Average speed (section 11): 384230
+Speed: 8 Average speed (overall): 407777
+Calculating train velocity for train 2 speed 9
+Average speed (section 0): 433654
+Average speed (section 1): 444256
+Average speed (section 2): 456424
+Average speed (section 3): 590662
+Average speed (section 4): 441453
+Average speed (section 5): 604099
+Average speed (section 6): 447122
+Average speed (section 7): 435286
+Average speed (section 8): 436171
+Average speed (section 9): 425477
+Average speed (section 10): 458703
+Average speed (section 11): 438522
+Speed: 9 Average speed (overall): 467652
+Calculating train velocity for train 2 speed 10
+Average speed (section 0): 490263
+Average speed (section 1): 496423
+Average speed (section 2): 507436
+Average speed (section 3): 676576
+Average speed (section 4): 496910
+Average speed (section 5): 664062
+Average speed (section 6): 515223
+Average speed (section 7): 485209
+Average speed (section 8): 491866
+Average speed (section 9): 483277
+Average speed (section 10): 512703
+Average speed (section 11): 489982
+Speed: 10 Average speed (overall): 525828
+Calculating train velocity for train 2 speed 11
+Average speed (section 0): 551147
+Average speed (section 1): 562532
+Average speed (section 2): 570866
+Average speed (section 3): 732957
+Average speed (section 4): 556097
+Average speed (section 5): 751770
+Average speed (section 6): 563375
+Average speed (section 7): 555327
+Average speed (section 8): 547214
+Average speed (section 9): 538093
+Average speed (section 10): 577279
+Average speed (section 11): 545916
+Speed: 11 Average speed (overall): 587715
+Calculating train velocity for train 2 speed 12
+Average speed (sction 0): 598144
+Average speed (section 1): 620229
+Average speed (section 2): 634295
+Average speed (section 3): 798736
+Average speed (section 4): 621295
+Average speed (section 5): 798757
+Average speed (section 6): 613936
+Average speed (section 7): 620237
+Average speed (section 8): 590657
+Average speed (section 9): 604097
+Average speed (section 10): 620185
+Average speed (section 11): 608561
+Speed: 12 Average speed (overall): 644094
+Calculating train velocity for train 2 speed 13
+Average speed (section 0): 681886
+Average speed (section 1): 668309
+Average speed (section 2): 669534
+Average speed (section 3): 864512
+Average speed (section 4): 678503
+Average speed (section 5): 817551
+Average speed (section 6): 722279
+Average speed (section 7): 649085
+Average speed (section 8): 660835
+Average speed (section 9): 657795
+Average speed (section 10): 660491
+Average speed (section 11): 626460
+Speed: 13 Average speed (overall): 696437
+Calculating train velocity for train 2 speed 14
+Average speed (section 0): 651978
+Average speed (section 1): 663500
+Average speed (section 2): 676582
+Average speed (section 3): 864513
+Average speed (section 4): 674988
+Average speed (section 5): 883332
+Average speed (section 6): 657272
+Average speed (section 7): 663509
+Average speed (section 8): 660833
+Average speed (section 9): 651531
+Average speed (section 10): 660490
+Average speed (section 11): 670312
+Speed: 14 Average speed (overall): 698237
+DONE

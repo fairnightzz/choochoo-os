@@ -1,0 +1,142 @@
+Calculating train velocity for train 58 speed 14
+Average speed (section 0): 563109
+Average speed (section 1): 577918
+Average speed (section 2): 599056
+Average speed (section 3): 817529
+Average speed (section 4): 592310
+Average speed (section 5): 805022
+Average speed (section 6): 577821
+Average speed (section 7): 598600
+Average speed (section 8): 593999
+Average speed (section 9): 582841
+Average speed (section 10): 596782
+Average speed (section 11): 609680
+Speed: 14 Average speed (overall): 626222
+Calculating train velocity for train 58 speed 13
+Average speed (section 0): 546874
+Average speed (section 1): 558927
+Average speed (section 2): 563818
+Average speed (section 3): 754883
+Average speed (section 4): 556097
+Average speed (section 5): 751770
+Average speed (section 6): 568191
+Average speed (section 7): 548115
+Average speed (section 8): 547215
+Average speed (section 9): 559349
+Average speed (section 10): 553876
+Average speed (section 11): 554864
+Speed: 13 Average speed (overall): 588665
+Calculating train velocity for train 58 speed 12
+Average speed (section 0): 483856
+Average speed (section 1): 471181
+Average speed (section 2): 498039
+Average speed (section 3): 664047
+Average speed (section 4): 481553
+Average speed (section 5): 645268
+Average speed (section 6): 486332
+Average speed (section 7): 471186
+Average speed (section 8): 482468
+Average speed (section 9): 469852
+Average speed (section 10): 485399
+Average speed (section 11): 479913
+Speed: 12 Average speed (overall): 509925
+Calculating train velocity for train 58 speed 11
+Average speed (section 0): 401254
+Average speed (section 1): 421819
+Average speed (section 2): 416151
+Average speed (section 3): 563814
+Average speed (section 4): 416592
+Average speed (section 5): 545926
+Average speed (section 6): 429925
+Average speed (section 7): 403873
+Average speed (section 8): 416677
+Average speed (section 9): 403028
+Average speed (section 10): 418988
+Average speed (section 11): 418163
+Speed: 11 Average speed (overall): 438017
+Calculating train velocity for train 58 speed 10
+Average speed (section 0): 334416
+Average speed (section 1): 335263
+Average speed (section 2): 344555
+Average speed (section 3): 454185
+Average speed (section 4): 343228
+Average speed (section 5): 446360
+Average speed (section 6): 347092
+Average speed (section 7): 333971
+Average speed (section 8): 336531
+Average speed (section 9): 327471
+Average speed (section 10): 351447
+Average speed (section 11): 333163
+Speed: 10 Average speed (overall): 357307
+Calculating train velocity for train 58 speed 9
+Average speed (section 0): 276065
+Average speed (section 1): 280785
+Average speed (section 2): 281909
+Average speed (section 3): 375877
+Average speed (section 4): 284509
+Average speed (section 5): 375882
+Average speed (section 6): 282342
+Average speed (section 7): 276940
+Average speed (section 8): 275535
+Average speed (section 9): 277779
+Average speed (section 10): 286688
+Average speed (section 11): 278810
+Speed: 9 Average speed (overall): 296093
+Calculating train velocity for train 58 speed 8
+Average speed (section 0): 192553
+Average speed (section 1): 191001
+Average speed (section 2): 190618
+Average speed (section 3): 188427
+Average speed (section 4): 194747
+Average speed (section 5): 192880
+Average speed (section 6): 193287
+Average speed (section 7): 191002
+Average speed (section 8): 188775
+Average speed (section 9): 189912
+Average speed (section 10): 193386
+Average speed (section 11): 189911
+Speed: 8 Average speed (overall): 191375
+Calculating train velocity for train 58 speed 7
+Average speed (section 0): 170892
+Average speed (section 1): 172663
+Average speed (section 2): 169969
+Average speed (section 3): 168991
+Average speed (section 4): 174346
+Average speed (section 5): 173289
+Average speed (section 6): 172064
+Average speed (section 7): 171200
+Average speed (section 8): 168754
+Average speed (section 9): 171255
+Average speed (section 10): 171377
+Average speed (section 11): 170848
+Speed: 7 Average speed (overall): 171304
+Calculating train velocity for train 58 speed 6
+Average speed (section 0): 120462
+Average speed (section 1): 120581
+Average speed (section 2): 119756
+Average speed (section 3): 119731
+Average speed (section 4): 122647
+Average speed (section 5): 122662
+Average speed (section 6): 121724
+Average speed (section 7): 119691
+Average speed (section 8): 118369
+Average speed (section 9): 121260
+Average speed (section 10): 121027
+Average speed (section 11): 120489
+Speed: 6 Average speed (overall): 120700
+Calculating train velocity for train 58 speed 5
+Average speed (section 0): 85252
+Average speed (section 1): 85759
+Average speed (section 2): 86091
+Average speed (section 3): 86318
+Average speed (section 4): 88139
+Average speed (section 5): 87831
+Average speed (section 6): 85485
+Average speed (section 7): 84942
+Average speed (section 8): 84055
+Average speed (section 9): 87117
+Average speed (section 10): 86090
+Average speed (section 11): 86317
+Speed: 5 Average speed (overall): 86116
+DONE
+
