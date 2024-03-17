@@ -74,10 +74,6 @@ void clockUITask()
   int clock_server = WhoIs(ClockAddress);
   while (1)
   {
-    if (trainsys_exited())
-    {
-      break;
-    }
     int cur_tick = Time(clock_server);
     render_time(cur_tick);
     Delay(clock_server, 5);

@@ -66,7 +66,7 @@ void trainsys_execute_command(CommandResult cres)
   }
   case QUIT_COMMAND:
   {
-    SystemState.exited = true;
+    Reboot();
     break;
   }
   case PATH_COMMAND:
@@ -101,7 +101,6 @@ void trainsys_init()
   int switch_tid = WhoIs(SwitchAddress);
   int pathfinder_tid = WhoIs(PathFinderAddress);
   SystemState = (TrainSystemState){
-      .exited = false,
       .system_tid = system_tid,
       .clock_tid = clock_tid,
       .switch_tid = switch_tid,
@@ -129,9 +128,4 @@ void trainsys_init_track(TrackSwitchPlans track_plan)
   } else {
     init_trackb(SystemState.track);
   }*/
-}
-
-bool trainsys_exited()
-{
-  return SystemState.exited;
 }

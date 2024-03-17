@@ -18,7 +18,6 @@ typedef struct
   int clock_tid;
   int switch_tid;
   int pathfinder_tid;
-  bool exited;
   uint32_t moving_train;
 } TrainSystemState;
 
@@ -26,6 +25,5 @@ void trainsys_init();
 void trainsys_init_track(TrackSwitchPlans track_plan);
 void trainsys_execute_command(CommandResult cres);
 uint32_t trainsys_get_moving_train();
-bool trainsys_exited();
 
 #endif // __TRAINSYS_H__

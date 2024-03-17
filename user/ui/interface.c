@@ -15,10 +15,6 @@ void idlePerformanceTask()
   for (;;)
   {
     Delay(clockServer, 500);
-    if (trainsys_exited())
-    {
-      break;
-    }
     render_perf_stats(idle_timer_percentage());
   }
 }
