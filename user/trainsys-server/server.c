@@ -92,7 +92,7 @@ void TrainSystemServer()
         Reply(from_tid, (char *)&response, sizeof(TrainSystemResponse));
         break;
       } case SYSTEM_SENSOR_HIT: {
-        LOG_INFO("[TrainSystemServer INFO]: sensor hit %d -> update train", request.sensor_hit);
+        render_command("[TrainSystemServer INFO]: sensor hit %d -> update train", request.sensor_hit);
         
         response = (TrainSystemResponse){
           .type = SYSTEM_SENSOR_HIT,
@@ -104,10 +104,12 @@ void TrainSystemServer()
 
         int sensor_hit = request.sensor_hit;
         int train = -1;
+        int train_idx = -1;
         for (int i = 0; i < SENSOR_DEPTH; i++) {
           for (int j = 0; j < TRAIN_DATA_TRAIN_COUNT; j++) {
             if (train_next_sensors[j][i] == request.sensor_hit) {
               train = TRAIN_DATA_TRAINS[j];
+              train_idx = j;
               break;
             }
           }
@@ -136,28 +138,30 @@ void TrainSystemServer()
         bool is_unknown = false;
         int dist_to_next = 0;
 
-        int next_sensor_id = find_next_sensor(cur_node_idx, switch_server, &is_unknown, &dist_to_next);
+        int next_sensor_node_idx = find_next_sensor(cur_node_idx, switch_server, &is_unknown, &dist_to_next);
         if (is_unknown) {
           render_command("[TrainSystem Sensor Hit ERROR]: no next sensor found");
-          train_next_sensors[train][0] = -1;
-          train_next_sensors[train][1] = -1;
+          train_next_sensors[train_idx][0] = -1;
+          train_next_sensors[train_idx][1] = -1;
           Reply(from_tid, (char *)&response, sizeof(TrainSystemResponse));
           break;
         } else {
-          train_next_sensors[train][0] = next_sensor_id;
+          train_next_sensors[train_idx][0] = traintrack[next_sensor_node_idx].num;
         }
-        response.next_sensor_id = next_sensor_id;
+
+        response.next_sensor_id =  traintrack[next_sensor_node_idx].num;
         response.train = train;
         response.train_state = train_states[train];
         response.dist_to_next = dist_to_next;
 
-        int next_next_sensor_id = find_next_sensor(next_sensor_id, switch_server, &is_unknown, &dist_to_next);
+        int next_next_sensor_id = find_next_sensor(next_sensor_node_idx, switch_server, &is_unknown, &dist_to_next);
         if (is_unknown) {
-          train_next_sensors[train][1] = -1;
+          train_next_sensors[train_idx][1] = -1;
           render_command("[TrainSystem Sensor Hit ERROR]: no next next sensor found");
         } else {
-          train_next_sensors[train][1] = next_next_sensor_id;
+          train_next_sensors[train_idx][1] = traintrack[next_next_sensor_id].num;
         }
+
         Reply(from_tid, (char *)&response, sizeof(TrainSystemResponse));
         break;
       }
