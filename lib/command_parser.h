@@ -16,6 +16,7 @@ typedef struct
     SWITCH_COMMAND,
     LIGHTS_COMMAND,
     PATH_COMMAND,
+    RESET_TRACK,
     QUIT_COMMAND,
     ERROR_COMMAND,
   } command_type;

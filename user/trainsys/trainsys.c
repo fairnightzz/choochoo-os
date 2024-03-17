@@ -66,7 +66,7 @@ void trainsys_execute_command(CommandResult cres)
   }
   case QUIT_COMMAND:
   {
-    Reboot();
+    reboot();
     break;
   }
   case PATH_COMMAND:
