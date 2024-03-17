@@ -25,6 +25,10 @@ string cres_to_string(CommandResult cres)
   {
     return to_string("[q]: Exiting...");
   }
+  case RESET_TRACK_COMMAND:
+  {
+    return to_string("[rt]: Resetting track");
+  }
   case LIGHTS_COMMAND:
   {
     uint32_t train = cres.command_args.light_args.train;

@@ -86,9 +86,12 @@ void SwitchServer()
       SwitchMode mode = request.mode;
       int switch_index = get_switch_index(switch_id);
 
-      switch_states[switch_index] = mode;
-      io_marklin_set_switch(marklin_io, switch_id, mode);
-      unblock_on_switch(requests_queue, switch_id, mode);
+      if (switch_index != -1 && switch_states[switch_index] != mode)
+      {
+        switch_states[switch_index] = mode;
+        io_marklin_set_switch(marklin_io, switch_id, mode);
+        unblock_on_switch(requests_queue, switch_id, mode);
+      }
 
       // Handle Special Center Case
       if (switch_id == 153 || switch_id == 154)

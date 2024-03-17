@@ -69,6 +69,11 @@ void trainsys_execute_command(CommandResult cres)
     reboot();
     break;
   }
+  case RESET_TRACK_COMMAND:
+  {
+    trainsys_init_track(TRACK_A);
+    break;
+  }
   case PATH_COMMAND:
   {
     uint32_t train = cres.command_args.path_args.train;
