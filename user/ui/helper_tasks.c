@@ -93,6 +93,8 @@ void promptTask()
   string prompt = new_string();
 
   trainsys_init_track(TRACK_A);
+  trainsys_init_trains();
+
   for (int i = 0; i < SWITCH_COUNT; i++)
   {
     int switch_id = i + 1;

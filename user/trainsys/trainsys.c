@@ -6,6 +6,7 @@
 #include "user/trainsys-server/interface.h"
 #include "user/switch-server/interface.h"
 #include "user/pathfinder-server/interface.h"
+#include "user/traindata/train_data.h"
 
 static TrainSystemState SystemState;
 
@@ -103,4 +104,12 @@ void trainsys_init_track(TrackSwitchPlans track_plan)
   } else {
     init_trackb(SystemState.track);
   }*/
+}
+
+void trainsys_init_trains()
+{
+  for (int i = 0; i < TRAIN_DATA_TRAIN_COUNT; i++)
+  {
+    TrainSystemSetSpeed(SystemState.system_tid, TRAIN_DATA_TRAINS[i], 0);
+  }
 }

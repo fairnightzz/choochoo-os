@@ -22,6 +22,7 @@ typedef struct
 
 void trainsys_init();
 void trainsys_init_track(TrackSwitchPlans track_plan);
+void trainsys_init_trains();
 void trainsys_execute_command(CommandResult cres);
 
 #endif // __TRAINSYS_H__
