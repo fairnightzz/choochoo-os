@@ -5,6 +5,7 @@
 #include "user/io-server/interface.h"
 #include "user/nameserver.h"
 #include "user/clock-server/interface.h"
+#include "user/traindata/train_data.h"
 
 #define ANSI_CLEAR "\033[2J"
 #define ANSI_HIDE "\033[?25l"
@@ -96,7 +97,12 @@ void render_init()
   uart_printf(CONSOLE, "│─[train-system]────────────────────────────────────────────────────────────────┤\r\n");
   uart_printf(CONSOLE, "│   Train #  │  Current Sensor  │  Next Sensor  │  Time Err.  │  Distance Err.  │\r\n");
   uart_printf(CONSOLE, "│───────────────────────────────────────────────────────────────────────────────│\r\n");
-  uart_printf(CONSOLE, "│                                                       ticks            mm     │\r\n");
+  uart_printf(CONSOLE, "│     02                                                ticks            mm     │\r\n");
+  uart_printf(CONSOLE, "│     47                                                ticks            mm     │\r\n");
+  uart_printf(CONSOLE, "│     54                                                ticks            mm     │\r\n");
+  uart_printf(CONSOLE, "│     55                                                ticks            mm     │\r\n");
+  uart_printf(CONSOLE, "│     58                                                ticks            mm     │\r\n");
+  uart_printf(CONSOLE, "│     77                                                ticks            mm     │\r\n");
   uart_printf(CONSOLE, "╰───────────────────────────────────────────────────────────────────────────────╯\r\n");
 
   UIState = (TermUIState){
@@ -173,19 +179,22 @@ void render_train_system_train(int train)
   print("\033[%u;%uH%s", 26 + 15, 6, trainString.data);
 }
 
-void render_predict_current_sensor(int sensor_id)
+void render_predict_current_sensor(int train, int sensor_id)
 {
+  int train_index = get_train_index(train);
   string sensorString = get_sensor_string(sensor_id);
-  print("\033[%u;%uH%s", 26 + 15, 22, sensorString.data);
+  print("\033[%u;%uH%s", 26 + 15 + train_index, 22, sensorString.data);
 }
-void render_predict_next_sensor(int sensor_id)
+void render_predict_next_sensor(int train, int sensor_id)
 {
+  int train_index = get_train_index(train);
   string sensorString = get_sensor_string(sensor_id);
-  print("\033[%u;%uH%s", 26 + 15, 39, sensorString.data);
+  print("\033[%u;%uH%s", 26 + 15 + train_index, 39, sensorString.data);
 }
-void render_predict_error(int terr, int derr)
+void render_predict_error(int train, int terr, int derr)
 {
 
+  int train_index = get_train_index(train);
   char tstring[10];
   i2a(terr, tstring);
   char dstring[10];
@@ -196,8 +205,8 @@ void render_predict_error(int terr, int derr)
 
   // print("\033[%u;%uH     ", 26 + 15, 51, terr);
   // print("\033[%u;%uH     ", 26 + 15, 68, derr);
-  print("\033[%u;%uH   %d ticks", 26 + 15, 53 - toffset.length, terr);
-  print("\033[%u;%uH   %d mm", 26 + 15, 70 - doffset.length, derr);
+  print("\033[%u;%uH   %d ticks", 26 + 15 + train_index, 53 - toffset.length, terr);
+  print("\033[%u;%uH   %d mm", 26 + 15 + train_index, 70 - doffset.length, derr);
 }
 
 void render_debug_log(int message)

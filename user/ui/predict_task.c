@@ -16,14 +16,14 @@ void predictTask()
 
   int clock_server = WhoIs(ClockAddress);
   int sensor_server = WhoIs(SensorAddress);
-  int switch_server = WhoIs(SwitchAddress);
+  // int switch_server = WhoIs(SwitchAddress);
   int trainsys_server = WhoIs(TrainSystemAddress);
 
   HashMap *NodeIndexMap = hashmap_new();
   init_tracka(traintrack, NodeIndexMap);
 
-  int last_sensor_time = -1;
-  int predicted_sensor_time = -1;
+  int last_sensor_time[TRAIN_DATA_TRAIN_COUNT] = {0};
+  int predicted_sensor_time[TRAIN_DATA_TRAIN_COUNT] = {0};
 
   Delay(clock_server, 30);
 
@@ -36,86 +36,43 @@ void predictTask()
       continue;
     }
 
-    char letter[2] = {'A' + sensor_id / 16, '\0'};
-    string sensor_str = string_format("%s%d", letter, (sensor_id % 16) + 1);
-    render_predict_current_sensor(sensor_id);
+    // Ask TrainSysServer for train that this sensor pertains to
 
-    bool success;
-    int cur_node_idx = (int)(intptr_t)hashmap_get(NodeIndexMap, sensor_str.data, &success);
-    if (!success)
+    TrainSystemResponse response = TrainSystemSensorToTrain(trainsys_server, sensor_id);
+    int train = response.train;
+    int train_speed = response.train_state & TRAIN_SPEED_MASK;
+    int next_sensor_id = response.next_sensor_id;
+    int dist_to_next = response.dist_to_next;
+
+    if (train != -1)
     {
-      render_command("[predictTask ERROR]: error on getting sensor from hashmap: %s", sensor_str.data);
-      continue;
+      render_predict_current_sensor(train, sensor_id);
     }
 
-    bool is_unknown = false;
-    int dist_to_next = 0;
-
-    do
+    if (next_sensor_id != -1)
     {
-      if (traintrack[cur_node_idx].type == NODE_EXIT || traintrack[cur_node_idx].type == NODE_NONE)
-      {
-        is_unknown = true;
-        break;
-      }
-
-      if (traintrack[cur_node_idx].type == NODE_BRANCH)
-      {
-        SwitchMode sw_mode = SwitchGet(switch_server, traintrack[cur_node_idx].num);
-        if (sw_mode == SWITCH_MODE_UNKNOWN)
-        {
-          is_unknown = true;
-          break;
-        }
-        else if (sw_mode == SWITCH_MODE_C)
-        {
-          dist_to_next += traintrack[cur_node_idx].edge[DIR_CURVED].dist;
-          cur_node_idx = traintrack[cur_node_idx].edge[DIR_CURVED].dest - traintrack;
-        }
-        else
-        {
-          dist_to_next += traintrack[cur_node_idx].edge[DIR_STRAIGHT].dist;
-          cur_node_idx = traintrack[cur_node_idx].edge[DIR_STRAIGHT].dest - traintrack;
-        }
-      }
-      else
-      {
-        dist_to_next += traintrack[cur_node_idx].edge[DIR_AHEAD].dist;
-        cur_node_idx = traintrack[cur_node_idx].edge[DIR_AHEAD].dest - traintrack;
-      }
-    } while (traintrack[cur_node_idx].type != NODE_SENSOR);
-
-    if (!is_unknown)
-    {
-      render_predict_next_sensor(traintrack[cur_node_idx].num);
+      render_predict_next_sensor(train, next_sensor_id);
     }
     else
     {
       continue;
     }
-    int train = trainsys_get_moving_train();
-    if (train == -1)
-    {
-      continue;
-    }
-    int train_speed = TrainSystemGetTrainState(trainsys_server, train) & TRAIN_SPEED_MASK;
-    if (get_train_index(train) == -1 || get_speed_index(train_speed) == -1)
+
+    int train_index = get_train_index(train);
+    if (train_index == -1 || get_speed_index(train_speed) == -1)
     {
       continue;
     }
     int train_vel = train_data_vel(train, train_speed);
 
     int curr_time = Time(clock_server);
-    int elapsed = curr_time - last_sensor_time;
-    last_sensor_time = curr_time;
+    int elapsed = curr_time - last_sensor_time[train_index];
+    last_sensor_time[train_index] = curr_time;
 
-    if (predicted_sensor_time != -1)
-    {
-      int t_err = elapsed - predicted_sensor_time;
-      int d_err = (t_err * train_vel) / 100;
-      render_predict_error(t_err, d_err);
-    }
+    int t_err = elapsed - predicted_sensor_time[train_index];
+    int d_err = (t_err * train_vel) / 100;
+    render_predict_error(train, t_err, d_err);
 
-    predicted_sensor_time = (dist_to_next / train_vel) * 100; // in ticks
+    predicted_sensor_time[train_index] = (dist_to_next / train_vel) * 100; // in ticks
   }
 }

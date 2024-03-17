@@ -9,16 +9,6 @@
 
 static TrainSystemState SystemState;
 
-uint32_t trainsys_get_moving_train()
-{
-  return SystemState.moving_train;
-}
-
-void trainsys_set_moving_train(int train)
-{
-  SystemState.moving_train = train;
-}
-
 void trainsys_execute_command(CommandResult cres)
 {
   switch (cres.command_type)
@@ -27,15 +17,6 @@ void trainsys_execute_command(CommandResult cres)
   {
     uint32_t train = cres.command_args.train_speed_args.train;
     uint32_t speed = cres.command_args.train_speed_args.speed;
-    if (speed > 0)
-    {
-      render_train_system_train(train);
-      trainsys_set_moving_train(train);
-    }
-    else if (train == trainsys_get_moving_train())
-    {
-      trainsys_set_moving_train(-1);
-    }
     TrainSystemSetSpeed(SystemState.system_tid, train, speed);
     break;
   }
@@ -81,16 +62,6 @@ void trainsys_execute_command(CommandResult cres)
     string dest_node = cres.command_args.path_args.dest_node;
     int32_t offset = cres.command_args.path_args.offset;
 
-    if (speed > 0)
-    {
-      render_train_system_train(train);
-      trainsys_set_moving_train(train);
-    }
-    else if (train == trainsys_get_moving_train())
-    {
-      trainsys_set_moving_train(-1);
-    }
-
     FindPath(SystemState.pathfinder_tid, train, speed, offset, dest_node.data);
     break;
   }
@@ -110,7 +81,6 @@ void trainsys_init()
       .clock_tid = clock_tid,
       .switch_tid = switch_tid,
       .pathfinder_tid = pathfinder_tid,
-      .moving_train = -1,
   };
 }
 
