@@ -9,8 +9,6 @@
 #include "user/ui/render.h"
 #include "user/traindata/train_data.h"
 
-track_node traintrack[TRACK_MAX];
-
 void predictTask()
 {
 
@@ -18,9 +16,6 @@ void predictTask()
   int sensor_server = WhoIs(SensorAddress);
   // int switch_server = WhoIs(SwitchAddress);
   int trainsys_server = WhoIs(TrainSystemAddress);
-
-  HashMap *NodeIndexMap = hashmap_new();
-  init_tracka(traintrack, NodeIndexMap);
 
   int last_sensor_time[TRAIN_DATA_TRAIN_COUNT] = {0};
   int predicted_sensor_time[TRAIN_DATA_TRAIN_COUNT] = {0};
