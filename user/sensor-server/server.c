@@ -9,6 +9,9 @@
 #define BYTE_PER_UNIT 2
 #define BYTE_COUNT 10
 
+BQueue tid_sensor_queue[128];
+bool tid_registered[128];
+
 // task for querying sensor states
 void sensorNotifierTask()
 {
@@ -74,8 +77,13 @@ void SensorServer()
   Create(2, &sensorNotifierTask);
   // Create(5, &sensorNotiferMonitorTask);
 
+  for (int i = 0; i < 128; i++)
+  {
+    tid_sensor_queue[i] = new_byte_queue();
+    tid_registered[i] = false;
+  }
+
   LList *sensor_requests = llist_new();
-  // BQueue sensor_triggered_queue = new_byte_queue();
 
   SensorRequest request;
   SensorResponse response;
@@ -98,25 +106,46 @@ void SensorServer()
       int *triggered = request.ids_triggered;
       for (; *triggered != -1; ++triggered)
       {
-        // push sensor to the buffer
-        // push(&sensor_triggered_queue, *triggered);
-        // unblock all tasks that are waiting
-        LListIter *it = llist_iter(sensor_requests);
-        while (it->current)
+        // char letter[2] = {'A' + *triggered / 16, '\0'};
+        // string sensor_str = string_format("%s%d", letter, (*triggered % 16) + 1);
+        // render_command("Sensor triggered: %s", sensor_str.data);
+        for (int i = 0; i < 128; i++)
         {
-          SensorBufferRequest *sensor_buffer_req = (SensorBufferRequest *)llist_next(it);
-          if (sensor_buffer_req->sensor_id == *triggered || sensor_buffer_req->sensor_id == -1)
+          if (tid_registered[i])
           {
-            SensorResponse reply_buf = (SensorResponse){
-                .type = SENSOR_WAITING,
-                .triggered = *triggered};
-            Reply(sensor_buffer_req->tid, (char *)&reply_buf, sizeof(SensorResponse));
-            llist_remove_item(sensor_requests, sensor_buffer_req);
-            free(sensor_buffer_req, SENSOR_BUFFER_REQUEST);
+            push(&tid_sensor_queue[i], *triggered);
           }
         }
       }
 
+      LListIter *it = llist_iter(sensor_requests);
+      while (it->current)
+      {
+        SensorBufferRequest *sensor_buffer_req = (SensorBufferRequest *)llist_next(it);
+
+        int triggered_sensor = -1;
+        bool found = false;
+        while (!isEmpty(&tid_sensor_queue[sensor_buffer_req->tid]))
+        {
+          triggered_sensor = pop(&tid_sensor_queue[sensor_buffer_req->tid]);
+          if (sensor_buffer_req->sensor_id == -1 || sensor_buffer_req->sensor_id == triggered_sensor)
+          {
+            found = true;
+            break;
+          }
+        }
+
+        if (found)
+        {
+          SensorResponse reply_buf = (SensorResponse){
+              .type = SENSOR_WAITING,
+              .triggered = triggered_sensor,
+          };
+          Reply(sensor_buffer_req->tid, (char *)&reply_buf, sizeof(SensorResponse));
+          llist_remove_item(sensor_requests, sensor_buffer_req);
+          free(sensor_buffer_req, SENSOR_BUFFER_REQUEST);
+        }
+      }
       // response to notifier - could do this at the end?
       response = (SensorResponse){
           .type = SENSOR_TRIGGERED};
@@ -125,13 +154,39 @@ void SensorServer()
     }
     case SENSOR_WAITING:
     {
-      SensorBufferRequest *request_buffer = alloc(SENSOR_BUFFER_REQUEST);
-      *request_buffer = (SensorBufferRequest){
-          .tid = from_tid,
-          .sensor_id = request.id_wait,
-      };
-      // buffer the wait response
-      llist_append(sensor_requests, request_buffer);
+      // A1, A2, A3, A4
+      int triggered_sensor = -1;
+      bool found = false;
+      while (!isEmpty(&tid_sensor_queue[from_tid]))
+      {
+        triggered_sensor = pop(&tid_sensor_queue[from_tid]);
+        if (request.id_wait == -1 || request.id_wait == triggered_sensor)
+        {
+          found = true;
+          break;
+        }
+      }
+
+      if (!found)
+      {
+        tid_registered[from_tid] = true;
+        SensorBufferRequest *request_buffer = alloc(SENSOR_BUFFER_REQUEST);
+        *request_buffer = (SensorBufferRequest){
+            .tid = from_tid,
+            .sensor_id = request.id_wait,
+        };
+
+        // buffer the wait response
+        llist_append(sensor_requests, request_buffer);
+      }
+      else
+      {
+        SensorResponse reply_buf = (SensorResponse){
+            .type = SENSOR_WAITING,
+            .triggered = triggered_sensor,
+        };
+        Reply(from_tid, (char *)&reply_buf, sizeof(SensorResponse));
+      }
 
       break;
     }
