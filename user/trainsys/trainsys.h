@@ -19,7 +19,6 @@ typedef struct
   int clock_tid;
   int switch_tid;
   int pathfinder_tid;
-  bool trainReverseState[TRAIN_DATA_TRAIN_COUNT];
 } TrainSystemState;
 
 void trainsys_init();

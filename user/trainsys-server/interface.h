@@ -18,7 +18,11 @@ typedef enum
   SYSTEM_SET_LIGHTS,
   SYSTEM_GET_TRAIN,
   SYSTEM_SENSOR_HIT,
-  SYSTEM_SWITCH_CHANGE
+  SYSTEM_SWITCH_CHANGE,
+  SYSTEM_REVERSE,
+  SYSTEM_REVERSE_REVERSE, // for the reverse task
+  SYSTEM_REVERSE_RESTART, // for the reverse restart task
+  SYSTEM_GET_NEXT_TRAIN_SENSOR,
 } TrainSystemRequestType;
 
 typedef struct
@@ -38,11 +42,15 @@ typedef struct
   int train;
   int next_sensor_id;
   int dist_to_next;
+  bool was_already_reversing;
 } TrainSystemResponse;
 
 int TrainSystemSetSpeed(int system_server, int train, int speed);
 int TrainSystemSetLights(int system_server, int train, bool status);
 TrainSystemResponse TrainSystemSensorToTrain(int system_server, int sensor_id);
 uint8_t TrainSystemGetTrainState(int system_server, int train);
-void TrainSystemSwitchToTrain(int system_sensor, int switch_id);
+void TrainSystemSwitchToTrain(int system_server, int switch_id);
+int TrainSystemReverse(int system_server, int train);
+int TrainSystemGetNextTrainSensor(int system_server, int train);
+
 #endif // __TRAIN_SYSTEM_INTERFACE_H__

@@ -6,10 +6,56 @@
 #include "user/traintrack/track_data.h"
 #include "user/switch-server/interface.h"
 #include "user/ui/render.h"
+#include "user/clock-server/interface.h"
 
 track_node traintrack[TRACK_MAX];
 
 #define SENSOR_DEPTH 2
+
+typedef struct
+{
+  int train;
+  int speed;
+} ReverseRequest;
+
+typedef struct
+{
+  bool success;
+} ReverseResponse;
+
+void ReverseTask()
+{
+  int clock_server = WhoIs(ClockAddress);
+  ReverseRequest request;
+  int requestTid;
+  Receive(&requestTid, (char *)&request, sizeof(ReverseRequest));
+  ReverseResponse response = (ReverseResponse){
+      .success = true,
+  };
+  Reply(requestTid, (char *)&response, sizeof(ReverseResponse));
+
+  // TrainSystemSetSpeed(SystemState.system_tid, request.train, SPEED_STOP);
+  // Delay(SystemState.clock_tid, REV_STOP_DELAY);
+  // TrainSystemSetSpeed(SystemState.system_tid, request.train, SPEED_REVERSE);
+  // Delay(SystemState.clock_tid, REV_DELAY);
+  // TrainSystemSetSpeed(SystemState.system_tid, request.train, request.train_speed);
+  // SystemState.trainReverseState[get_train_index(request.train)] = false;
+
+  TrainSystemResponse trainsys_response;
+  TrainSystemRequest trainsys_request;
+
+  Delay(clock_server, train_data_stop_time(request.train, request.speed) / 10 + 100);
+  trainsys_request = (TrainSystemRequest){
+      .type = SYSTEM_REVERSE_REVERSE,
+  };
+  Send(MyParentTid(), (const char *)&trainsys_request, sizeof(TrainSystemRequest), (char *)&trainsys_response, sizeof(TrainSystemResponse));
+
+  Delay(clock_server, 10); // TODO arbitrary delay
+  trainsys_request = (TrainSystemRequest){
+      .type = SYSTEM_REVERSE_RESTART,
+  };
+  Send(MyParentTid(), (const char *)&trainsys_request, sizeof(TrainSystemRequest), (char *)&trainsys_response, sizeof(TrainSystemResponse));
+}
 
 int find_next_sensor(int cur_node_idx, int switch_server, bool *is_unknown, int *dist_to_next)
 {
@@ -59,6 +105,8 @@ void TrainSystemServer()
   init_tracka(traintrack, NodeIndexMap);
 
   uint8_t train_states[TRAINS_COUNT] = {0};
+  bool reversed[TRAINS_COUNT] = {0};
+  int reverse_tasks[TRAINS_COUNT] = {0}; // 0 means no task is reversing
   int train_next_sensors[TRAIN_DATA_TRAIN_COUNT][SENSOR_DEPTH] = {
       {0, 44},  // 2   A1 -> C13
       {12, 44}, // 47  A13 -> C13
@@ -68,12 +116,12 @@ void TrainSystemServer()
       {35, 37}  // 77  C4 -> C6
   };
   int train_positions[TRAIN_DATA_TRAIN_COUNT] = {
-    1,
-    13,
-    22,
-    26,
-    24,
-    34,
+      1,
+      13,
+      22,
+      26,
+      24,
+      34,
   };
 
   TrainSystemRequest request;
@@ -102,9 +150,8 @@ void TrainSystemServer()
     }
     case SYSTEM_SWITCH_CHANGE:
     {
-      response = (TrainSystemResponse) {
-        .type = SYSTEM_SWITCH_CHANGE
-      };
+      response = (TrainSystemResponse){
+          .type = SYSTEM_SWITCH_CHANGE};
       int switch_id = request.switch_triggered;
       Reply(from_tid, (char *)&response, sizeof(TrainSystemResponse));
 
@@ -113,23 +160,25 @@ void TrainSystemServer()
       int switch_zone_id = zone_getid_by_switch_id(switch_id);
       for (int i = 0; i < TRAIN_DATA_TRAIN_COUNT; i++)
       {
-        if (zone_getid_by_sensor_id(train_next_sensors[i][0]) == switch_zone_id) {
+        if (zone_getid_by_sensor_id(train_next_sensors[i][0]) == switch_zone_id)
+        {
           train = TRAIN_DATA_TRAINS[i];
           train_idx = i;
         }
       }
-      if (train_idx != -1) {
-          bool is_unknown = false;
-          bool is_unknown2 = false;
-          int dist;
-          int current_next_sens = train_positions[train_idx];
-          int new_next_sens = find_next_sensor(current_next_sens, switch_server, &is_unknown, &dist);
-          int new_next_next_sens = find_next_sensor(new_next_sens, switch_server, &is_unknown2, &dist);
-          new_next_sens = is_unknown ? -1 : new_next_sens;
-          new_next_next_sens = is_unknown2 ? -1 : new_next_next_sens;
-          train_next_sensors[train_idx][0] = new_next_sens;
-          train_next_sensors[train_idx][1] = new_next_next_sens;
-          render_predict_next_sensor(train, new_next_sens);
+      if (train_idx != -1)
+      {
+        bool is_unknown = false;
+        bool is_unknown2 = false;
+        int dist;
+        int current_next_sens = train_positions[train_idx];
+        int new_next_sens = find_next_sensor(current_next_sens, switch_server, &is_unknown, &dist);
+        int new_next_next_sens = find_next_sensor(new_next_sens, switch_server, &is_unknown2, &dist);
+        new_next_sens = is_unknown ? -1 : new_next_sens;
+        new_next_next_sens = is_unknown2 ? -1 : new_next_next_sens;
+        train_next_sensors[train_idx][0] = new_next_sens;
+        train_next_sensors[train_idx][1] = new_next_next_sens;
+        render_predict_next_sensor(train, new_next_sens);
       }
       break;
     }
@@ -281,6 +330,121 @@ void TrainSystemServer()
           .type = SYSTEM_SET_SPEED,
           .train_state = train_states[train],
           .train = train};
+      Reply(from_tid, (char *)&response, sizeof(TrainSystemResponse));
+
+      break;
+    }
+
+    case SYSTEM_REVERSE:
+    {
+      int train = request.train;
+      int speed = train_states[train] & TRAIN_SPEED_MASK;
+
+      bool was_already_reversing;
+      if (reverse_tasks[train] != 0)
+      {
+        was_already_reversing = true;
+      }
+      else
+      {
+        was_already_reversing = false;
+        if (speed == 0)
+        {
+          uint8_t temp_state = train_states[train];
+          speed = 15;
+          temp_state = (temp_state & ~TRAIN_SPEED_MASK) | speed;
+          io_marklin_set_train(marklin_io, train, temp_state);
+        }
+        else
+        {
+          uint8_t temp_state = train_states[train];
+          temp_state = (temp_state & ~TRAIN_SPEED_MASK) | 0;
+          io_marklin_set_train(marklin_io, train, temp_state);
+          reverse_tasks[train] = Create(2, &ReverseTask);
+
+          ReverseResponse reverse_response;
+          ReverseRequest reverse_request = (ReverseRequest){
+              .train = train,
+              .speed = speed};
+          Send(reverse_tasks[train], (const char *)&reverse_request, sizeof(ReverseRequest), (char *)&reverse_response, sizeof(ReverseResponse));
+        }
+      }
+
+      response = (TrainSystemResponse){
+          .type = SYSTEM_REVERSE,
+          .was_already_reversing = was_already_reversing,
+      };
+      Reply(from_tid, (char *)&response, sizeof(TrainSystemResponse));
+
+      break;
+    }
+    case SYSTEM_REVERSE_REVERSE:
+    {
+      int train = -1;
+      for (int i = 0; i < TRAINS_COUNT; i++)
+      {
+        if (reverse_tasks[i] == from_tid)
+        {
+          train = i;
+          break;
+        }
+      }
+      if (train == -1)
+      {
+        LOG_ERROR("Couldn't find train associated with reverse task");
+      }
+
+      uint8_t temp_state = train_states[train];
+      int speed = 15;
+      temp_state = (temp_state & ~TRAIN_SPEED_MASK) | speed;
+      io_marklin_set_train(marklin_io, train, temp_state);
+
+      // set the train state to reversed
+      reversed[train] = !reversed[train];
+
+      response = (TrainSystemResponse){
+          .type = SYSTEM_REVERSE_REVERSE,
+      };
+      Reply(from_tid, (char *)&response, sizeof(TrainSystemResponse));
+
+      break;
+    }
+    case SYSTEM_REVERSE_RESTART:
+    {
+
+      int train = -1;
+      for (int i = 0; i < TRAINS_COUNT; i++)
+      {
+        if (reverse_tasks[i] == from_tid)
+        {
+          train = i;
+          break;
+        }
+      }
+      if (train == -1)
+      {
+        LOG_ERROR("Couldn't find train associated with reverse task");
+      }
+
+      io_marklin_set_train(marklin_io, train, train_states[train]);
+      reverse_tasks[train] = 0;
+
+      response = (TrainSystemResponse){
+          .type = SYSTEM_REVERSE_RESTART,
+      };
+      Reply(from_tid, (char *)&response, sizeof(TrainSystemResponse));
+
+      break;
+    }
+    case SYSTEM_GET_NEXT_TRAIN_SENSOR:
+    {
+
+      int train = request.train;
+      int next_sensor_id = train_next_sensors[train][0];
+      response = (TrainSystemResponse){
+          .type = SYSTEM_GET_NEXT_TRAIN_SENSOR,
+          .next_sensor_id = next_sensor_id,
+      };
       Reply(from_tid, (char *)&response, sizeof(TrainSystemResponse));
 
       break;

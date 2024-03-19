@@ -14,17 +14,21 @@
 #define INF 2147483647
 #define NONE 2147483646
 
-void setSwitchesInZone(int switch_server, track_node *track, int zone, SwitchMode* desired_switches) {
-  for (int i = 0; i < SWITCH_COUNT; i++) {
+void setSwitchesInZone(int switch_server, track_node *track, int zone, SwitchMode *desired_switches)
+{
+  for (int i = 0; i < SWITCH_COUNT; i++)
+  {
     int switch_idx = 80 + i * 2;
-    if (track[switch_idx].zone == zone && desired_switches[i] != SWITCH_MODE_UNKNOWN) {
+    if (track[switch_idx].zone == zone && desired_switches[i] != SWITCH_MODE_UNKNOWN)
+    {
       int switch_id = (0 <= i && i <= 17) ? i + 1 : i + 135;
       SwitchSet(switch_server, switch_id, desired_switches[i]);
     }
   }
 }
 
-void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_count, int train, int speed, int offset) {
+void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_count, int train, int speed, int offset)
+{
   int clock_server = WhoIs(ClockAddress);
   int sensor_server = WhoIs(SensorAddress);
   int switch_server = WhoIs(SwitchAddress);
@@ -36,41 +40,51 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
 
   track_node *waiting_sensor;
   int train_speed = speed;
-  for (int idx = get_speed_index(speed); idx >= 0; --idx) {
+  for (int idx = get_speed_index(speed); idx >= 0; --idx)
+  {
     train_speed = TRAIN_DATA_SPEEDS[idx];
     stopping_distance = train_data_stop_dist(train, train_speed) - offset;
     train_vel = train_data_vel(train, train_speed);
 
     waiting_sensor = 0;
     int last_edge_idx = (edge_count > 1) ? edge_count - 1 : 0;
-    while (last_edge_idx >= 0) {
+    while (last_edge_idx >= 0)
+    {
       track_edge *edge = simple_path[last_edge_idx];
       stopping_distance -= edge->dist;
-      if (stopping_distance <= 0 && edge->src->type == NODE_SENSOR) {
+      if (stopping_distance <= 0 && edge->src->type == NODE_SENSOR)
+      {
         waiting_sensor = edge->src;
         break;
       }
       last_edge_idx -= 1;
     }
 
-    if (waiting_sensor != 0 && simple_path[0]->src != waiting_sensor) {
+    if (waiting_sensor != 0 && simple_path[0]->src != waiting_sensor)
+    {
       break;
     }
   }
 
   // compute desired switches
   SwitchMode desired_switch_modes[SWITCH_COUNT];
-  for (int i = 0; i < SWITCH_COUNT; i++) {
+  for (int i = 0; i < SWITCH_COUNT; i++)
+  {
     desired_switch_modes[i] = SWITCH_MODE_UNKNOWN;
   }
 
-  for (int i = 0; i < edge_count; i++) {
+  for (int i = 0; i < edge_count; i++)
+  {
     track_edge *edge = simple_path[i];
-    if (edge->src->type == NODE_BRANCH) {
+    if (edge->src->type == NODE_BRANCH)
+    {
       int switch_num = edge->src->num;
-      if (track_edge_cmp(edge->src->edge[DIR_STRAIGHT], *edge)) {
+      if (track_edge_cmp(edge->src->edge[DIR_STRAIGHT], *edge))
+      {
         desired_switch_modes[switch_num] = SWITCH_MODE_S;
-      } else {
+      }
+      else
+      {
         desired_switch_modes[switch_num] = SWITCH_MODE_C;
       }
     }
@@ -81,26 +95,33 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
   int my_zone = first_edge->src->reverse->zone;
   int next_zone = track_next_sensor(switch_server, first_edge->src)->reverse->zone;
   int immediate_zones[2] = {my_zone, next_zone};
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++)
+  {
     int zone = immediate_zones[i];
     setSwitchesInZone(switch_server, track, zone, desired_switch_modes);
   }
 
-  if (waiting_sensor == 0 || simple_path[0]->src == waiting_sensor) {
+  if (waiting_sensor == 0 || simple_path[0]->src == waiting_sensor)
+  {
     int distance_to_dest = 0;
-    for (int i = 0; i < edge_count; ++i) {
-        track_edge* edge = simple_path[i];
-        distance_to_dest += edge->dist;
+    for (int i = 0; i < edge_count; ++i)
+    {
+      track_edge *edge = simple_path[i];
+      distance_to_dest += edge->dist;
     }
     TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED);
     Delay(clock_server, train_data_short_move_time(train, distance_to_dest) / 10);
     TrainSystemSetSpeed(trainsys_server, train, 0);
     Delay(clock_server, train_data_stop_time(train, TRAIN_DATA_SHORT_MOVE_SPEED) / 10 + 100);
-  } else {
+  }
+  else
+  {
     TrainSystemSetSpeed(trainsys_server, train, train_speed);
-    for (int i = 1; i < edge_count; i++) {
+    for (int i = 1; i < edge_count; i++)
+    {
       track_edge *edge = simple_path[edge_count];
-      if (edge->src->type == NODE_SENSOR) {
+      if (edge->src->type == NODE_SENSOR)
+      {
         int new_pos = WaitOnSensor(sensor_server, edge->src->num);
         track_node *node = track + new_pos;
         track_node *next_node = track_next_sensor(switch_server, node);
@@ -108,15 +129,17 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
         int next_zone = next_node->reverse->zone;
         setSwitchesInZone(switch_server, track, next_zone, desired_switch_modes);
 
-        if (node->zone != -1) {
+        if (node->zone != -1)
+        {
           zone_unreserve(reserve_server, train, node->zone);
         }
 
-        if (edge->src->num == waiting_sensor->num) break;
+        if (edge->src->num == waiting_sensor->num)
+          break;
       }
     }
-  
-    Delay(clock_server, distance_from_sensor*100/train_vel / 10);
+
+    Delay(clock_server, distance_from_sensor * 100 / train_vel / 10);
     TrainSystemSetSpeed(trainsys_server, train, 0);
     Delay(clock_server, train_data_stop_time(train, TRAIN_DATA_SHORT_MOVE_SPEED) / 10 + 100);
   }
@@ -127,57 +150,66 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
 }
 void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path, int edge_count, int train, int speed, int offset)
 {
-    // no work to do
-    if (path[0] == 0) return;
+  // no work to do
+  if (path[0] == 0)
+    return;
 
-    // break path into simple paths (no reversals)
-    track_edge * simple_path[TRACK_MAX + 1] = {0};
-    int sind = 0;
-    for (int i = 0; i < edge_count; ++i) {
+  // break path into simple paths (no reversals)
+  track_edge *simple_path[TRACK_MAX + 1] = {0};
+  int sind = 0;
+  for (int i = 0; i < edge_count; ++i)
+  {
 
-        track_edge* cur_edge = path[i];
-        simple_path[sind] = cur_edge;
-        sind += 1;
+    track_edge *cur_edge = path[i];
+    simple_path[sind] = cur_edge;
+    sind += 1;
 
-        // check for reversal
-        if (cur_edge->type == EDGE_REVERSE) {
-            if (sind > 1) {
-                PatherSimplePath(track, simple_path, sind, train, speed, offset);
-            }
-            TrainSystemReverseTrain(trainsys_server, train);
-            for (int j = 0; j < sind; j++) {
-              simple_path[j] = 0;
-            }
-            sind = 0;
-        }
-    }
-
-    if (sind > 0) {
+    // check for reversal
+    if (cur_edge->type == EDGE_REVERSE)
+    {
+      if (sind > 1)
+      {
         PatherSimplePath(track, simple_path, sind, train, speed, offset);
+      }
+      TrainSystemReverse(trainsys_server, train);
+      for (int j = 0; j < sind; j++)
+      {
+        simple_path[j] = 0;
+      }
+      sind = 0;
     }
+  }
+
+  if (sind > 0)
+  {
+    PatherSimplePath(track, simple_path, sind, train, speed, offset);
+  }
 }
 
-void PartialPathFinderTask() {
+void PartialPathFinderTask()
+{
   int from_tid;
   PathFinderResponse response;
   PartialPathFinderRequest request;
   int req_len = Receive(&from_tid, (char *)&request, sizeof(PartialPathFinderRequest));
 
-  if (req_len < 0) {
+  if (req_len < 0)
+  {
     LOG_WARN("[PartialPathFinderTask] error on receive");
-    response = (PathFinderResponse) { .success = false };
+    response = (PathFinderResponse){.success = false};
     Reply(from_tid, (char *)&response, sizeof(PathFinderResponse));
     Exit();
     return;
   }
 
   PatherComplexPath(request.trainsys_server, request.track, request.path, request.edge_count, request.train, request.speed, request.offset);
-  response = (PathFinderResponse) { .success = true };
+  response = (PathFinderResponse){.success = true};
   Reply(from_tid, (char *)&response, sizeof(PathFinderResponse));
   Exit();
 }
 
-void PathFinderTask() {
+void PathFinderTask()
+{
   int trainsys_server = WhoIs(TrainSystemAddress);
   int reserve_server = WhoIs(ZoneAddress);
 
@@ -187,15 +219,16 @@ void PathFinderTask() {
   PathFinderResponse response;
   int req_len = Receive(&from_tid, (char *)&request, sizeof(PathFinderRequest));
 
-  if (req_len < 0) {
+  if (req_len < 0)
+  {
     LOG_WARN("[PathFinderTask]: error when receiving");
-    response = (PathFinderResponse){ .success = false };
+    response = (PathFinderResponse){.success = false};
     Reply(from_tid, (char *)&response, sizeof(PathFinderResponse));
     Exit();
     return;
   }
 
-  response = (PathFinderResponse) { .success = true };
+  response = (PathFinderResponse){.success = true};
   Reply(from_tid, (char *)&response, sizeof(PathFinderResponse));
 
   int src = request.source;
@@ -205,44 +238,50 @@ void PathFinderTask() {
   int offset = request.offset;
   bool allow_reversal = request.allow_reversal;
 
-  if (src == dest || src == track[dest].reverse - track) {
+  if (src == dest || src == track[dest].reverse - track)
+  {
     LOG_WARN("[PathFinderTask] Source Equals Destination");
     Exit();
   }
 
   track_edge *route_edges[TRACK_MAX + 1];
   int edge_count = do_djikstra(track, train, src, dest, allow_reversal, true, route_edges);
-  if (edge_count == -1) {
+  if (edge_count == -1)
+  {
     LOG_WARN("[PATHER] djikstra cannot find path, recompute a blocking path");
     edge_count = do_djikstra(track, train, src, dest, allow_reversal, false, route_edges);
   }
 
   track_edge *complex_path[TRACK_MAX + 1] = {0};
   int cind = 0;
-  for (int i = 0; i < edge_count; i++) {
+  for (int i = 0; i < edge_count; i++)
+  {
     track_edge *edge = route_edges[i];
     int zone = edge->dest->reverse->zone;
-    if (zone != -1) {
-      if (!zone_reserve(reserve_server, train, zone)) {
+    if (zone != -1)
+    {
+      if (!zone_reserve(reserve_server, train, zone))
+      {
         int partialPathTask = Create(5, &PartialPathFinderTask);
         PathFinderResponse pp_response;
-        PartialPathFinderRequest pp_request = (PartialPathFinderRequest) {
-          .trainsys_server = trainsys_server,
-          .track = track,
-          .path = complex_path,
-          .edge_count = cind,
-          .train = train,
-          .speed = speed,
-          .offset = offset
-        };
+        PartialPathFinderRequest pp_request = (PartialPathFinderRequest){
+            .trainsys_server = trainsys_server,
+            .track = track,
+            .path = complex_path,
+            .edge_count = cind,
+            .train = train,
+            .speed = speed,
+            .offset = offset};
         Send(partialPathTask, (const char *)&pp_request, sizeof(PartialPathFinderRequest), (char *)&pp_response, sizeof(PathFinderResponse));
 
         zone_wait(reserve_server, train, zone);
-        if (!zone_reserve(reserve_server, train, zone)) {
+        if (!zone_reserve(reserve_server, train, zone))
+        {
           LOG_WARN("[ERROR] should have claimed zone");
         }
 
-        for (int i = 0; i < TRACK_MAX + 1; i++) {
+        for (int i = 0; i < TRACK_MAX + 1; i++)
+        {
           complex_path[i] = 0;
         }
         cind = 0;
@@ -256,8 +295,3 @@ void PathFinderTask() {
 
   Exit();
 }
-
-
-
-
-

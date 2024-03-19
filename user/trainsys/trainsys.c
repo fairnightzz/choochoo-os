@@ -9,32 +9,6 @@
 
 static TrainSystemState SystemState;
 
-typedef struct
-{
-  int train;
-  int train_speed;
-} ReverseRequest;
-
-typedef struct
-{
-  bool success;
-} ReverseResponse;
-
-void ReverseTask()
-{
-    ReverseRequest request;
-    int requestTid;
-    Receive(&requestTid, (char*)&request, sizeof(ReverseRequest));
-    ReverseResponse response = (ReverseResponse) {.success = true,};
-    Reply(requestTid, (char*)&response, sizeof(ReverseResponse));
-    TrainSystemSetSpeed(SystemState.system_tid, request.train, SPEED_STOP);
-    Delay(SystemState.clock_tid, REV_STOP_DELAY);
-    TrainSystemSetSpeed(SystemState.system_tid, request.train, SPEED_REVERSE);
-    Delay(SystemState.clock_tid, REV_DELAY);
-    TrainSystemSetSpeed(SystemState.system_tid, request.train, request.train_speed);
-    SystemState.trainReverseState[get_train_index(request.train)] = false;
-}
-
 void trainsys_execute_command(CommandResult cres)
 {
   switch (cres.command_type)
@@ -56,19 +30,7 @@ void trainsys_execute_command(CommandResult cres)
   case REVERSE_COMMAND:
   {
     uint32_t train = cres.command_args.reverse_args.train;
-    if (SystemState.trainReverseState[get_train_index(train)] == true) {
-      render_command("Train %d is currently reversing, cancelling command.", train);
-      break;
-    }
-    int old_speed = TrainSystemGetTrainState(SystemState.system_tid, train) & TRAIN_SPEED_MASK;
-    int reverseTid = Create(8, &ReverseTask);
-    ReverseRequest request = (ReverseRequest) {
-      .train = train,
-      .train_speed = old_speed,
-    };
-    SystemState.trainReverseState[get_train_index(train)] = true;
-    ReverseResponse response;
-    Send(reverseTid, (char*)&request, sizeof(ReverseRequest), (char*)&response, sizeof(ReverseResponse));
+    TrainSystemReverse(SystemState.system_tid, train);
     break;
   }
   case SWITCH_COMMAND:
@@ -114,7 +76,6 @@ void trainsys_init()
       .clock_tid = clock_tid,
       .switch_tid = switch_tid,
       .pathfinder_tid = pathfinder_tid,
-      .trainReverseState = {0},
   };
 }
 
@@ -144,6 +105,5 @@ void trainsys_init_trains()
   for (int i = 0; i < TRAIN_DATA_TRAIN_COUNT; i++)
   {
     TrainSystemSetSpeed(SystemState.system_tid, TRAIN_DATA_TRAINS[i], 0);
-    SystemState.trainReverseState[i] = false;
   }
 }

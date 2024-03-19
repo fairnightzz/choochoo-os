@@ -83,12 +83,60 @@ void TrainSystemSwitchToTrain(int system_server, int switch_id)
       .train = 0,            // unused
       .speed = 0,            // unused
       .light_status = false, // unused
-      .sensor_hit = -1,     // unused
-      .switch_triggered = switch_id
-  };
+      .sensor_hit = -1,      // unused
+      .switch_triggered = switch_id};
   int ret = Send(system_server, (const char *)&request, sizeof(TrainSystemRequest), (char *)&response, sizeof(TrainSystemResponse));
   if (ret < 0)
   {
     LOG_WARN("TrainSystemSwitchChange ERRORED");
   }
+}
+
+int TrainSystemReverse(int trainstate_server, int train)
+{
+  if (!(1 <= train && train <= 100))
+  {
+    LOG_WARN("invalid train number %d", train);
+    return -1;
+  }
+
+  TrainSystemResponse response;
+  TrainSystemRequest request = (TrainSystemRequest){
+      .type = SYSTEM_REVERSE,
+      .train = train,
+  };
+  int ret = Send(trainstate_server, (const char *)&request, sizeof(TrainSystemRequest), (char *)&response, sizeof(TrainSystemResponse));
+  if (response.was_already_reversing)
+  {
+    LOG_WARN("Train %d was already reversing", train);
+    return -1;
+  }
+  if (ret < 0)
+  {
+    LOG_WARN("TrainstateReverse errored");
+    return -1;
+  }
+  return 0;
+}
+
+int TrainSystemGetNextTrainSensor(int system_server, int train)
+{
+  if (!(1 <= train && train <= 100))
+  {
+    LOG_WARN("invalid train number %d", train);
+    return -1;
+  }
+
+  TrainSystemResponse response;
+  TrainSystemRequest request = (TrainSystemRequest){
+      .type = SYSTEM_GET_NEXT_TRAIN_SENSOR,
+      .train = train,
+  };
+  int ret = Send(system_server, (const char *)&request, sizeof(TrainSystemRequest), (char *)&response, sizeof(TrainSystemResponse));
+  if (ret < 0)
+  {
+    LOG_WARN("TrainstateReverse errored");
+    return -1;
+  }
+  return response.next_sensor_id;
 }
