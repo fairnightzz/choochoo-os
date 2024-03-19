@@ -1,10 +1,11 @@
 #include "helpers.h"
+#include "user/ui/render.h"
 
 #define INF 2147483647
 #define NONE 2147483646
 
 
-int do_edge_trace(int cur_node, int src_node, int src_rev_node, int iter_count, uint32_t *prev, track_edge* edges, track_edge *edge_graph)
+int do_edge_trace(int cur_node, int src_node, int src_rev_node, int iter_count, uint32_t *prev, track_edge** edges, track_edge **edge_graph)
 {
   if (cur_node == src_node || cur_node == src_rev_node)
   {
@@ -12,7 +13,7 @@ int do_edge_trace(int cur_node, int src_node, int src_rev_node, int iter_count, 
   }
   else if (iter_count > 130)
   {
-    render_command("[PathfinderServer ERROR] cannot form edge graph through trace");
+    render_command("[EdgeTrace ERROR] cannot form edge graph through trace");
     return -1;
   }
   int tot_iterations = do_edge_trace(prev[cur_node], src_node, src_rev_node, iter_count + 1, prev, edges, edge_graph);
@@ -22,8 +23,8 @@ int do_edge_trace(int cur_node, int src_node, int src_rev_node, int iter_count, 
   return tot_iterations;
 }
 
-int do_djikstra(track_node *track, int train, int source_node, int dest_node, bool allow_reversal, bool check_reserve, track_edge *edge_graph) {
-  int reserve_server = WhoIs(ReserveAddress);
+int do_djikstra(track_node *track, int train, int source_node, int dest_node, bool allow_reversal, bool check_reserve, track_edge **edge_graph) {
+  // int reserve_server = WhoIs(ReserveAddress);
   
   uint32_t dist[TRACK_MAX];
   uint32_t prev[TRACK_MAX];
@@ -50,7 +51,7 @@ int do_djikstra(track_node *track, int train, int source_node, int dest_node, bo
       }
     }
     if (cur_node == NONE) {
-      return NULL;
+      return -1;
     }
     visited[cur_node] = true;
     if (cur_node == dest_node) {
@@ -62,14 +63,14 @@ int do_djikstra(track_node *track, int train, int source_node, int dest_node, bo
       dest_node = dest_rev;
       break;
     }
-
+/*
     if (check_reserve) {
       int cur_zone = track[cur_node].reverse->zone;
       if (cur_zone != -1 && zone_is_reserved(reserve_server, train, cur_zone)) {
         continue;
       }
     }
-
+*/
     if (track[cur_node].type == NODE_SENSOR || track[cur_node].type == NODE_MERGE)
     {
       track_edge *next_edge = &track[cur_node].edge[DIR_AHEAD];
@@ -113,9 +114,6 @@ int do_djikstra(track_node *track, int train, int source_node, int dest_node, bo
     }
   }
 
-  int iters = 0;
-  int src_rev = track[src_rev].reverse - track;
-
+  int src_rev = track[source_node].reverse - track;
   return do_edge_trace(dest_node, source_node, src_rev, 0, prev, edges, edge_graph);
-
 }

@@ -10,19 +10,12 @@
 #include "user/ui/render.h"
 #include "user/trainsys-server/interface.h"
 #include "user/trainsys/trainsys.h"
-
+#include "user/pathfinder-server/helpers.h"
 #define INF 2147483647
 #define NONE 2147483646
 
 // Statically allocated arrays used in Dijkstra algorithm
-uint32_t dist[TRACK_MAX];
-uint32_t prev[TRACK_MAX];
-track_edge *edges[TRACK_MAX];
-bool visited[TRACK_MAX];
 track_edge *route_edges[TRACK_MAX];
-track_node track[TRACK_MAX];
-
-int do_djikstra(track_node *track, int source_node, int dest_node);
 void do_train_course(track_node *track, int trainsys_server, int sensor_server, int switch_server, int clock_server, int src, int dest, int train, int train_speed, int offset);
 
 void PathFinderServer()
@@ -35,9 +28,8 @@ void PathFinderServer()
   // int io_server = WhoIs(MarklinIOAddress);
   int trainsys_tid = WhoIs(TrainSystemAddress);
 
-  HashMap *NodeIndexMap = hashmap_new();
-
-  init_tracka(track, NodeIndexMap);
+  HashMap *NodeIndexMap = get_node_map();
+  track_node *track = get_track();
 
   PathFinderRequest request;
   PathFinderResponse response;
@@ -92,106 +84,10 @@ void PathFinderServer()
   Exit();
 }
 
-int do_edge_trace(int cur_node, int src_node, int src_rev_node, int iter_count)
-{
-  if (cur_node == src_node || cur_node == src_rev_node)
-  {
-    return iter_count - 1;
-  }
-  else if (iter_count > 130)
-  {
-    render_command("[PathfinderServer ERROR] cannot form edge graph through trace");
-    return -1;
-  }
-  int tot_iterations = do_edge_trace(prev[cur_node], src_node, src_rev_node, iter_count + 1);
-  route_edges[tot_iterations - iter_count] = edges[cur_node];
-  // string render_string = string_format("edge trace: tot_iterations - iter_count: %d, src: %s, dest: %s, dist: %d", tot_iterations - iter_count, edges[cur_node]->src->name, edges[cur_node]->dest->name, edges[cur_node]->dist);
-  // render_command(&render_string);
-  return tot_iterations;
-}
-
-int do_djikstra(track_node *track, int source_node, int dest_node)
-{
-  for (int i = 0; i < TRACK_MAX; i++)
-  {
-    dist[i] = INF;
-    prev[i] = NONE;
-    edges[i] = 0;
-    visited[i] = false;
-  }
-
-  dist[source_node] = 0;
-
-  while (1)
-  {
-    // Find next closest node
-    int cur_node = NONE;
-    for (int i = 0; i < TRACK_MAX; i++)
-    {
-      if (dist[i] != INF && visited[i] == false)
-      {
-        if (cur_node == NONE)
-        {
-          cur_node = i;
-        }
-        else
-        {
-          cur_node = dist[cur_node] < dist[i] ? cur_node : i;
-        }
-      }
-    }
-
-    visited[cur_node] = true;
-    if (cur_node == dest_node)
-      break;
-
-    int dest_rev = track[dest_node].reverse - track;
-    if (cur_node == dest_rev)
-    {
-      dest_node = dest_rev;
-      break;
-    }
-
-    if (track[cur_node].type == NODE_SENSOR || track[cur_node].type == NODE_MERGE)
-    {
-      track_edge *next_edge = &track[cur_node].edge[DIR_AHEAD];
-      int next_node_idx = next_edge->dest - track;
-      if (dist[cur_node] + next_edge->dist < dist[next_node_idx])
-      {
-        dist[next_node_idx] = dist[cur_node] + next_edge->dist;
-        prev[next_node_idx] = cur_node;
-        edges[next_node_idx] = next_edge;
-      }
-    }
-    else if (track[cur_node].type == NODE_BRANCH)
-    {
-      track_edge *edge_straight = &track[cur_node].edge[DIR_STRAIGHT];
-      int next_node_idx = edge_straight->dest - track;
-      if (dist[cur_node] + edge_straight->dist < dist[next_node_idx])
-      {
-        dist[next_node_idx] = dist[cur_node] + edge_straight->dist;
-        prev[next_node_idx] = cur_node;
-        edges[next_node_idx] = edge_straight;
-      }
-
-      track_edge *edge_curved = &track[cur_node].edge[DIR_CURVED];
-      next_node_idx = edge_curved->dest - track;
-      if (dist[cur_node] + edge_curved->dist < dist[next_node_idx])
-      {
-        dist[next_node_idx] = dist[cur_node] + edge_curved->dist;
-        prev[next_node_idx] = cur_node;
-        edges[next_node_idx] = edge_curved;
-      }
-    }
-  }
-
-  int source_rev_node = track[source_node].reverse - track;
-  return do_edge_trace(dest_node, source_node, source_rev_node, 0);
-}
-
 void do_train_course(track_node *track, int trainsys_server, int sensor_server, int switch_server, int clock_server, int src, int dest, int train, int train_speed, int offset)
 {
-  int edges_in_path = do_djikstra(track, src, dest);
+  track_edge *route_edges[150];
+  int edges_in_path = do_djikstra(track, train, src, dest, true, false, route_edges);
   if (edges_in_path == -1)
   {
     render_command("[PathfinderServer]: could not find path in do_train_course");
