@@ -45,7 +45,11 @@ static const Zones zones[] = {
     {{"A16", 0}, {0}},
 };
 
-string to_sensor_string(int sensor_id)
+static const int sensors[] = {27, 10, 9, 10, 2, 3, 3, 1, 3, 0, -1, 3, 28, 10, 10, 29, 7, 25, 7, 8, 11, 15, -1, 0, -1, 2, -1, 1, 24, 13, 5, 9, 13, 8, 4, 26, 5, 4, 3, 4, 7, 5, 10, 11, 10, 14, 4, 6, 17, 13, 15, 16, 20, 19, 18, 20, 20, 21, 4, 6, 23, 25, 23, 24, 12, 13, 16, 17, 16, 19, 14, 18, 22, 20, 4, 21, 22, 23, 12, 11};
+static const int switches[] = {3, 3, 3, 10, 4, 4, 4, 20, 20, 16, 10, 10, 11, 10, 5, 7, 23, 4, 13, 13, 13, 13};
+
+string
+to_sensor_string(int sensor_id)
 {
     int sensor_group = sensor_id / 16;
     int sensor_index = (sensor_id % 16) + 1;
@@ -76,39 +80,54 @@ string to_sensor_string(int sensor_id)
 
 int zone_getid_by_sensor_id(int sensorId)
 {
-    string sensoridString = to_sensor_string(sensorId);
-    for (int i = 0; i < NUM_ZONES;)
-    {
-        for (int j = 0;; ++j)
-        {
-            char *sensor_str = zones[i].sensors[j];
-            if (sensor_str == 0)
-                break;
+    return sensors[sensorId];
+    // string sensoridString = to_sensor_string(sensorId);
+    // for (int i = 0; i < NUM_ZONES; i++)
+    // {
+    //     for (int j = 0;; ++j)
+    //     {
+    //         char *sensor_str = zones[i].sensors[j];
+    //         if (sensor_str == 0)
+    //             break;
 
-            if (strcmp(get_data(&sensoridString), sensor_str) == 0)
-            {
-                return i;
-            }
-        }
-    }
-    return -1;
+    //         if (strcmp(get_data(&sensoridString), sensor_str) == 0)
+    //         {
+    //             return i;
+    //         }
+    //     }
+    // }
+    // return -1;
 }
-int zone_getid_by_switch_id(int switchId)
+int zone_getid_by_switch_id(int switch_id)
 {
-    for (int i = 0; i < NUM_ZONES;)
+    if (1 <= switch_id && switch_id <= 18)
     {
-        for (int j = 0;; ++j)
-        {
-            int switch_id = zones[i].switches[j];
-            if (switch_id == 0)
-                break;
-            if (switchId == switch_id)
-            {
-                return i;
-            }
-        }
+        switch_id = switch_id - 1;
     }
-    return -1;
+    else if (153 <= switch_id && switch_id <= 156)
+    {
+        switch_id = switch_id - 135;
+    }
+    else
+    {
+        return -1;
+    }
+    return switches[switch_id];
+
+    // for (int i = 0; i < NUM_ZONES; i++)
+    // {
+    //     for (int j = 0;; ++j)
+    //     {
+    //         int switch_id = zones[i].switches[j];
+    //         if (switch_id == 0)
+    //             break;
+    //         if (switchId == switch_id)
+    //         {
+    //             return i;
+    //         }
+    //     }
+    // }
+    // return -1;
 }
 
 int get_train_index(uint32_t train)
