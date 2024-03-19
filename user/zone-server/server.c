@@ -1,10 +1,26 @@
 #include "server.h"
 #include "interface.h"
 #include "user/traindata/train_data.h"
+#include "lib/stdlib.h"
+#include "user/nameserver.h"
 
 #define MAX_ZONE_COUNT 32 // assume max 32 zones for now
 
 static int reservations[MAX_ZONE_COUNT]; // zero means no train has the zone reserved
+
+// returns if the zone was successfully reserved
+bool _zone_reserve(int train, int zone)
+{
+  if (reservations[zone] == train)
+    return true; // train is allowed to reserve a zone multiple times
+  if (reservations[zone] != 0)
+  {
+    LOG_WARN("unable for train %d to reserve zone %d, already reserved by train %d", train, zone, reservations[zone]);
+    return false;
+  }
+  reservations[zone] = train;
+  return true;
+}
 
 // returns false if zone was not able to be unreserved
 bool _zone_unreserve(int train, int zone)
@@ -73,7 +89,7 @@ void ZoneServer()
   RegisterAs(ZoneAddress);
   alloc_init(ZONE_BUFFER_REQUEST, sizeof(ZoneBufferRequest));
 
-  track_node *track = get_track();
+  // track_node *track = get_track();
 
   for (int i = 0; i < MAX_ZONE_COUNT; ++i)
   {
@@ -180,7 +196,7 @@ void ZoneServer()
     else if (request.type == ZONE_WAIT_CHANGE)
     {
       // for waiting on ANY change
-      push(&wait_change_requests, (void *)from_tid);
+      push(&wait_change_requests, from_tid);
     }
   }
 

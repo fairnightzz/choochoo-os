@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "user/traintrack/track_node.h"
+#include "lib/stdlib.h"
 
 #define TRAIN_DATA_TRAIN_COUNT 6
 #define TRAIN_DATA_SPEED_COUNT 10
@@ -35,7 +36,7 @@ static const uint32_t TRAIN_DATA_STOP_DIST[TRAIN_DATA_TRAIN_COUNT][TRAIN_DATA_SP
 
 void train_data_init();
 track_node *get_track();
-HashMap *get_node_index_map();
+HashMap *get_node_map();
 uint32_t train_data_vel(uint32_t train, uint32_t speed);
 uint32_t train_data_stop_dist(uint32_t train, uint32_t speed);
 int get_train_index(uint32_t train);

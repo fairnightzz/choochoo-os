@@ -1,6 +1,5 @@
 
 #include "train_data.h"
-#include "lib/stdlib.h"
 #include "string.h"
 #include "user/traintrack/track_data.h"
 
@@ -63,7 +62,7 @@ get_track()
     return traintrack;
 }
 
-HashMap *get_node_index_map()
+HashMap *get_node_map()
 {
     return NodeIndexMap;
 }
