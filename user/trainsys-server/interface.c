@@ -74,3 +74,21 @@ TrainSystemResponse TrainSystemSensorToTrain(int system_server, int sensor_id)
   }
   return response;
 }
+
+void TrainSystemSwitchToTrain(int system_server, int switch_id)
+{
+  TrainSystemResponse response;
+  TrainSystemRequest request = (TrainSystemRequest){
+      .type = SYSTEM_SWITCH_CHANGE,
+      .train = 0,            // unused
+      .speed = 0,            // unused
+      .light_status = false, // unused
+      .sensor_hit = -1,     // unused
+      .switch_triggered = switch_id
+  };
+  int ret = Send(system_server, (const char *)&request, sizeof(TrainSystemRequest), (char *)&response, sizeof(TrainSystemResponse));
+  if (ret < 0)
+  {
+    LOG_WARN("TrainSystemSwitchChange ERRORED");
+  }
+}

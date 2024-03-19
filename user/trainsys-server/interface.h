@@ -18,6 +18,7 @@ typedef enum
   SYSTEM_SET_LIGHTS,
   SYSTEM_GET_TRAIN,
   SYSTEM_SENSOR_HIT,
+  SYSTEM_SWITCH_CHANGE
 } TrainSystemRequestType;
 
 typedef struct
@@ -27,6 +28,7 @@ typedef struct
   int speed;
   bool light_status;
   int sensor_hit;
+  int switch_triggered;
 } TrainSystemRequest;
 
 typedef struct
@@ -42,5 +44,5 @@ int TrainSystemSetSpeed(int system_server, int train, int speed);
 int TrainSystemSetLights(int system_server, int train, bool status);
 TrainSystemResponse TrainSystemSensorToTrain(int system_server, int sensor_id);
 uint8_t TrainSystemGetTrainState(int system_server, int train);
-
+void TrainSystemSwitchToTrain(int system_sensor, int switch_id);
 #endif // __TRAIN_SYSTEM_INTERFACE_H__

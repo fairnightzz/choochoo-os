@@ -8,7 +8,7 @@
 #include "user/switch-server/interface.h"
 #include "user/sensor-server/interface.h"
 #include "user/ui/predict_task.h"
-
+#include "user/trainsys-server/interface.h"
 void idlePerformanceTask()
 {
   int clockServer = WhoIs(ClockAddress);
@@ -23,6 +23,7 @@ void renderSwitchTask()
 {
   int switch_server = WhoIs(SwitchAddress);
   int clock_server = WhoIs(ClockAddress);
+  int system_sensor = WhoIs(TrainSystemAddress);
 
   // Inital drawing of tasks screws things up
   Delay(clock_server, 20);
@@ -32,6 +33,7 @@ void renderSwitchTask()
   {
     SwitchResponse response;
     response = WaitOnSwitchChange(switch_server, -1); // switch_id = -1 means any switch
+    TrainSystemSwitchToTrain(system_sensor, response.switch_id);
     render_switch(response.switch_id, response.mode);
   }
 }
