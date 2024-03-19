@@ -2,8 +2,9 @@
 
 #include "track_data.h"
 
-void init_tracka(track_node *track, HashMap *nodeMap) {
-  memset(track, 0, TRACK_MAX*sizeof(track_node));
+void init_tracka(track_node *track, HashMap *nodeMap)
+{
+  memset(track, 0, TRACK_MAX * sizeof(track_node));
   track[0].name = "A1";
   track[0].type = NODE_SENSOR;
   track[0].num = 0;
@@ -1185,13 +1186,15 @@ void init_tracka(track_node *track, HashMap *nodeMap) {
   track[143].type = NODE_EXIT;
   track[143].reverse = &track[142];
 
-  for (int i = 0; i < TRACK_A_SIZE; ++i) {
+  for (int i = 0; i < TRACK_A_SIZE; ++i)
+  {
     hashmap_insert(nodeMap, track[i].name, (void *)(intptr_t)i);
   }
 }
 
-void init_trackb(track_node *track, HashMap *nodeMap) {
-  memset(track, 0, TRACK_MAX*sizeof(track_node));
+void init_trackb(track_node *track, HashMap *nodeMap)
+{
+  memset(track, 0, TRACK_MAX * sizeof(track_node));
   track[0].name = "A1";
   track[0].type = NODE_SENSOR;
   track[0].num = 0;
@@ -2353,7 +2356,8 @@ void init_trackb(track_node *track, HashMap *nodeMap) {
   track[139].type = NODE_EXIT;
   track[139].reverse = &track[138];
 
-  for (int i = 0; i < TRACK_A_SIZE; ++i) {
+  for (int i = 0; i < TRACK_A_SIZE; ++i)
+  {
     hashmap_insert(nodeMap, track[i].name, (void *)(intptr_t)i);
   }
 }
