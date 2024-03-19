@@ -2,6 +2,7 @@
 
 #include "track_data.h"
 #include <string.h>
+#include "user/switch-server/interface.h"
 
 static const Zones zones[] = {
     {{"B8", "A10", 0}, {0}},
@@ -78,6 +79,55 @@ bool track_edge_cmp(track_edge a, track_edge b)
   if (a.reverse != b.reverse)
     return false;
   return true;
+}
+
+track_edge *track_next_edge(int switch_server, track_node *node)
+{
+  if (node == NULL)
+  {
+    return NULL;
+  }
+  if (node->type == NODE_SENSOR || node->type == NODE_MERGE || node->type == NODE_ENTER)
+  {
+    return &node->edge[DIR_AHEAD];
+  }
+  else if (node->type == NODE_BRANCH)
+  {
+    SwitchMode mode = SwitchGet(switch_server, node->num);
+    if (mode == SWITCH_MODE_S)
+    {
+      return &node->edge[DIR_STRAIGHT];
+    }
+    if (mode == SWITCH_MODE_C)
+    {
+      return &node->edge[DIR_CURVED];
+    }
+    return NULL;
+  }
+  return NULL;
+}
+
+track_node *track_next_node(int switch_server, track_node *node)
+{
+  track_edge *next_edge = track_next_edge(switch_server, node);
+  if (next_edge == NULL)
+    return NULL;
+  return next_edge->dest;
+}
+
+track_node *track_next_sensor(int switch_server, track_node *node)
+{
+  for (track_node *current = track_next_node(switch_server, node);; current = track_next_node(switch_server, current))
+  {
+    if (current == NULL || current->type == NODE_EXIT)
+    {
+      return NULL;
+    }
+    if (current->type == NODE_SENSOR)
+    {
+      return current;
+    }
+  }
 }
 
 void init_tracka(track_node *track, HashMap *nodeMap)

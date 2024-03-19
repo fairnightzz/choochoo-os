@@ -23,5 +23,8 @@ typedef struct
 void init_tracka(track_node *track, HashMap *nodeMap);
 void init_trackb(track_node *track, HashMap *nodeMap);
 bool track_edge_cmp(track_edge a, track_edge b);
+track_edge *track_next_edge(int switch_server, track_node *node);
+track_node *track_next_node(int switch_server, track_node *node);
+track_node *track_next_sensor(int switch_server, track_node *node);
 
 #endif // __TRACK_DATA_H__
