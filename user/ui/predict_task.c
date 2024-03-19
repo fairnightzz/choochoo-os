@@ -50,14 +50,14 @@ void predictTask()
     }
     else
     {
-      render_command("bad next sensor id");
+      // render_command("bad next sensor id");
       continue;
     }
 
     int train_index = get_train_index(train);
     if (train_index == -1 || get_speed_index(train_speed) == -1)
     {
-      render_command("bad train index or speed index %d %d", train_index, train_speed);
+      // render_command("bad train index or speed index %d %d", train_index, train_speed);
       continue;
     }
     int train_vel = train_data_vel(train, train_speed);

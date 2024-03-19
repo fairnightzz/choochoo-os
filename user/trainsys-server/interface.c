@@ -8,7 +8,8 @@ int TrainSystemSetSpeed(int system_server, int train, int speed)
       .type = SYSTEM_SET_SPEED,
       .train = train,
       .speed = speed,
-      .light_status = false // unused
+      .light_status = false, // unused
+      .sensor_hit = -1,      // unused
   };
   int ret = Send(system_server, (const char *)&request, sizeof(TrainSystemRequest), (char *)&response, sizeof(TrainSystemResponse));
   if (ret < 0)
@@ -25,7 +26,8 @@ int TrainSystemSetLights(int system_server, int train, bool status)
   TrainSystemRequest request = (TrainSystemRequest){
       .type = SYSTEM_SET_LIGHTS,
       .train = train,
-      .speed = 0, // unused
+      .speed = 0,       // unused
+      .sensor_hit = -1, // unused
       .light_status = status};
   int ret = Send(system_server, (const char *)&request, sizeof(TrainSystemRequest), (char *)&response, sizeof(TrainSystemResponse));
   if (ret < 0)
@@ -43,6 +45,7 @@ uint8_t TrainSystemGetTrainState(int system_server, int train)
       .type = SYSTEM_GET_TRAIN,
       .train = train,
       .speed = 0,           // unused
+      .sensor_hit = -1,     // unused
       .light_status = false // unused
   };
   int ret = Send(system_server, (const char *)&request, sizeof(TrainSystemRequest), (char *)&response, sizeof(TrainSystemResponse));

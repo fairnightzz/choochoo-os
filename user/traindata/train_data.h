@@ -1,4 +1,4 @@
-#ifndef __TRAINDATA_H__
+#ifndef __TRAIN_DATA_H__
 #define __TRAIN_DATA_H__
 
 #include <stdint.h>

@@ -17,7 +17,7 @@ typedef enum
   SYSTEM_SET_SPEED = 1,
   SYSTEM_SET_LIGHTS,
   SYSTEM_GET_TRAIN,
-  SYSTEM_SENSOR_HIT
+  SYSTEM_SENSOR_HIT,
 } TrainSystemRequestType;
 
 typedef struct

@@ -143,6 +143,12 @@ string get_sensor_string(int sensor_id)
   int sensor_index = (sensor_id % 16) + 1;
 
   char sensorString[4] = {0};
+  if (sensor_id == -1) {
+    sensorString[1] = '-';
+    sensorString[2] = '-';
+    sensorString[3] = '-';
+    return to_string(sensorString);
+  }
   sensorString[0] = sensor_group + 'A';
   sensorString[3] = '\0';
   if (sensor_index < 10)
