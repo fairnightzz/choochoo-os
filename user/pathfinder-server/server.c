@@ -35,10 +35,10 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
   int trainsys_server = WhoIs(TrainSystemAddress);
   int reserve_server = WhoIs(ZoneAddress);
 
-  int stopping_distance;
-  int train_vel;
+  int stopping_distance = 0;
+  int train_vel = 0;
 
-  track_node *waiting_sensor;
+  track_node *waiting_sensor = 0;
   int train_speed = speed;
   for (int idx = get_speed_index(speed); idx >= 0; --idx)
   {
@@ -139,7 +139,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
       }
     }
 
-    Delay(clock_server, distance_from_sensor * 100 / train_vel / 10);
+    Delay(clock_server, distance_from_sensor * 100 / train_vel);
     TrainSystemSetSpeed(trainsys_server, train, 0);
     Delay(clock_server, train_data_stop_time(train, TRAIN_DATA_SHORT_MOVE_SPEED) / 10 + 100);
   }

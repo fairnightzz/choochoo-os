@@ -56,8 +56,14 @@ void trainsys_execute_command(CommandResult cres)
     uint32_t speed = cres.command_args.path_args.speed;
     string dest_node = cres.command_args.path_args.dest_node;
     int32_t offset = cres.command_args.path_args.offset;
-
-    FindPath(SystemState.pathfinder_tid, train, speed, offset, dest_node.data);
+    Path new_path = {
+      .allow_reversal = true,
+      .train = train,
+      .speed = speed,
+      .offset = offset,
+      .dest = dest_node.data,
+    };
+    PlanPath(new_path);
     break;
   }
   default:
