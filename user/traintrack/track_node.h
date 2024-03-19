@@ -11,6 +11,12 @@ typedef enum
   NODE_EXIT,
 } node_type;
 
+typedef enum
+{
+  EDGE_FORWARD = 0,
+  EDGE_REVERSE
+} edge_type;
+
 #define DIR_AHEAD 0
 #define DIR_STRAIGHT 0
 #define DIR_CURVED 1
@@ -25,6 +31,7 @@ struct track_edge
   track_edge *reverse;
   track_node *src, *dest;
   int dist; /* in millimetres */
+  edge_type type;
 };
 
 struct track_node
@@ -34,6 +41,7 @@ struct track_node
   int num;             /* sensor or switch number */
   track_node *reverse; /* same location, but opposite direction */
   track_edge edge[3];
+  int zone;
 };
 
 #endif

@@ -4,9 +4,7 @@
 #include "lib/stdlib.h"
 #include "user/nameserver.h"
 
-#define MAX_ZONE_COUNT 32 // assume max 32 zones for now
-
-static int reservations[MAX_ZONE_COUNT]; // zero means no train has the zone reserved
+static int reservations[NUM_ZONES]; // zero means no train has the zone reserved
 
 // returns if the zone was successfully reserved
 bool _zone_reserve(int train, int zone)
@@ -91,7 +89,7 @@ void ZoneServer()
 
   // track_node *track = get_track();
 
-  for (int i = 0; i < MAX_ZONE_COUNT; ++i)
+  for (int i = 0; i < NUM_ZONES; ++i)
   {
     reservations[i] = 0;
   }
@@ -139,7 +137,7 @@ void ZoneServer()
     }
     else if (request.type == ZONE_UNRESERVE_ALL)
     {
-      for (int i = 0; i < MAX_ZONE_COUNT; ++i)
+      for (int i = 0; i < NUM_ZONES; ++i)
       {
         if (reservations[i] == request.unreserve_all)
         {

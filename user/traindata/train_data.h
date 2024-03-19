@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "user/traintrack/track_node.h"
+#include "user/traintrack/track_data.h"
 #include "lib/stdlib.h"
 
 #define TRAIN_DATA_TRAIN_COUNT 6
