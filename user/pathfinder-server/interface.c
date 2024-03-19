@@ -3,6 +3,7 @@
 #include "user/traintrack/track_data.h"
 #include "user/trainsys-server/interface.h"
 #include "server.h"
+#include "user/traindata/train_data.h"
 
 int PlanPath(Path path)
 {

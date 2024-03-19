@@ -1,5 +1,7 @@
 #include "helpers.h"
 #include "user/ui/render.h"
+#include "user/zone-server/interface.h"
+#include "user/nameserver.h"
 
 #define INF 2147483647
 #define NONE 2147483646
@@ -24,7 +26,7 @@ int do_edge_trace(int cur_node, int src_node, int src_rev_node, int iter_count, 
 }
 
 int do_djikstra(track_node *track, int train, int source_node, int dest_node, bool allow_reversal, bool check_reserve, track_edge **edge_graph) {
-  // int reserve_server = WhoIs(ReserveAddress);
+  int reserve_server = WhoIs(ZoneAddress);
   
   uint32_t dist[TRACK_MAX];
   uint32_t prev[TRACK_MAX];
@@ -63,14 +65,12 @@ int do_djikstra(track_node *track, int train, int source_node, int dest_node, bo
       dest_node = dest_rev;
       break;
     }
-/*
     if (check_reserve) {
       int cur_zone = track[cur_node].reverse->zone;
       if (cur_zone != -1 && zone_is_reserved(reserve_server, train, cur_zone)) {
         continue;
       }
     }
-*/
     if (track[cur_node].type == NODE_SENSOR || track[cur_node].type == NODE_MERGE)
     {
       track_edge *next_edge = &track[cur_node].edge[DIR_AHEAD];

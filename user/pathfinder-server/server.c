@@ -5,11 +5,11 @@
 #include "user/switch-server/interface.h"
 #include "user/clock-server/interface.h"
 #include "user/traintrack/track_data.h"
-#include "user/io-server/io_marklin.h"
 #include "user/traindata/train_data.h"
 #include "user/ui/render.h"
 #include "user/trainsys-server/interface.h"
 #include "user/trainsys/trainsys.h"
+#include "user/zone-server/interface.h"
 #include "user/pathfinder-server/helpers.h"
 #define INF 2147483647
 #define NONE 2147483646
@@ -25,12 +25,11 @@ void setSwitchesInZone(int switch_server, track_node *track, int zone, SwitchMod
 }
 
 void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_count, int train, int speed, int offset) {
-  int io_server = WhoIs(MarklinIOAddress);
   int clock_server = WhoIs(ClockAddress);
   int sensor_server = WhoIs(SensorAddress);
   int switch_server = WhoIs(SwitchAddress);
   int trainsys_server = WhoIs(TrainSystemAddress);
-  int reserve_server = WhoIs(ReserveAddress);
+  int reserve_server = WhoIs(ZoneAddress);
 
   int stopping_distance;
   int train_vel;
@@ -95,10 +94,10 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     }
     TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED);
     Delay(clock_server, train_data_short_move_time(train, distance_to_dest) / 10);
-    TrainstateSetSpeed(trainsys_server, train, 0);
+    TrainSystemSetSpeed(trainsys_server, train, 0);
     Delay(clock_server, train_data_stop_time(train, TRAIN_DATA_SHORT_MOVE_SPEED) / 10 + 100);
   } else {
-    TrainstateSetSpeed(trainsys_server, train, train_speed);
+    TrainSystemSetSpeed(trainsys_server, train, train_speed);
     for (int i = 1; i < edge_count; i++) {
       track_edge *edge = simple_path[edge_count];
       if (edge->src->type == NODE_SENSOR) {
@@ -116,13 +115,17 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
         if (edge->src->num == waiting_sensor->num) break;
       }
     }
+  
+    Delay(clock_server, distance_from_sensor*100/train_vel / 10);
+    TrainSystemSetSpeed(trainsys_server, train, 0);
+    Delay(clock_server, train_data_stop_time(train, TRAIN_DATA_SHORT_MOVE_SPEED) / 10 + 100);
   }
 
   zone_unreserve_all(reserve_server, train);
   int dest_zone = simple_path[edge_count - 1]->dest->reverse->zone;
   zone_reserve(reserve_server, train, dest_zone);
 }
-void PatherComplexPath(int trainsys_server, int clock_server, track_node *track, track_edge **path, int edge_count, int train, int speed, int offset)
+void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path, int edge_count, int train, int speed, int offset)
 {
     // no work to do
     if (path[0] == 0) return;
@@ -168,19 +171,15 @@ void PartialPathFinderTask() {
     return;
   }
 
-  PatherComplexPath(request.trainsys_server, request.clock_server, request.track, request.path, request.edge_count, request.train, request.speed, request.offset);
+  PatherComplexPath(request.trainsys_server, request.track, request.path, request.edge_count, request.train, request.speed, request.offset);
   response = (PathFinderResponse) { .success = true };
   Reply(from_tid, (char *)&response, sizeof(PathFinderResponse));
   Exit();
 }
 
 void PathFinderTask() {
-  int io_server = WhoIs(MarklinIOAddress);
-  int clock_server = WhoIs(ClockAddress);
-  int sensor_server = WhoIs(SensorAddress);
-  int switch_server = WhoIs(SwitchAddress);
   int trainsys_server = WhoIs(TrainSystemAddress);
-  int reserve_server = WhoIs(ReserveAddress);
+  int reserve_server = WhoIs(ZoneAddress);
 
   track_node *track = get_track();
   int from_tid;
@@ -206,7 +205,6 @@ void PathFinderTask() {
   int offset = request.offset;
   bool allow_reversal = request.allow_reversal;
 
-  TrainSystemSetDestination(trainsys_server, train, dest);
   if (src == dest || src == track[dest].reverse - track) {
     LOG_WARN("[PathFinderTask] Source Equals Destination");
     Exit();
@@ -230,7 +228,6 @@ void PathFinderTask() {
         PathFinderResponse pp_response;
         PartialPathFinderRequest pp_request = (PartialPathFinderRequest) {
           .trainsys_server = trainsys_server,
-          .clock_server = clock_server,
           .track = track,
           .path = complex_path,
           .edge_count = cind,
@@ -255,7 +252,7 @@ void PathFinderTask() {
     cind += 1;
   }
 
-  PatherComplexPath(trainsys_server, clock_server, track, complex_path, cind, train, speed, offset);
+  PatherComplexPath(trainsys_server, track, complex_path, cind, train, speed, offset);
 
   Exit();
 }

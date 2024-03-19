@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "user/traintrack/track_node.h"
 
 #define PathFinderAddress "¯|_pathfinder_/¯"
 
@@ -19,7 +20,6 @@ typedef struct
 typedef struct
 {
   int trainsys_server;
-  int clock_server;
   track_node* track;
   track_edge** path;
   int edge_count;
