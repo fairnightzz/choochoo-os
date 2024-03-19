@@ -12,6 +12,8 @@
 #include "switch-server/server.h"
 #include "user/io-server/io_marklin.h"
 #include "user/pathfinder-server/server.h"
+#include "user/traindata/train_data.h"
+#include "user/zone-server/server.h"
 
 void idleTask()
 {
@@ -61,10 +63,12 @@ void initTask()
   int marklin_server = Create(2, &MarklinIOServer);
 
   io_marklin_init(marklin_server);
+  train_data_init();
 
   Create(2, &SensorServer);
   Create(2, &SwitchServer);
 
+  Create(4, &ZoneServer);
   Create(4, &TrainSystemServer);
   // Create(4, &PathFinderServer);
 

@@ -14,6 +14,7 @@ typedef enum
   CLOCK_BUFFER_REQUEST = 13,
   SENSOR_BUFFER_REQUEST = 14,
   SWITCH_BUFFER_REQUEST = 15,
+  ZONE_BUFFER_REQUEST = 16,
 } UserAllocationType;
 
 void alloc_init(UserAllocationType uat, size_t size);

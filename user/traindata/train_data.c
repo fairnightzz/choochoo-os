@@ -2,6 +2,7 @@
 #include "train_data.h"
 #include "lib/stdlib.h"
 #include "string.h"
+#include "user/traintrack/track_data.h"
 
 #define ZONE_MAX_SENSORS 8
 #define ZONE_MAX_SWITCHES 6
@@ -48,34 +49,23 @@ static const Zones zones[] = {
 static const int sensors[] = {27, 10, 9, 10, 2, 3, 3, 1, 3, 0, -1, 3, 28, 10, 10, 29, 7, 25, 7, 8, 11, 15, -1, 0, -1, 2, -1, 1, 24, 13, 5, 9, 13, 8, 4, 26, 5, 4, 3, 4, 7, 5, 10, 11, 10, 14, 4, 6, 17, 13, 15, 16, 20, 19, 18, 20, 20, 21, 4, 6, 23, 25, 23, 24, 12, 13, 16, 17, 16, 19, 14, 18, 22, 20, 4, 21, 22, 23, 12, 11};
 static const int switches[] = {3, 3, 3, 10, 4, 4, 4, 20, 20, 16, 10, 10, 11, 10, 5, 7, 23, 4, 13, 13, 13, 13};
 
-string
-to_sensor_string(int sensor_id)
+static track_node traintrack[TRACK_MAX];
+static HashMap *NodeIndexMap;
+void train_data_init()
 {
-    int sensor_group = sensor_id / 16;
-    int sensor_index = (sensor_id % 16) + 1;
+    NodeIndexMap = hashmap_new();
+    init_tracka(traintrack, NodeIndexMap);
+}
 
-    char sensorString[4] = {0};
-    if (sensor_id == -1)
-    {
-        sensorString[1] = '-';
-        sensorString[2] = '-';
-        sensorString[3] = '-';
-        return to_string(sensorString);
-    }
-    sensorString[0] = sensor_group + 'A';
-    sensorString[3] = '\0';
-    if (sensor_index < 10)
-    {
-        sensorString[1] = '0';
-        sensorString[2] = '0' + sensor_index;
-    }
-    else
-    {
-        sensorString[1] = '1';
-        sensorString[2] = '0' + (sensor_index % 10);
-    }
+track_node *
+get_track()
+{
+    return traintrack;
+}
 
-    return to_string(sensorString);
+HashMap *get_node_index_map()
+{
+    return NodeIndexMap;
 }
 
 int zone_getid_by_sensor_id(int sensorId)
