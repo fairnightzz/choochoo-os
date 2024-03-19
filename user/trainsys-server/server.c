@@ -67,6 +67,14 @@ void TrainSystemServer()
       {4, 38},  // 58  A5 -> C7
       {35, 37}  // 77  C4 -> C6
   };
+  int train_positions[TRAIN_DATA_TRAIN_COUNT] = {
+    1,
+    13,
+    22,
+    26,
+    24,
+    34,
+  };
 
   TrainSystemRequest request;
   TrainSystemResponse response;
@@ -106,7 +114,6 @@ void TrainSystemServer()
       for (int i = 0; i < TRAIN_DATA_TRAIN_COUNT; i++)
       {
         if (zone_getid_by_sensor_id(train_next_sensors[i][0]) == switch_zone_id) {
-          render_command("[TrainSystemServer INFO]: zone_id in same zone as train");
           train = TRAIN_DATA_TRAINS[i];
           train_idx = i;
         }
@@ -115,7 +122,7 @@ void TrainSystemServer()
           bool is_unknown = false;
           bool is_unknown2 = false;
           int dist;
-          int current_next_sens = traintrack[train_next_sensors[train_idx][0]].reverse - traintrack;
+          int current_next_sens = train_positions[train_idx];
           int new_next_sens = find_next_sensor(current_next_sens, switch_server, &is_unknown, &dist);
           int new_next_next_sens = find_next_sensor(new_next_sens, switch_server, &is_unknown2, &dist);
           new_next_sens = is_unknown ? -1 : new_next_sens;
@@ -163,6 +170,8 @@ void TrainSystemServer()
         Reply(from_tid, (char *)&response, sizeof(TrainSystemResponse));
         break;
       }
+
+      train_positions[train_idx] = sensor_hit;
 
       char letter[2] = {'A' + sensor_hit / 16, '\0'};
       string sensor_str = string_format("%s%d", letter, (sensor_hit % 16) + 1);

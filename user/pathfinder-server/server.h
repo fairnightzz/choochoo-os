@@ -4,6 +4,14 @@
 #include "interface.h"
 #include "lib/stdlib.h"
 
-void PathFinderServer();
+typedef struct {
+  int train;
+  int speed;
+  int offset;
+  char *dest;
+  bool allow_reversal;
+} Route;
+
+int AllAboard(Route path);
 
 #endif // __PATHFINDER_SERVER_H__
