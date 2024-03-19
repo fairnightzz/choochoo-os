@@ -42,7 +42,7 @@ static const Zones zones[] = {
     {{"C4", 0}, {0}},
     {{"A1", 0}, {0}},
     {{"A13", 0}, {0}},
-    {{"A16", "A11", 0}, {0}},
+    {{"A16", 0}, {0}},
 };
 
 string to_sensor_string(int sensor_id)
