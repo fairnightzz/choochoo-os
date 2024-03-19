@@ -79,7 +79,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
   int distance_from_sensor = -stopping_distance;
   track_edge *first_edge = simple_path[0];
   int my_zone = first_edge->src->reverse->zone;
-  int next_zone = track_next_sensor(switch_server, track, first_edge->src)->reverse->zone;
+  int next_zone = track_next_sensor(switch_server, first_edge->src)->reverse->zone;
   int immediate_zones[2] = {my_zone, next_zone};
   for (int i = 0; i < 2; i++) {
     int zone = immediate_zones[i];
@@ -103,7 +103,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
       if (edge->src->type == NODE_SENSOR) {
         int new_pos = WaitOnSensor(sensor_server, edge->src->num);
         track_node *node = track + new_pos;
-        track_node *next_node = track_next_sensor(switch_server, track, node);
+        track_node *next_node = track_next_sensor(switch_server, node);
 
         int next_zone = next_node->reverse->zone;
         setSwitchesInZone(switch_server, track, next_zone, desired_switch_modes);
