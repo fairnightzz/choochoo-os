@@ -200,9 +200,10 @@ void TrainSystemServer()
         }
         if (train_idx != -1)
         {
-          bool is_unknown, is_unknown2;
+          bool is_unknown = false;
+          bool is_unknown2 = false;
           int dist;
-          int current_next_sens = train_next_sensors[train_idx][0];
+          int current_next_sens = traintrack[train_next_sensors[train_idx][0]].reverse - traintrack;
           int new_next_sens = find_next_sensor(current_next_sens, switch_server, &is_unknown, &dist);
           int new_next_next_sens = find_next_sensor(new_next_sens, switch_server, &is_unknown2, &dist);
           new_next_sens = is_unknown ? -1 : new_next_sens;
