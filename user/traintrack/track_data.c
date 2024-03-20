@@ -97,7 +97,7 @@ track_node *track_next_sensor(int switch_server, track_node *node)
   }
 }
 
-void post_track(track_node *track, Zones *zones)
+void post_track(track_node *track, int* sensors, int* switches)
 {
   // Reverse edges
   // construct the edges between nodes of opposite direction with dist 0
@@ -129,36 +129,40 @@ void post_track(track_node *track, Zones *zones)
   {
     track[i].zone = -1;
   }
-  // set zones
-  for (int i = 0; i < NUM_ZONES; ++i)
-  {
-    int zone_id = i;
-    // track->zones[i] = (Zone){
-    //     .zone = zone_id,
-    //     .sensors = {0},
-    //     .switches = {0}};
 
-    for (int j = 0;; ++j)
-    {
-      char *sensor_str = zones[i].sensors[j];
-      if (sensor_str == 0)
-        break;
-      track_node *node = track_node_by_name(track, sensor_str);
-      node->zone = zone_id;
-      // track->zones[i].sensors[j] = node;
-    }
-
-    for (int j = 0;; ++j)
-    {
-      int switch_id = zones[i].switches[j];
-      if (switch_id == 0)
-        break;
-      track_node *node = track_node_by_branch_id(track, switch_id);
-      node->zone = zone_id;
-      node->reverse->zone = zone_id;
-      // track->zones[i].switches[j] = node;
-    }
+  for (int i = 0; i<80; i++) {
+    track[i].zone = sensors[i];
   }
+
+  for (int i = 0; i<22; i++) {
+    track[80+2*i].zone = switches[i];
+  }
+
+  // set zones
+  // for (int i = 0; i < NUM_ZONES; ++i)
+  // {
+  //   int zone_id = i;
+
+  //   for (int j = 0;; ++j)
+  //   {
+  //     char *sensor_str = zones[i].sensors[j];
+  //     PRINT("sensor string: %s", sensor_str);
+  //     if (sensor_str == 0)
+  //       break;
+  //     track_node *node = track_node_by_name(track, sensor_str);
+  //     node->zone = zone_id;
+  //   }
+
+    // for (int j = 0;; ++j)
+    // {
+    //   int switch_id = zones[i].switches[j];
+    //   if (switch_id == 0)
+    //     break;
+    //   track_node *node = track_node_by_branch_id(track, switch_id);
+    //   node->zone = zone_id;
+    //   node->reverse->zone = zone_id;
+    // }
+  // }
 }
 
 void init_tracka(track_node *track, HashMap *nodeMap)
@@ -1345,39 +1349,9 @@ void init_tracka(track_node *track, HashMap *nodeMap)
   track[143].type = NODE_EXIT;
   track[143].reverse = &track[142];
 
-  Zones zonesA[] = {
-      {{"B8", "A10", 0}, {0}},
-      {{"B12", "A8", 0}, {0}},
-      {{"B10", "A5", 0}, {0}},
-      {{"A12", "A9", "A7", "A6", "C7", 0}, {1, 2, 3, 0}},
-      {{"C8", "C6", "C15", "D11", "C3", "E11", 0}, {6, 18, 5, 7, 0}},
-      {{"C5", "C10", "B15", 0}, {15, 0}},
-      {{"C16", "D12", 0}, {0}},
-      {{"C9", "B1", "B3", 0}, {16, 0}},
-      {{"B4", "C2", 0}, {0}},
-      {{"B16", "A3", 0}, {0}},
-      {{"A4", "C11", "C13", "A2", "A14", "A15", 0}, {14, 11, 12, 4, 0}},
-      {{"C12", "B5", "E16", 0}, {13, 0}},
-      {{"E15", "E1", 0}, {0}},
-      {{"E2", "D2", "C1", "B14", 0}, {153, 154, 155, 156, 0}},
-      {{"C14", "E7", 0}, {0}},
-      {{"B6", "D3", 0}, {0}},
-      {{"D4", "E3", "E5", 0}, {10, 0}},
-      {{"D1", "E4", 0}, {0}},
-      {{"E8", "D7", 0}, {0}},
-      {{"E6", "D6", 0}, {0}},
-      {{"D8", "D5", "E10", "D9", 0}, {9, 8, 0}},
-      {{"E12", "D10", 0}, {0}},
-      {{"E13", "E9", 0}, {0}},
-      {{"D15", "D13", "E14", 0}, {17, 0}},
-      {{"B13", "D16", 0}, {0}},
-      {{"B2", "D14", 0}, {0}},
-      {{"C4", 0}, {0}},
-      {{"A1", 0}, {0}},
-      {{"A13", 0}, {0}},
-      {{"A16", 0}, {0}},
-  };
-  post_track(track, zonesA);
+  int sensorsA[] = {27, 10, 9, 10, 2, 3, 3, 1, 3, 0, -1, 3, 28, 10, 10, 29, 7, 25, 7, 8, 11, 15, -1, 0, -1, 2, -1, 1, 24, 13, 5, 9, 13, 8, 4, 26, 5, 4, 3, 4, 7, 5, 10, 11, 10, 14, 4, 6, 17, 13, 15, 16, 20, 19, 18, 20, 20, 21, 4, 6, 23, 25, 23, 24, 12, 13, 16, 17, 16, 19, 14, 18, 22, 20, 4, 21, 22, 23, 12, 11};
+  int switchesA[] = {3, 3, 3, 10, 4, 4, 4, 20, 20, 16, 10, 10, 11, 10, 5, 7, 23, 4, 13, 13, 13, 13};
+  post_track(track, sensorsA, switchesA);
 
   for (int i = 0; i < TRACK_A_SIZE; ++i)
   {
@@ -2549,39 +2523,9 @@ void init_trackb(track_node *track, HashMap *nodeMap)
   track[139].type = NODE_EXIT;
   track[139].reverse = &track[138];
 
-  Zones zonesB[] = {
-      {{"B8", "A10", 0}, {0}},
-      {{"B12", "A8", 0}, {0}},
-      {{"B10", "A5", 0}, {0}},
-      {{"A12", "A9", "A7", "A6", "C7", 0}, {1, 2, 3, 0}},
-      {{"C8", "C6", "C15", "D11", "C3", "E11", 0}, {6, 18, 5, 7, 0}},
-      {{"C5", "C10", "B15", 0}, {15, 0}},
-      {{"C16", "D12", 0}, {0}},
-      {{"C9", "B1", "B3", 0}, {16, 0}},
-      {{"B4", "C2", 0}, {0}},
-      {{"B16", "A3", 0}, {0}},
-      {{"A4", "C11", "C13", "A2", "A14", "A15", 0}, {14, 11, 12, 4, 0}},
-      {{"C12", "B5", "E16", 0}, {13, 0}},
-      {{"E15", "E1", 0}, {0}},
-      {{"E2", "D2", "C1", "B14", 0}, {153, 154, 155, 156, 0}},
-      {{"C14", "E7", 0}, {0}},
-      {{"B6", "D3", 0}, {0}},
-      {{"D4", "E3", "E5", 0}, {10, 0}},
-      {{"D1", "E4", 0}, {0}},
-      {{"E8", "D7", 0}, {0}},
-      {{"E6", "D6", 0}, {0}},
-      {{"D8", "D5", "E10", "D9", 0}, {9, 8, 0}},
-      {{"E12", "D10", 0}, {0}},
-      {{"E13", "E9", 0}, {0}},
-      {{"D15", "D13", "E14", 0}, {17, 0}},
-      {{"B13", "D16", 0}, {0}},
-      {{"B2", "D14", 0}, {0}},
-      {{"C4", 0}, {0}},
-      {{"A1", 0}, {0}},
-      {{"A13", 0}, {0}},
-      {{"A16", "A11", 0}, {0}},
-  };
-  post_track(track, zonesB);
+  int sensorsB[] = {27, 10, 9, 10, 2, 3, 3, 1, 3, 0, 29, 3, 28, 10, 10, 29, 7, 25, 7, 8, 11, 15, -1, 0, -1, 2, -1, 1, 24, 13, 5, 9, 13, 8, 4, 26, 5, 4, 3, 4, 7, 5, 10, 11, 10, 14, 4, 6, 17, 13, 15, 16, 20, 19, 18, 20, 20, 21, 4, 6, 23, 25, 23, 24, 12, 13, 16, 17, 16, 19, 14, 18, 22, 20, 4, 21, 22, 23, 12, 11};
+  int switchesB[] = {3, 3, 3, 10, 4, 4, 4, 20, 20, 16, 10, 10, 11, 10, 5, 7, 23, 4, 13, 13, 13, 13};
+  post_track(track, sensorsB, switchesB);
 
   for (int i = 0; i < TRACK_A_SIZE; ++i)
   {

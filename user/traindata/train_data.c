@@ -3,22 +3,23 @@
 #include "string.h"
 #include "user/traintrack/track_data.h"
 
+int sensorsA[] = {27, 10, 9, 10, 2, 3, 3, 1, 3, 0, -1, 3, 28, 10, 10, 29, 7, 25, 7, 8, 11, 15, -1, 0, -1, 2, -1, 1, 24, 13, 5, 9, 13, 8, 4, 26, 5, 4, 3, 4, 7, 5, 10, 11, 10, 14, 4, 6, 17, 13, 15, 16, 20, 19, 18, 20, 20, 21, 4, 6, 23, 25, 23, 24, 12, 13, 16, 17, 16, 19, 14, 18, 22, 20, 4, 21, 22, 23, 12, 11};
+int switchesA[] = {3, 3, 3, 10, 4, 4, 4, 20, 20, 16, 10, 10, 11, 10, 5, 7, 23, 4, 13, 13, 13, 13};
+int sensorsB[] = {27, 10, 9, 10, 2, 3, 3, 1, 3, 0, 29, 3, 28, 10, 10, 29, 7, 25, 7, 8, 11, 15, -1, 0, -1, 2, -1, 1, 24, 13, 5, 9, 13, 8, 4, 26, 5, 4, 3, 4, 7, 5, 10, 11, 10, 14, 4, 6, 17, 13, 15, 16, 20, 19, 18, 20, 20, 21, 4, 6, 23, 25, 23, 24, 12, 13, 16, 17, 16, 19, 14, 18, 22, 20, 4, 21, 22, 23, 12, 11};
+int switchesB[] = {3, 3, 3, 10, 4, 4, 4, 20, 20, 16, 10, 10, 11, 10, 5, 7, 23, 4, 13, 13, 13, 13};
 track_node traintrack[TRACK_MAX];
 int trackType;
 HashMap *NodeIndexMap;
 void train_data_init()
 {
-    PRINT("INITIALIZING HASHMAP");
     NodeIndexMap = hashmap_new();
 
-    PRINT("INIT TRACK A");
     // Init track A or B?
-    init_tracka(traintrack, NodeIndexMap);
-    PRINT("done init track A");
-    trackType = 0; // A
+    // init_tracka(traintrack, NodeIndexMap);
+    // trackType = 0; // A
 
-    // init_trackb(traintrack, NodeIndexMap);
-    // trackType = 1; // B
+    init_trackb(traintrack, NodeIndexMap);
+    trackType = 1; // B
 }
 
 track_node *
@@ -34,8 +35,6 @@ HashMap *get_node_map()
 
 int zone_getid_by_sensor_id(int sensorId)
 {
-    int sensorsA[] = {27, 10, 9, 10, 2, 3, 3, 1, 3, 0, -1, 3, 28, 10, 10, 29, 7, 25, 7, 8, 11, 15, -1, 0, -1, 2, -1, 1, 24, 13, 5, 9, 13, 8, 4, 26, 5, 4, 3, 4, 7, 5, 10, 11, 10, 14, 4, 6, 17, 13, 15, 16, 20, 19, 18, 20, 20, 21, 4, 6, 23, 25, 23, 24, 12, 13, 16, 17, 16, 19, 14, 18, 22, 20, 4, 21, 22, 23, 12, 11};
-    int sensorsB[] = {27, 10, 9, 10, 2, 3, 3, 1, 3, 0, 29, 3, 28, 10, 10, 29, 7, 25, 7, 8, 11, 15, -1, 0, -1, 2, -1, 1, 24, 13, 5, 9, 13, 8, 4, 26, 5, 4, 3, 4, 7, 5, 10, 11, 10, 14, 4, 6, 17, 13, 15, 16, 20, 19, 18, 20, 20, 21, 4, 6, 23, 25, 23, 24, 12, 13, 16, 17, 16, 19, 14, 18, 22, 20, 4, 21, 22, 23, 12, 11};
     if (trackType == 0)
     {
         return sensorsA[sensorId];
@@ -63,8 +62,6 @@ int zone_getid_by_sensor_id(int sensorId)
 }
 int zone_getid_by_switch_id(int switch_id)
 {
-    int switchesA[] = {3, 3, 3, 10, 4, 4, 4, 20, 20, 16, 10, 10, 11, 10, 5, 7, 23, 4, 13, 13, 13, 13};
-    int switchesB[] = {3, 3, 3, 10, 4, 4, 4, 20, 20, 16, 10, 10, 11, 10, 5, 7, 23, 4, 13, 13, 13, 13};
     if (1 <= switch_id && switch_id <= 18)
     {
         switch_id = switch_id - 1;
