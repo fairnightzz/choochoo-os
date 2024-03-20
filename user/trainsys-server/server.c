@@ -106,6 +106,12 @@ void TrainSystemServer()
   train_sys_track = get_track();
 
   uint8_t train_states[TRAINS_COUNT] = {0};
+  int train_positions[TRAINS_COUNT] = {0};
+
+  for (int i = 0; i < TRAINS_COUNT; i++) {
+    train_positions[i] = -1;
+  }
+
   bool reversed[TRAINS_COUNT] = {0};
   int reverse_tasks[TRAINS_COUNT] = {0}; // 0 means no task is reversing
   int train_next_sensors[TRAIN_DATA_TRAIN_COUNT][SENSOR_DEPTH] = {
@@ -200,6 +206,7 @@ void TrainSystemServer()
           if (zone_getid_by_sensor_id(train_next_sensors[j][i]) == zone_getid_by_sensor_id(sensor_hit))
           {
             train = TRAIN_DATA_TRAINS[j];
+            train_positions[train] = sensor_hit;
             train_idx = j;
             break;
           }
@@ -460,14 +467,14 @@ void TrainSystemServer()
 
       break;
     }
-    case SYSTEM_GET_NEXT_TRAIN_SENSOR:
+    case SYSTEM_GET_TRAIN_POSITION:
     {
 
       int train = request.train;
-      int next_sensor_id = train_next_sensors[get_train_index(train)][0];
+      int pos = train_positions[train];
       response = (TrainSystemResponse){
-          .type = SYSTEM_GET_NEXT_TRAIN_SENSOR,
-          .next_sensor_id = next_sensor_id,
+          .type = SYSTEM_GET_TRAIN_POSITION,
+          .position = pos,
       };
       Reply(from_tid, (char *)&response, sizeof(TrainSystemResponse));
 

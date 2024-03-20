@@ -120,7 +120,7 @@ int TrainSystemReverse(int trainstate_server, int train)
   return 0;
 }
 
-int TrainSystemGetNextTrainSensor(int system_server, int train)
+int TrainSystemGetTrainPosition(int system_server, int train)
 {
   if (!(1 <= train && train <= 100))
   {
@@ -130,7 +130,7 @@ int TrainSystemGetNextTrainSensor(int system_server, int train)
 
   TrainSystemResponse response;
   TrainSystemRequest request = (TrainSystemRequest){
-      .type = SYSTEM_GET_NEXT_TRAIN_SENSOR,
+      .type = SYSTEM_GET_TRAIN_POSITION,
       .train = train,
   };
   int ret = Send(system_server, (const char *)&request, sizeof(TrainSystemRequest), (char *)&response, sizeof(TrainSystemResponse));

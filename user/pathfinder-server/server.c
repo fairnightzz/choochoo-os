@@ -68,6 +68,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
       break;
     }
   }
+  render_command("Found Waiting Sensor: %s", waiting_sensor->name);
 
   // compute desired switches
   SwitchMode desired_switch_modes[SWITCH_COUNT];
@@ -107,6 +108,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
 
   if (waiting_sensor == 0 || simple_path[0]->src == waiting_sensor)
   {
+    render_command("starting short move");
     int distance_to_dest = 0;
     for (int i = 0; i < edge_count; ++i)
     {
@@ -128,6 +130,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
       {
         int new_pos = WaitOnSensor(sensor_server, edge->src->num);
         track_node *node = track + new_pos;
+        render_command("waiting on sensor %s", node->name);
         track_node *next_node = track_next_sensor(switch_server, node);
 
         int next_zone = next_node->reverse->zone;

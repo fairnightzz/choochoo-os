@@ -2,6 +2,7 @@
 #include "user/nameserver.h"
 #include "user/traintrack/track_data.h"
 #include "user/trainsys-server/interface.h"
+#include "user/switch-server/interface.h"
 #include "server.h"
 #include "user/traindata/train_data.h"
 #include "user/ui/render.h"
@@ -10,9 +11,8 @@ int PlanPath(Path path)
 {
     HashMap *nodeMap = get_node_map();
     int trainsys_server = WhoIs(TrainSystemAddress);
-
     // TODO
-    int start_sensor = TrainSystemGetNextTrainSensor(trainsys_server, path.train);
+    int start_sensor = TrainSystemGetTrainPosition(trainsys_server, path.train);
     render_command("[PlanPath INFO] Train: %d Source Sensor: %d Destination Sensor: %s", path.train, start_sensor, path.dest);
     if (start_sensor == -1)
     {
