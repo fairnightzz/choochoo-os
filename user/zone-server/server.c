@@ -3,6 +3,7 @@
 #include "user/traindata/train_data.h"
 #include "lib/stdlib.h"
 #include "user/nameserver.h"
+#include "user/ui/render.h"
 
 static int reservations[NUM_ZONES]; // zero means no train has the zone reserved
 
@@ -13,7 +14,7 @@ bool _zone_reserve(int train, int zone)
     return true; // train is allowed to reserve a zone multiple times
   if (reservations[zone] != 0)
   {
-    LOG_WARN("unable for train %d to reserve zone %d, already reserved by train %d", train, zone, reservations[zone]);
+    render_command("unable for train %d to reserve zone %d, already reserved by train %d", train, zone, reservations[zone]);
     return false;
   }
   reservations[zone] = train;
@@ -105,7 +106,7 @@ void ZoneServer()
     int msg_len = Receive(&from_tid, (char *)&request, sizeof(ZoneRequest));
     if (msg_len < 0)
     {
-      LOG_WARN("Zone request error when receiving");
+      render_command("Zone request error when receiving");
       continue;
     }
 
@@ -174,7 +175,7 @@ void ZoneServer()
       // if the train is already holding the zone, return
       if (!_zone_is_reserved(zone, train))
       {
-        LOG_WARN("Zone server train %d is alreading holding zone %d, unblocking", train, zone);
+        render_command("Zone server train %d is alreading holding zone %d, unblocking", train, zone);
         response = (ZoneResponse){
             .type = ZONE_WAIT,
         };

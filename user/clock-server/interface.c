@@ -1,5 +1,6 @@
 #include "interface.h"
 #include "stdlib.h"
+#include "user/ui/render.h"
 
 // Returns time as ticks and so will every other call
 int Time(int tid)
@@ -37,7 +38,7 @@ int Delay(int tid, int ticks)
 
   if (returnValue < 0 || response.type != CLOCK_DELAY)
   {
-    PRINT("Delay request to clock server %d has errored.", tid);
+    render_command("Delay request to clock server %d has errored: ret value: %d type %d", tid, returnValue, response.type);
     return -1;
   }
 

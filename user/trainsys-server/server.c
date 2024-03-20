@@ -167,7 +167,7 @@ void TrainSystemServer()
           train_idx = i;
         }
       }
-      if (train_idx != -1)
+      if (train_idx != -1 && train_next_sensors[train_idx][0] != -1)
       {
         bool is_unknown = false;
         bool is_unknown2 = false;
@@ -273,7 +273,7 @@ void TrainSystemServer()
     }
     case SYSTEM_SET_SPEED:
     {
-      // render_command("log: setting train speed of train %d to %d", request.train, request.speed);
+      render_command("setting train speed of train %d to %d", request.train, request.speed);
 
       int train = request.train;
       int speed = request.speed;
@@ -313,6 +313,8 @@ void TrainSystemServer()
       int train = request.train;
       int speed = train_states[train] & TRAIN_SPEED_MASK;
 
+      render_command("[TSS Reverse]: train %d speed %d", request.train, speed);
+
       bool was_already_reversing;
       if (reverse_tasks[train] != 0)
       {
@@ -327,6 +329,32 @@ void TrainSystemServer()
           speed = 15;
           temp_state = (temp_state & ~TRAIN_SPEED_MASK) | speed;
           io_marklin_set_train(marklin_io, train, temp_state);
+
+          // update the next two sensors
+          int train_idx = -1;
+          for (int j = 0; j < TRAIN_DATA_TRAIN_COUNT; j++)
+          {
+            if (TRAIN_DATA_TRAINS[j] == (uint32_t)train)
+            {
+              train = TRAIN_DATA_TRAINS[j];
+              train_idx = j;
+              break;
+            }
+          }
+          if (train_idx != -1)
+          {
+            bool is_unknown = false;
+            bool is_unknown2 = false;
+            int dist;
+            int current_next_sens = train_sys_track[train_next_sensors[train_idx][0]].reverse - train_sys_track;
+            int new_next_sens = find_next_sensor(current_next_sens, switch_server, &is_unknown, &dist);
+            int new_next_next_sens = find_next_sensor(new_next_sens, switch_server, &is_unknown2, &dist);
+            new_next_sens = is_unknown ? -1 : new_next_sens;
+            new_next_next_sens = is_unknown2 ? -1 : new_next_next_sens;
+            train_next_sensors[train_idx][0] = new_next_sens;
+            train_next_sensors[train_idx][1] = new_next_next_sens;
+            render_predict_next_sensor(train, new_next_sens);
+          }
         }
         else
         {
@@ -366,6 +394,7 @@ void TrainSystemServer()
       {
         LOG_ERROR("Couldn't find train associated with reverse task");
       }
+      render_command("[TSS Reverse Reverse]: train %d", train);
 
       uint8_t temp_state = train_states[train];
       int speed = 15;
@@ -391,7 +420,7 @@ void TrainSystemServer()
           break;
         }
       }
-      if (train_idx != -1)
+      if (train_idx != -1 && train_next_sensors[train_idx][0] != -1)
       {
         bool is_unknown = false;
         bool is_unknown2 = false;
@@ -425,6 +454,7 @@ void TrainSystemServer()
         LOG_ERROR("Couldn't find train associated with reverse task");
       }
 
+      render_command("[TSS Reverse RESTART]: train %d", train);
       io_marklin_set_train(marklin_io, train, train_states[train]);
       reverse_tasks[train] = 0;
 

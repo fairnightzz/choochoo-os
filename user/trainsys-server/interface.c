@@ -1,5 +1,6 @@
 #include "interface.h"
 #include "user/nameserver.h"
+#include "user/ui/render.h"
 
 int TrainSystemSetSpeed(int system_server, int train, int speed)
 {
@@ -14,7 +15,7 @@ int TrainSystemSetSpeed(int system_server, int train, int speed)
   int ret = Send(system_server, (const char *)&request, sizeof(TrainSystemRequest), (char *)&response, sizeof(TrainSystemResponse));
   if (ret < 0)
   {
-    LOG_WARN("TrainSystemSetSpeed ERRORED");
+    render_command("TrainSystemSetSpeed ERRORED %d", ret);
     return -1;
   }
   return 0;
@@ -108,7 +109,7 @@ int TrainSystemReverse(int trainstate_server, int train)
   int ret = Send(trainstate_server, (const char *)&request, sizeof(TrainSystemRequest), (char *)&response, sizeof(TrainSystemResponse));
   if (response.was_already_reversing)
   {
-    LOG_WARN("Train %d was already reversing", train);
+    render_command("Train %d was already reversing", train);
     return -1;
   }
   if (ret < 0)

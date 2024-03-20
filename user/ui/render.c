@@ -12,7 +12,7 @@
 #define ANSI_ORIGIN "\033[H"
 #define ANSI_MOVE(r, c) "\033[" r ";" c "H"
 #define ANSI_CLEAR_LINE "\033[K"
-#define COMMAND_LINE_HISTORY 23
+#define COMMAND_LINE_HISTORY 43
 #define SENSOR_LINE_HISTORY 5
 
 static TermUIState UIState;
@@ -66,6 +66,26 @@ void render_init()
   uart_printf(CONSOLE, "│ 016 .    017 .    018 .    153 .    154 . │                                   │\r\n");
   uart_printf(CONSOLE, "│ 155 .    156 .                            │                                   │\r\n");
   uart_printf(CONSOLE, "├─[console]─────────────────────────────────────────────────────────────────────┤\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│                                                                               │\r\n");
   uart_printf(CONSOLE, "│                                                                               │\r\n");
@@ -143,7 +163,8 @@ string get_sensor_string(int sensor_id)
   int sensor_index = (sensor_id % 16) + 1;
 
   char sensorString[4] = {0};
-  if (sensor_id == -1) {
+  if (sensor_id == -1)
+  {
     sensorString[1] = '-';
     sensorString[2] = '-';
     sensorString[3] = '-';
@@ -167,7 +188,7 @@ string get_sensor_string(int sensor_id)
 
 void render_perf_stats(int percentage)
 {
-  print("\033[%u;%uH%d%%", 22 + 15, 35, percentage);
+  print("\033[%u;%uH%d%%", 22 + 35, 35, percentage);
 }
 
 void render_train_system_train(int train)
@@ -182,20 +203,20 @@ void render_train_system_train(int train)
     trainString = string_format("%d", train);
   }
 
-  print("\033[%u;%uH%s", 26 + 15, 6, trainString.data);
+  print("\033[%u;%uH%s", 26 + 35, 6, trainString.data);
 }
 
 void render_predict_current_sensor(int train, int sensor_id)
 {
   int train_index = get_train_index(train);
   string sensorString = get_sensor_string(sensor_id);
-  print("\033[%u;%uH%s", 26 + 15 + train_index, 22, sensorString.data);
+  print("\033[%u;%uH%s", 26 + 35 + train_index, 22, sensorString.data);
 }
 void render_predict_next_sensor(int train, int sensor_id)
 {
   int train_index = get_train_index(train);
   string sensorString = get_sensor_string(sensor_id);
-  print("\033[%u;%uH%s", 26 + 15 + train_index, 39, sensorString.data);
+  print("\033[%u;%uH%s", 26 + 35 + train_index, 39, sensorString.data);
 }
 void render_predict_error(int train, int terr, int derr)
 {
@@ -211,13 +232,13 @@ void render_predict_error(int train, int terr, int derr)
 
   // print("\033[%u;%uH     ", 26 + 15, 51, terr);
   // print("\033[%u;%uH     ", 26 + 15, 68, derr);
-  print("\033[%u;%uH   %d ticks", 26 + 15 + train_index, 53 - toffset.length, terr);
-  print("\033[%u;%uH   %d mm", 26 + 15 + train_index, 70 - doffset.length, derr);
+  print("\033[%u;%uH   %d ticks", 26 + 35 + train_index, 53 - toffset.length, terr);
+  print("\033[%u;%uH   %d mm", 26 + 35 + train_index, 70 - doffset.length, derr);
 }
 
 void render_debug_log(int message)
 {
-  uart_printf(CONSOLE, "\033[%u;%uH%d", 23 + 15, 35, message);
+  uart_printf(CONSOLE, "\033[%u;%uH%d", 23 + 35, 35, message);
 }
 
 void render_char(unsigned char ch, int prompt_length)
@@ -227,7 +248,7 @@ void render_char(unsigned char ch, int prompt_length)
     char buf[2];
     buf[1] = '\0';
     buf[0] = ch;
-    print("\033[34;%dH%s", prompt_length + 5, buf);
+    print("\033[%d;%dH%s", 34 + 20, prompt_length + 5, buf);
   }
 }
 
@@ -238,13 +259,13 @@ void render_backspace(int prompt_length)
     char buf[2];
     buf[1] = '\0';
     buf[0] = ' ';
-    print("\033[34;%dH%s", prompt_length + 5 - 1, buf);
+    print("\033[%d;%dH%s", 34 + 20, prompt_length + 5 - 1, buf);
   }
 }
 
 void render_prompt_clear()
 {
-  print("\033[34;5H                                                                           ");
+  print("\033[54;5H                                                                           ");
 }
 
 void clear_console()
