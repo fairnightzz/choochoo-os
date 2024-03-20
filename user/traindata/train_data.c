@@ -11,11 +11,11 @@ void train_data_init()
     NodeIndexMap = hashmap_new();
 
     // Init track A or B?
-    // init_tracka(traintrack, NodeIndexMap);
-    // trackType = 0; // A
+    init_tracka(traintrack, NodeIndexMap);
+    trackType = 0; // A
 
-    init_trackb(traintrack, NodeIndexMap);
-    trackType = 1; // B
+    // init_trackb(traintrack, NodeIndexMap);
+    // trackType = 1; // B
 }
 
 track_node *
