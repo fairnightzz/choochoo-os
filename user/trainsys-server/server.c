@@ -197,7 +197,7 @@ void TrainSystemServer()
       {
         for (int j = 0; j < TRAIN_DATA_TRAIN_COUNT; j++)
         {
-          if (train_next_sensors[j][i] == request.sensor_hit)
+          if (zone_getid_by_sensor_id(train_next_sensors[j][i]) == zone_getid_by_sensor_id(sensor_hit))
           {
             train = TRAIN_DATA_TRAINS[j];
             train_idx = j;
