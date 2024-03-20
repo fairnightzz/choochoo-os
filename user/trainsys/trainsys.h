@@ -18,7 +18,6 @@ typedef struct
   int system_tid;
   int clock_tid;
   int switch_tid;
-  int pathfinder_tid;
 } TrainSystemState;
 
 void trainsys_init();

@@ -57,11 +57,11 @@ void trainsys_execute_command(CommandResult cres)
     string dest_node = cres.command_args.path_args.dest_node;
     int32_t offset = cres.command_args.path_args.offset;
     Path new_path = {
-      .allow_reversal = true,
-      .train = train,
-      .speed = speed,
-      .offset = offset,
-      .dest = dest_node.data,
+        .allow_reversal = true,
+        .train = train,
+        .speed = speed,
+        .offset = offset,
+        .dest = dest_node.data,
     };
     PlanPath(new_path);
     break;
@@ -76,12 +76,10 @@ void trainsys_init()
   int system_tid = WhoIs(TrainSystemAddress);
   int clock_tid = WhoIs(ClockAddress);
   int switch_tid = WhoIs(SwitchAddress);
-  int pathfinder_tid = WhoIs(PathFinderAddress);
   SystemState = (TrainSystemState){
       .system_tid = system_tid,
       .clock_tid = clock_tid,
       .switch_tid = switch_tid,
-      .pathfinder_tid = pathfinder_tid,
   };
 }
 

@@ -8,9 +8,9 @@
 #include "user/ui/render.h"
 #include "user/clock-server/interface.h"
 
-track_node traintrack[TRACK_MAX];
-
 #define SENSOR_DEPTH 2
+
+track_node *train_sys_track;
 
 typedef struct
 {
@@ -61,15 +61,15 @@ int find_next_sensor(int cur_node_idx, int switch_server, bool *is_unknown, int 
 {
   do
   {
-    if (traintrack[cur_node_idx].type == NODE_EXIT || traintrack[cur_node_idx].type == NODE_NONE)
+    if (train_sys_track[cur_node_idx].type == NODE_EXIT || train_sys_track[cur_node_idx].type == NODE_NONE)
     {
       *is_unknown = true;
       break;
     }
 
-    if (traintrack[cur_node_idx].type == NODE_BRANCH)
+    if (train_sys_track[cur_node_idx].type == NODE_BRANCH)
     {
-      SwitchMode sw_mode = SwitchGet(switch_server, traintrack[cur_node_idx].num);
+      SwitchMode sw_mode = SwitchGet(switch_server, train_sys_track[cur_node_idx].num);
       if (sw_mode == SWITCH_MODE_UNKNOWN)
       {
         *is_unknown = true;
@@ -77,21 +77,21 @@ int find_next_sensor(int cur_node_idx, int switch_server, bool *is_unknown, int 
       }
       else if (sw_mode == SWITCH_MODE_C)
       {
-        *dist_to_next += traintrack[cur_node_idx].edge[DIR_CURVED].dist;
-        cur_node_idx = traintrack[cur_node_idx].edge[DIR_CURVED].dest - traintrack;
+        *dist_to_next += train_sys_track[cur_node_idx].edge[DIR_CURVED].dist;
+        cur_node_idx = train_sys_track[cur_node_idx].edge[DIR_CURVED].dest - train_sys_track;
       }
       else
       {
-        *dist_to_next += traintrack[cur_node_idx].edge[DIR_STRAIGHT].dist;
-        cur_node_idx = traintrack[cur_node_idx].edge[DIR_STRAIGHT].dest - traintrack;
+        *dist_to_next += train_sys_track[cur_node_idx].edge[DIR_STRAIGHT].dist;
+        cur_node_idx = train_sys_track[cur_node_idx].edge[DIR_STRAIGHT].dest - train_sys_track;
       }
     }
     else
     {
-      *dist_to_next += traintrack[cur_node_idx].edge[DIR_AHEAD].dist;
-      cur_node_idx = traintrack[cur_node_idx].edge[DIR_AHEAD].dest - traintrack;
+      *dist_to_next += train_sys_track[cur_node_idx].edge[DIR_AHEAD].dist;
+      cur_node_idx = train_sys_track[cur_node_idx].edge[DIR_AHEAD].dest - train_sys_track;
     }
-  } while (traintrack[cur_node_idx].type != NODE_SENSOR);
+  } while (train_sys_track[cur_node_idx].type != NODE_SENSOR);
   return cur_node_idx;
 }
 
@@ -101,8 +101,8 @@ void TrainSystemServer()
   int marklin_io = WhoIs(MarklinIOAddress);
   int switch_server = WhoIs(SwitchAddress);
 
-  HashMap *NodeIndexMap = hashmap_new();
-  init_tracka(traintrack, NodeIndexMap);
+  HashMap *NodeIndexMap = get_node_map();
+  train_sys_track = get_track();
 
   uint8_t train_states[TRAINS_COUNT] = {0};
   bool reversed[TRAINS_COUNT] = {0};
@@ -248,10 +248,10 @@ void TrainSystemServer()
       }
       else
       {
-        train_next_sensors[train_idx][0] = traintrack[next_sensor_node_idx].num;
+        train_next_sensors[train_idx][0] = train_sys_track[next_sensor_node_idx].num;
       }
 
-      response.next_sensor_id = traintrack[next_sensor_node_idx].num;
+      response.next_sensor_id = train_sys_track[next_sensor_node_idx].num;
       response.train = train;
       response.train_state = train_states[train];
       response.dist_to_next = dist_to_next;
@@ -264,7 +264,7 @@ void TrainSystemServer()
       }
       else
       {
-        train_next_sensors[train_idx][1] = traintrack[next_next_sensor_id].num;
+        train_next_sensors[train_idx][1] = train_sys_track[next_next_sensor_id].num;
       }
 
       Reply(from_tid, (char *)&response, sizeof(TrainSystemResponse));
@@ -295,7 +295,7 @@ void TrainSystemServer()
           bool is_unknown = false;
           bool is_unknown2 = false;
           int dist;
-          int current_next_sens = traintrack[train_next_sensors[train_idx][0]].reverse - traintrack;
+          int current_next_sens = train_sys_track[train_next_sensors[train_idx][0]].reverse - train_sys_track;
           int new_next_sens = find_next_sensor(current_next_sens, switch_server, &is_unknown, &dist);
           int new_next_next_sens = find_next_sensor(new_next_sens, switch_server, &is_unknown2, &dist);
           new_next_sens = is_unknown ? -1 : new_next_sens;

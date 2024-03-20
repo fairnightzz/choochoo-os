@@ -4,39 +4,6 @@
 #include <string.h>
 #include "user/switch-server/interface.h"
 
-static const Zones zones[] = {
-    {{"B8", "A10", 0}, {0}},
-    {{"B12", "A8", 0}, {0}},
-    {{"B10", "A5", 0}, {0}},
-    {{"A12", "A9", "A7", "A6", "C7", 0}, {1, 2, 3, 0}},
-    {{"C8", "C6", "C15", "D11", "C3", "E11", 0}, {6, 18, 5, 7, 0}},
-    {{"C5", "C10", "B15", 0}, {15, 0}},
-    {{"C16", "D12", 0}, {0}},
-    {{"C9", "B1", "B3", 0}, {16, 0}},
-    {{"B4", "C2", 0}, {0}},
-    {{"B16", "A3", 0}, {0}},
-    {{"A4", "C11", "C13", "A2", "A14", "A15", 0}, {14, 11, 12, 4, 0}},
-    {{"C12", "B5", "E16", 0}, {13, 0}},
-    {{"E15", "E1", 0}, {0}},
-    {{"E2", "D2", "C1", "B14", 0}, {153, 154, 155, 156, 0}},
-    {{"C14", "E7", 0}, {0}},
-    {{"B6", "D3", 0}, {0}},
-    {{"D4", "E3", "E5", 0}, {10, 0}},
-    {{"D1", "E4", 0}, {0}},
-    {{"E8", "D7", 0}, {0}},
-    {{"E6", "D6", 0}, {0}},
-    {{"D8", "D5", "E10", "D9", 0}, {9, 8, 0}},
-    {{"E12", "D10", 0}, {0}},
-    {{"E13", "E9", 0}, {0}},
-    {{"D15", "D13", "E14", 0}, {17, 0}},
-    {{"B13", "D16", 0}, {0}},
-    {{"B2", "D14", 0}, {0}},
-    {{"C4", 0}, {0}},
-    {{"A1", 0}, {0}},
-    {{"A13", 0}, {0}},
-    {{"A16", 0}, {0}},
-};
-
 track_node *
 track_node_by_name(track_node *track, char *name)
 {
@@ -126,6 +93,70 @@ track_node *track_next_sensor(int switch_server, track_node *node)
     if (current->type == NODE_SENSOR)
     {
       return current;
+    }
+  }
+}
+
+void post_track(track_node *track, Zones *zones)
+{
+  // Reverse edges
+  // construct the edges between nodes of opposite direction with dist 0
+  for (int i = 0; i < TRACK_A_SIZE; ++i)
+  {
+    track_node *rev = track[i].reverse;
+    track[i].edge[DIR_REVERSE].reverse = &rev->edge[DIR_REVERSE];
+    track[i].edge[DIR_REVERSE].src = &track[i];
+    track[i].edge[DIR_REVERSE].dest = rev;
+    track[i].edge[DIR_REVERSE].dist = 0;
+    track[i].edge[DIR_REVERSE].type = EDGE_REVERSE;
+
+    // also set the type of other edges
+    node_type node_type = track[i].type;
+    if (node_type == NODE_SENSOR || node_type == NODE_MERGE)
+    {
+      track[i].edge[DIR_AHEAD].type = EDGE_FORWARD;
+    }
+    else if (node_type == NODE_BRANCH)
+    {
+      track[i].edge[DIR_STRAIGHT].type = EDGE_FORWARD;
+      track[i].edge[DIR_CURVED].type = EDGE_FORWARD;
+    }
+  }
+
+  // construct zones
+  // init zones to -1
+  for (int i = 0; i < TRACK_MAX; ++i)
+  {
+    track[i].zone = -1;
+  }
+  // set zones
+  for (int i = 0; i < NUM_ZONES; ++i)
+  {
+    int zone_id = i;
+    // track->zones[i] = (Zone){
+    //     .zone = zone_id,
+    //     .sensors = {0},
+    //     .switches = {0}};
+
+    for (int j = 0;; ++j)
+    {
+      char *sensor_str = zones[i].sensors[j];
+      if (sensor_str == 0)
+        break;
+      track_node *node = track_node_by_name(track, sensor_str);
+      node->zone = zone_id;
+      // track->zones[i].sensors[j] = node;
+    }
+
+    for (int j = 0;; ++j)
+    {
+      int switch_id = zones[i].switches[j];
+      if (switch_id == 0)
+        break;
+      track_node *node = track_node_by_branch_id(track, switch_id);
+      node->zone = zone_id;
+      node->reverse->zone = zone_id;
+      // track->zones[i].switches[j] = node;
     }
   }
 }
@@ -1314,66 +1345,39 @@ void init_tracka(track_node *track, HashMap *nodeMap)
   track[143].type = NODE_EXIT;
   track[143].reverse = &track[142];
 
-  // Reverse edges
-  // construct the edges between nodes of opposite direction with dist 0
-  for (int i = 0; i < TRACK_A_SIZE; ++i)
-  {
-    track_node *rev = track[i].reverse;
-    track[i].edge[DIR_REVERSE].reverse = &rev->edge[DIR_REVERSE];
-    track[i].edge[DIR_REVERSE].src = &track[i];
-    track[i].edge[DIR_REVERSE].dest = rev;
-    track[i].edge[DIR_REVERSE].dist = 0;
-    track[i].edge[DIR_REVERSE].type = EDGE_REVERSE;
-
-    // also set the type of other edges
-    node_type node_type = track[i].type;
-    if (node_type == NODE_SENSOR || node_type == NODE_MERGE)
-    {
-      track[i].edge[DIR_AHEAD].type = EDGE_FORWARD;
-    }
-    else if (node_type == NODE_BRANCH)
-    {
-      track[i].edge[DIR_STRAIGHT].type = EDGE_FORWARD;
-      track[i].edge[DIR_CURVED].type = EDGE_FORWARD;
-    }
-  }
-
-  // construct zones
-  // init zones to -1
-  for (int i = 0; i < TRACK_MAX; ++i)
-  {
-    track[i].zone = -1;
-  }
-  // set zones
-  for (int i = 0; i < NUM_ZONES; ++i)
-  {
-    int zone_id = i;
-    // track->zones[i] = (Zone){
-    //     .zone = zone_id,
-    //     .sensors = {0},
-    //     .switches = {0}};
-
-    for (int j = 0;; ++j)
-    {
-      char *sensor_str = zones[i].sensors[j];
-      if (sensor_str == 0)
-        break;
-      track_node *node = track_node_by_name(track, sensor_str);
-      node->zone = zone_id;
-      // track->zones[i].sensors[j] = node;
-    }
-
-    for (int j = 0;; ++j)
-    {
-      int switch_id = zones[i].switches[j];
-      if (switch_id == 0)
-        break;
-      track_node *node = track_node_by_branch_id(track, switch_id);
-      node->zone = zone_id;
-      node->reverse->zone = zone_id;
-      // track->zones[i].switches[j] = node;
-    }
-  }
+  Zones zonesA[] = {
+      {{"B8", "A10", 0}, {0}},
+      {{"B12", "A8", 0}, {0}},
+      {{"B10", "A5", 0}, {0}},
+      {{"A12", "A9", "A7", "A6", "C7", 0}, {1, 2, 3, 0}},
+      {{"C8", "C6", "C15", "D11", "C3", "E11", 0}, {6, 18, 5, 7, 0}},
+      {{"C5", "C10", "B15", 0}, {15, 0}},
+      {{"C16", "D12", 0}, {0}},
+      {{"C9", "B1", "B3", 0}, {16, 0}},
+      {{"B4", "C2", 0}, {0}},
+      {{"B16", "A3", 0}, {0}},
+      {{"A4", "C11", "C13", "A2", "A14", "A15", 0}, {14, 11, 12, 4, 0}},
+      {{"C12", "B5", "E16", 0}, {13, 0}},
+      {{"E15", "E1", 0}, {0}},
+      {{"E2", "D2", "C1", "B14", 0}, {153, 154, 155, 156, 0}},
+      {{"C14", "E7", 0}, {0}},
+      {{"B6", "D3", 0}, {0}},
+      {{"D4", "E3", "E5", 0}, {10, 0}},
+      {{"D1", "E4", 0}, {0}},
+      {{"E8", "D7", 0}, {0}},
+      {{"E6", "D6", 0}, {0}},
+      {{"D8", "D5", "E10", "D9", 0}, {9, 8, 0}},
+      {{"E12", "D10", 0}, {0}},
+      {{"E13", "E9", 0}, {0}},
+      {{"D15", "D13", "E14", 0}, {17, 0}},
+      {{"B13", "D16", 0}, {0}},
+      {{"B2", "D14", 0}, {0}},
+      {{"C4", 0}, {0}},
+      {{"A1", 0}, {0}},
+      {{"A13", 0}, {0}},
+      {{"A16", 0}, {0}},
+  };
+  post_track(track, zonesA);
 
   for (int i = 0; i < TRACK_A_SIZE; ++i)
   {
@@ -2544,6 +2548,40 @@ void init_trackb(track_node *track, HashMap *nodeMap)
   track[139].name = "EX10";
   track[139].type = NODE_EXIT;
   track[139].reverse = &track[138];
+
+  Zones zonesB[] = {
+      {{"B8", "A10", 0}, {0}},
+      {{"B12", "A8", 0}, {0}},
+      {{"B10", "A5", 0}, {0}},
+      {{"A12", "A9", "A7", "A6", "C7", 0}, {1, 2, 3, 0}},
+      {{"C8", "C6", "C15", "D11", "C3", "E11", 0}, {6, 18, 5, 7, 0}},
+      {{"C5", "C10", "B15", 0}, {15, 0}},
+      {{"C16", "D12", 0}, {0}},
+      {{"C9", "B1", "B3", 0}, {16, 0}},
+      {{"B4", "C2", 0}, {0}},
+      {{"B16", "A3", 0}, {0}},
+      {{"A4", "C11", "C13", "A2", "A14", "A15", 0}, {14, 11, 12, 4, 0}},
+      {{"C12", "B5", "E16", 0}, {13, 0}},
+      {{"E15", "E1", 0}, {0}},
+      {{"E2", "D2", "C1", "B14", 0}, {153, 154, 155, 156, 0}},
+      {{"C14", "E7", 0}, {0}},
+      {{"B6", "D3", 0}, {0}},
+      {{"D4", "E3", "E5", 0}, {10, 0}},
+      {{"D1", "E4", 0}, {0}},
+      {{"E8", "D7", 0}, {0}},
+      {{"E6", "D6", 0}, {0}},
+      {{"D8", "D5", "E10", "D9", 0}, {9, 8, 0}},
+      {{"E12", "D10", 0}, {0}},
+      {{"E13", "E9", 0}, {0}},
+      {{"D15", "D13", "E14", 0}, {17, 0}},
+      {{"B13", "D16", 0}, {0}},
+      {{"B2", "D14", 0}, {0}},
+      {{"C4", 0}, {0}},
+      {{"A1", 0}, {0}},
+      {{"A13", 0}, {0}},
+      {{"A16", "A11", 0}, {0}},
+  };
+  post_track(track, zonesB);
 
   for (int i = 0; i < TRACK_A_SIZE; ++i)
   {
