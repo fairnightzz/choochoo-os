@@ -44,7 +44,8 @@ void ReverseTask()
   TrainSystemResponse trainsys_response;
   TrainSystemRequest trainsys_request;
 
-  Delay(clock_server, train_data_stop_time(request.train, request.speed) / 10 + 100);
+  // Delay(clock_server, train_data_stop_time(request.train, request.speed) / 10 + 100);
+  Delay(clock_server, 250);
   trainsys_request = (TrainSystemRequest){
       .type = SYSTEM_REVERSE_REVERSE,
   };
@@ -278,34 +279,6 @@ void TrainSystemServer()
       int speed = request.speed;
       train_states[train] = (train_states[train] & ~TRAIN_SPEED_MASK) | speed;
 
-      if (speed == 15)
-      { // update the next two sensors
-        int train_idx = -1;
-        for (int j = 0; j < TRAIN_DATA_TRAIN_COUNT; j++)
-        {
-          if (TRAIN_DATA_TRAINS[j] == (uint32_t)train)
-          {
-            train = TRAIN_DATA_TRAINS[j];
-            train_idx = j;
-            break;
-          }
-        }
-        if (train_idx != -1)
-        {
-          bool is_unknown = false;
-          bool is_unknown2 = false;
-          int dist;
-          int current_next_sens = train_sys_track[train_next_sensors[train_idx][0]].reverse - train_sys_track;
-          int new_next_sens = find_next_sensor(current_next_sens, switch_server, &is_unknown, &dist);
-          int new_next_next_sens = find_next_sensor(new_next_sens, switch_server, &is_unknown2, &dist);
-          new_next_sens = is_unknown ? -1 : new_next_sens;
-          new_next_next_sens = is_unknown2 ? -1 : new_next_next_sens;
-          train_next_sensors[train_idx][0] = new_next_sens;
-          train_next_sensors[train_idx][1] = new_next_next_sens;
-          render_predict_next_sensor(train, new_next_sens);
-        }
-      }
-
       io_marklin_set_train(marklin_io, train, train_states[train]);
 
       response = (TrainSystemResponse){
@@ -407,6 +380,32 @@ void TrainSystemServer()
       };
       Reply(from_tid, (char *)&response, sizeof(TrainSystemResponse));
 
+      // update the next two sensors
+      int train_idx = -1;
+      for (int j = 0; j < TRAIN_DATA_TRAIN_COUNT; j++)
+      {
+        if (TRAIN_DATA_TRAINS[j] == (uint32_t)train)
+        {
+          train = TRAIN_DATA_TRAINS[j];
+          train_idx = j;
+          break;
+        }
+      }
+      if (train_idx != -1)
+      {
+        bool is_unknown = false;
+        bool is_unknown2 = false;
+        int dist;
+        int current_next_sens = train_sys_track[train_next_sensors[train_idx][0]].reverse - train_sys_track;
+        int new_next_sens = find_next_sensor(current_next_sens, switch_server, &is_unknown, &dist);
+        int new_next_next_sens = find_next_sensor(new_next_sens, switch_server, &is_unknown2, &dist);
+        new_next_sens = is_unknown ? -1 : new_next_sens;
+        new_next_next_sens = is_unknown2 ? -1 : new_next_next_sens;
+        train_next_sensors[train_idx][0] = new_next_sens;
+        train_next_sensors[train_idx][1] = new_next_next_sens;
+        render_predict_next_sensor(train, new_next_sens);
+      }
+
       break;
     }
     case SYSTEM_REVERSE_RESTART:
@@ -440,7 +439,7 @@ void TrainSystemServer()
     {
 
       int train = request.train;
-      int next_sensor_id = train_next_sensors[train][0];
+      int next_sensor_id = train_next_sensors[get_train_index(train)][0];
       response = (TrainSystemResponse){
           .type = SYSTEM_GET_NEXT_TRAIN_SENSOR,
           .next_sensor_id = next_sensor_id,

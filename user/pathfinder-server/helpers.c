@@ -7,9 +7,9 @@
 #define NONE 2147483646
 
 
-int do_edge_trace(int cur_node, int src_node, int src_rev_node, int iter_count, uint32_t *prev, track_edge** edges, track_edge **edge_graph)
+int do_edge_trace(int cur_node, int src_node, int iter_count, uint32_t *prev, track_edge** edges, track_edge **edge_graph)
 {
-  if (cur_node == src_node || cur_node == src_rev_node)
+  if (cur_node == src_node)
   {
     return iter_count - 1;
   }
@@ -18,7 +18,8 @@ int do_edge_trace(int cur_node, int src_node, int src_rev_node, int iter_count, 
     render_command("[EdgeTrace ERROR] cannot form edge graph through trace");
     return -1;
   }
-  int tot_iterations = do_edge_trace(prev[cur_node], src_node, src_rev_node, iter_count + 1, prev, edges, edge_graph);
+  int tot_iterations = do_edge_trace(prev[cur_node], src_node, iter_count + 1, prev, edges, edge_graph);
+  render_command("[Edge Trace]: %s -> %s, dist %d, type %d", edges[cur_node]->src->name, edges[cur_node]->dest->name, edges[cur_node]->dist,edges[cur_node]->type);
   edge_graph[tot_iterations - iter_count] = edges[cur_node];
   // string render_string = string_format("edge trace: tot_iterations - iter_count: %d, src: %s, dest: %s, dist: %d", tot_iterations - iter_count, edges[cur_node]->src->name, edges[cur_node]->dest->name, edges[cur_node]->dist);
   // render_command(&render_string);
@@ -114,6 +115,5 @@ int do_djikstra(track_node *track, int train, int source_node, int dest_node, bo
     }
   }
 
-  int src_rev = track[source_node].reverse - track;
-  return do_edge_trace(dest_node, source_node, src_rev, 0, prev, edges, edge_graph);
+  return do_edge_trace(dest_node, source_node, 0, prev, edges, edge_graph) + 1;
 }

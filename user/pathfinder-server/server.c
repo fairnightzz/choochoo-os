@@ -44,6 +44,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
   {
     train_speed = TRAIN_DATA_SPEEDS[idx];
     stopping_distance = train_data_stop_dist(train, train_speed) - offset;
+    // render_command("stopping distance: %d train_speed: %d", stopping_distance, train_speed);
     train_vel = train_data_vel(train, train_speed);
 
     waiting_sensor = 0;
@@ -51,6 +52,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     while (last_edge_idx >= 0)
     {
       track_edge *edge = simple_path[last_edge_idx];
+      // render_command("edge node %s", edge->src->name);
       stopping_distance -= edge->dist;
       if (stopping_distance <= 0 && edge->src->type == NODE_SENSOR)
       {
@@ -65,6 +67,8 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
       break;
     }
   }
+  // render_command("Waiting Sensor %s", waiting_sensor->name);
+
 
   // compute desired switches
   SwitchMode desired_switch_modes[SWITCH_COUNT];
@@ -79,12 +83,13 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     if (edge->src->type == NODE_BRANCH)
     {
       int switch_num = edge->src->num;
+      switch_num = (1 <= switch_num && switch_num <= 18) ? switch_num - 1 : switch_num - 135;
       if (track_edge_cmp(edge->src->edge[DIR_STRAIGHT], *edge))
       {
         desired_switch_modes[switch_num] = SWITCH_MODE_S;
       }
       else
-      {
+      {        
         desired_switch_modes[switch_num] = SWITCH_MODE_C;
       }
     }
@@ -119,7 +124,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     TrainSystemSetSpeed(trainsys_server, train, train_speed);
     for (int i = 1; i < edge_count; i++)
     {
-      track_edge *edge = simple_path[edge_count];
+      track_edge *edge = simple_path[i];
       if (edge->src->type == NODE_SENSOR)
       {
         int new_pos = WaitOnSensor(sensor_server, edge->src->num);
@@ -150,6 +155,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
 }
 void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path, int edge_count, int train, int speed, int offset)
 {
+  render_command("Starting Complex Path...");
   // no work to do
   if (path[0] == 0)
     return;
@@ -167,6 +173,7 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
     // check for reversal
     if (cur_edge->type == EDGE_REVERSE)
     {
+      render_command("reversal edge detected");
       if (sind > 1)
       {
         PatherSimplePath(track, simple_path, sind, train, speed, offset);
@@ -195,7 +202,7 @@ void PartialPathFinderTask()
 
   if (req_len < 0)
   {
-    LOG_WARN("[PartialPathFinderTask] error on receive");
+    render_command("[PartialPathFinderTask] error on receive");
     response = (PathFinderResponse){.success = false};
     Reply(from_tid, (char *)&response, sizeof(PathFinderResponse));
     Exit();
@@ -221,7 +228,7 @@ void PathFinderTask()
 
   if (req_len < 0)
   {
-    LOG_WARN("[PathFinderTask]: error when receiving");
+    render_command("[PathFinderTask]: error when receiving");
     response = (PathFinderResponse){.success = false};
     Reply(from_tid, (char *)&response, sizeof(PathFinderResponse));
     Exit();
@@ -229,7 +236,6 @@ void PathFinderTask()
   }
 
   response = (PathFinderResponse){.success = true};
-  Reply(from_tid, (char *)&response, sizeof(PathFinderResponse));
 
   int src = request.source;
   int dest = request.destination;
@@ -238,25 +244,34 @@ void PathFinderTask()
   int offset = request.offset;
   bool allow_reversal = request.allow_reversal;
 
+
+  Reply(from_tid, (char *)&response, sizeof(PathFinderResponse));
+
+  // render_command("PathFinderTask: pathing from %d to %d on train %d", src, dest, train);
   if (src == dest || src == track[dest].reverse - track)
   {
-    LOG_WARN("[PathFinderTask] Source Equals Destination");
+    render_command("[PathFinderTask] Source Equals Destination");
     Exit();
   }
-
+  
   track_edge *route_edges[TRACK_MAX + 1];
+  // render_command("doing djikstra reversal: %d", allow_reversal);
   int edge_count = do_djikstra(track, train, src, dest, allow_reversal, true, route_edges);
+  render_command("edge count %d", edge_count);
   if (edge_count == -1)
   {
-    LOG_WARN("[PATHER] djikstra cannot find path, recompute a blocking path");
+    render_command("[PATHER] djikstra cannot find path, recompute a blocking path");
     edge_count = do_djikstra(track, train, src, dest, allow_reversal, false, route_edges);
   }
+
+  // render_command("starting complex pathing :((()))");
 
   track_edge *complex_path[TRACK_MAX + 1] = {0};
   int cind = 0;
   for (int i = 0; i < edge_count; i++)
   {
     track_edge *edge = route_edges[i];
+    /*
     int zone = edge->dest->reverse->zone;
     if (zone != -1)
     {
@@ -277,7 +292,7 @@ void PathFinderTask()
         zone_wait(reserve_server, train, zone);
         if (!zone_reserve(reserve_server, train, zone))
         {
-          LOG_WARN("[ERROR] should have claimed zone");
+          render_command("[ERROR] should have claimed zone");
         }
 
         for (int i = 0; i < TRACK_MAX + 1; i++)
@@ -287,6 +302,7 @@ void PathFinderTask()
         cind = 0;
       }
     }
+    */
     complex_path[cind] = edge;
     cind += 1;
   }
