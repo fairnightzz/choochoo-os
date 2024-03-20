@@ -128,9 +128,9 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
       track_edge *edge = simple_path[i];
       if (edge->src->type == NODE_SENSOR)
       {
+        render_command("waiting on sensor %s", edge->src->name);
         int new_pos = WaitOnSensor(sensor_server, edge->src->num);
         track_node *node = track + new_pos;
-        render_command("waiting on sensor %s", node->name);
         track_node *next_node = track_next_sensor(switch_server, node);
 
         int next_zone = next_node->reverse->zone;
@@ -178,7 +178,7 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
       render_command("reversal edge detected");
       if (sind > 1)
       {
-        PatherSimplePath(track, simple_path, sind, train, speed, offset);
+        PatherSimplePath(track, simple_path, sind, train, speed, 300);
       }
       TrainSystemReverse(trainsys_server, train);
       for (int j = 0; j < sind; j++)

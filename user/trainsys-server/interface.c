@@ -139,5 +139,5 @@ int TrainSystemGetTrainPosition(int system_server, int train)
     LOG_WARN("TrainstateReverse errored");
     return -1;
   }
-  return response.next_sensor_id;
+  return response.position;
 }

@@ -186,7 +186,6 @@ void TrainSystemServer()
     }
     case SYSTEM_SENSOR_HIT:
     {
-      // render_command("[TrainSystemServer INFO]: sensor hit %d -> update train", request.sensor_hit);
 
       response = (TrainSystemResponse){
           .type = SYSTEM_SENSOR_HIT,
