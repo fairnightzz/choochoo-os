@@ -68,7 +68,6 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
       break;
     }
   }
-  render_command("Waiting Sensor %s", waiting_sensor->name);
 
   // compute desired switches
   SwitchMode desired_switch_modes[SWITCH_COUNT];
@@ -106,34 +105,48 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     setSwitchesInZone(switch_server, track, zone, desired_switch_modes);
   }
 
-  TrainSystemSetSpeed(trainsys_server, train, train_speed);
-  for (int i = 0; i < edge_count; i++)
+  if (waiting_sensor == 0 || simple_path[0]->src == waiting_sensor)
   {
-    track_edge *edge = simple_path[i];
-    render_command("[SimplePath Edge]: %s -> %s, src type: %d", edge->src->name, edge->dest->name, edge->src->type);
-    if (edge->src->type == NODE_SENSOR)
+    int distance_to_dest = 0;
+    for (int i = 0; i < edge_count; ++i)
     {
-      render_command("[SimplePath]: Waiting on sensor: %s", edge->src->name);
-      int new_pos = WaitOnSensor(sensor_server, edge->src->num);
-      track_node *node = track + new_pos;
-      track_node *next_node = track_next_sensor(switch_server, node);
-
-      int next_zone = next_node->reverse->zone;
-      setSwitchesInZone(switch_server, track, next_zone, desired_switch_modes);
-
-      if (node->zone != -1)
-      {
-        zone_unreserve(reserve_server, train, node->zone);
-      }
-
-      if (edge->src->num == waiting_sensor->num)
-        break;
+      track_edge *edge = simple_path[i];
+      distance_to_dest += edge->dist;
     }
+    TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED);
+    Delay(clock_server, train_data_short_move_time(train, distance_to_dest) / 10);
+    TrainSystemSetSpeed(trainsys_server, train, 0);
+    Delay(clock_server, train_data_stop_time(train, TRAIN_DATA_SHORT_MOVE_SPEED) / 10 + 100);
   }
+  else
+  {
+    TrainSystemSetSpeed(trainsys_server, train, train_speed);
+    for (int i = 1; i < edge_count; i++)
+    {
+      track_edge *edge = simple_path[i];
+      if (edge->src->type == NODE_SENSOR)
+      {
+        int new_pos = WaitOnSensor(sensor_server, edge->src->num);
+        track_node *node = track + new_pos;
+        track_node *next_node = track_next_sensor(switch_server, node);
 
-  Delay(clock_server, distance_from_sensor * 100 / train_vel);
-  TrainSystemSetSpeed(trainsys_server, train, 0);
-  Delay(clock_server, train_data_stop_time(train, TRAIN_DATA_SHORT_MOVE_SPEED) / 10 + 100);
+        int next_zone = next_node->reverse->zone;
+        setSwitchesInZone(switch_server, track, next_zone, desired_switch_modes);
+
+        if (node->zone != -1)
+        {
+          zone_unreserve(reserve_server, train, node->zone);
+        }
+
+        if (edge->src->num == waiting_sensor->num)
+          break;
+      }
+    }
+
+    Delay(clock_server, distance_from_sensor * 100 / train_vel);
+    TrainSystemSetSpeed(trainsys_server, train, 0);
+    Delay(clock_server, train_data_stop_time(train, TRAIN_DATA_SHORT_MOVE_SPEED) / 10 + 100);
+  }
 
   zone_unreserve_all(reserve_server, train);
   int dest_zone = simple_path[edge_count - 1]->dest->reverse->zone;

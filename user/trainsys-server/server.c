@@ -116,14 +116,6 @@ void TrainSystemServer()
       {4, 38},  // 58  A5 -> C7
       {35, 37}  // 77  C4 -> C6
   };
-  int train_positions[TRAIN_DATA_TRAIN_COUNT] = {
-      1,
-      13,
-      22,
-      26,
-      24,
-      34,
-  };
 
   TrainSystemRequest request;
   TrainSystemResponse response;
@@ -169,11 +161,14 @@ void TrainSystemServer()
       }
       if (train_idx != -1 && train_next_sensors[train_idx][0] != -1)
       {
+        render_command("2 next sensor: %d", train_next_sensors[train_idx][0]);
         bool is_unknown = false;
         bool is_unknown2 = false;
         int dist;
-        int current_next_sens = train_positions[train_idx];
+        int current_next_sens = track_prev_sensor(switch_server, train_sys_track + train_next_sensors[train_idx][0]) - train_sys_track;
+        render_command("2 current sensor: %d", current_next_sens);
         int new_next_sens = find_next_sensor(current_next_sens, switch_server, &is_unknown, &dist);
+        render_command("2 next new sensor: %d", new_next_sens);
         int new_next_next_sens = find_next_sensor(new_next_sens, switch_server, &is_unknown2, &dist);
         new_next_sens = is_unknown ? -1 : new_next_sens;
         new_next_next_sens = is_unknown2 ? -1 : new_next_next_sens;
@@ -220,8 +215,6 @@ void TrainSystemServer()
         Reply(from_tid, (char *)&response, sizeof(TrainSystemResponse));
         break;
       }
-
-      train_positions[train_idx] = sensor_hit;
 
       char letter[2] = {'A' + sensor_hit / 16, '\0'};
       string sensor_str = string_format("%s%d", letter, (sensor_hit % 16) + 1);
@@ -341,8 +334,9 @@ void TrainSystemServer()
               break;
             }
           }
-          if (train_idx != -1)
+          if (train_idx != -1 && train_next_sensors[train_idx][0] != -1)
           {
+            render_command("next sensor: %d", train_next_sensors[train_idx][0]);
             bool is_unknown = false;
             bool is_unknown2 = false;
             int dist;
@@ -422,6 +416,7 @@ void TrainSystemServer()
       }
       if (train_idx != -1 && train_next_sensors[train_idx][0] != -1)
       {
+        render_command("1 next sensor: %d", train_next_sensors[train_idx][0]);
         bool is_unknown = false;
         bool is_unknown2 = false;
         int dist;

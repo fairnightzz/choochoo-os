@@ -97,7 +97,12 @@ track_node *track_next_sensor(int switch_server, track_node *node)
   }
 }
 
-void post_track(track_node *track, int* sensors, int* switches)
+track_node *track_prev_sensor(int switch_server, track_node *node)
+{
+  return track_next_sensor(switch_server, node->reverse)->reverse;
+}
+
+void post_track(track_node *track, int *sensors, int *switches)
 {
   // Reverse edges
   // construct the edges between nodes of opposite direction with dist 0
@@ -130,12 +135,14 @@ void post_track(track_node *track, int* sensors, int* switches)
     track[i].zone = -1;
   }
 
-  for (int i = 0; i<80; i++) {
+  for (int i = 0; i < 80; i++)
+  {
     track[i].zone = sensors[i];
   }
 
-  for (int i = 0; i<22; i++) {
-    track[80+2*i].zone = switches[i];
+  for (int i = 0; i < 22; i++)
+  {
+    track[80 + 2 * i].zone = switches[i];
   }
 
   // set zones
@@ -153,15 +160,15 @@ void post_track(track_node *track, int* sensors, int* switches)
   //     node->zone = zone_id;
   //   }
 
-    // for (int j = 0;; ++j)
-    // {
-    //   int switch_id = zones[i].switches[j];
-    //   if (switch_id == 0)
-    //     break;
-    //   track_node *node = track_node_by_branch_id(track, switch_id);
-    //   node->zone = zone_id;
-    //   node->reverse->zone = zone_id;
-    // }
+  // for (int j = 0;; ++j)
+  // {
+  //   int switch_id = zones[i].switches[j];
+  //   if (switch_id == 0)
+  //     break;
+  //   track_node *node = track_node_by_branch_id(track, switch_id);
+  //   node->zone = zone_id;
+  //   node->reverse->zone = zone_id;
+  // }
   // }
 }
 

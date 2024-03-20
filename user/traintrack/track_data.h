@@ -26,5 +26,6 @@ bool track_edge_cmp(track_edge a, track_edge b);
 track_edge *track_next_edge(int switch_server, track_node *node);
 track_node *track_next_node(int switch_server, track_node *node);
 track_node *track_next_sensor(int switch_server, track_node *node);
+track_node *track_prev_sensor(int switch_server, track_node *node);
 track_node *track_node_by_name(track_node *track, char *name);
 #endif // __TRACK_DATA_H__

@@ -40,12 +40,12 @@ static const uint32_t TRAIN_DATA_STOP_DIST[TRAIN_DATA_TRAIN_COUNT][TRAIN_DATA_SP
 };
 
 static const uint32_t TRAIN_DATA_STOP_TIME[TRAIN_DATA_TRAIN_COUNT][TRAIN_DATA_SPEED_COUNT] = {
-    {1642, 2455, 2713, 2780, 2988}, // 2
-    {1493, 2377, 2672, 2641, 2865}, // 47
-    {1647, 3485, 3663, 3860, 4332}, // 54 // dummy data
-    {1647, 3485, 3663, 3860, 4332}, // 55 // dummy data
-    {1647, 3485, 3663, 3860, 4332}, // 58
-    {1600, 3495, 3853, 4543, 5190}, // 77
+    {2455, 0, 0, 2713, 0, 0, 2780, 0, 0, 2988}, // 2
+    {2377, 0, 0, 2672, 0, 0, 2641, 0, 0, 2865}, // 47
+    {3485, 0, 0, 3663, 0, 0, 3860, 0, 0, 4332}, // 54 // dummy data
+    {3485, 0, 0, 3663, 0, 0, 3860, 0, 0, 4332}, // 55 // dummy data
+    {3485, 0, 0, 3663, 0, 0, 3860, 0, 0, 4332}, // 58
+    {3495, 0, 0, 3853, 0, 0, 4543, 0, 0, 5190}, // 77
 };
 
 static const uint32_t TRAIN_DATA_SHORT_MOVE_DIST[TRAIN_DATA_TRAIN_COUNT][TRAIN_DATA_SHORT_MOVE_DIST_COUNT] = {
