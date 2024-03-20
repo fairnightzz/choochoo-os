@@ -271,7 +271,7 @@ void PathFinderTask()
   for (int i = 0; i < edge_count; i++)
   {
     track_edge *edge = route_edges[i];
-    /*
+  
     int zone = edge->dest->reverse->zone;
     if (zone != -1)
     {
@@ -302,7 +302,7 @@ void PathFinderTask()
         cind = 0;
       }
     }
-    */
+
     complex_path[cind] = edge;
     cind += 1;
   }
