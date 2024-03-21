@@ -108,7 +108,8 @@ void TrainSystemServer()
   uint8_t train_states[TRAINS_COUNT] = {0};
   int train_positions[TRAINS_COUNT] = {0};
 
-  for (int i = 0; i < TRAINS_COUNT; i++) {
+  for (int i = 0; i < TRAINS_COUNT; i++)
+  {
     train_positions[i] = -1;
   }
 
@@ -167,14 +168,14 @@ void TrainSystemServer()
       }
       if (train_idx != -1 && train_next_sensors[train_idx][0] != -1)
       {
-        render_command("2 next sensor: %d", train_next_sensors[train_idx][0]);
+        render_command("2 next sensor: %s", get_sensor_string(train_next_sensors[train_idx][0]));
         bool is_unknown = false;
         bool is_unknown2 = false;
         int dist;
         int current_next_sens = track_prev_sensor(switch_server, train_sys_track + train_next_sensors[train_idx][0]) - train_sys_track;
-        render_command("2 current sensor: %d", current_next_sens);
+        render_command("2 current sensor: %s", get_sensor_string(current_next_sens));
         int new_next_sens = find_next_sensor(current_next_sens, switch_server, &is_unknown, &dist);
-        render_command("2 next new sensor: %d", new_next_sens);
+        render_command("2 next new sensor: %s", get_sensor_string(new_next_sens));
         int new_next_next_sens = find_next_sensor(new_next_sens, switch_server, &is_unknown2, &dist);
         new_next_sens = is_unknown ? -1 : new_next_sens;
         new_next_next_sens = is_unknown2 ? -1 : new_next_next_sens;
@@ -196,6 +197,7 @@ void TrainSystemServer()
       };
 
       int sensor_hit = request.sensor_hit;
+      render_command("[TSS]: sensor %s zone %d", get_sensor_string(request.sensor_hit).data, zone_getid_by_sensor_id(sensor_hit));
       int train = -1;
       int train_idx = -1;
       for (int i = 0; i < SENSOR_DEPTH; i++)
@@ -342,7 +344,7 @@ void TrainSystemServer()
           }
           if (train_idx != -1 && train_next_sensors[train_idx][0] != -1)
           {
-            render_command("next sensor: %d", train_next_sensors[train_idx][0]);
+            render_command("next sensor: %s", get_sensor_string(train_next_sensors[train_idx][0]));
             bool is_unknown = false;
             bool is_unknown2 = false;
             int dist;

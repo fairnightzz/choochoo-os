@@ -68,7 +68,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
       break;
     }
   }
-  render_command("Found Waiting Sensor: %s", waiting_sensor->name);
+  // render_command("Found Waiting Sensor: %s", waiting_sensor->name);
 
   // compute desired switches
   SwitchMode desired_switch_modes[SWITCH_COUNT];
@@ -157,6 +157,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
 }
 void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path, int edge_count, int train, int speed, int offset)
 {
+  int clock_server = WhoIs(ClockAddress);
   render_command("Starting Complex Path...");
   // no work to do
   if (path[0] == 0)
@@ -186,6 +187,7 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
         simple_path[j] = 0;
       }
       sind = 0;
+      Delay(clock_server, 1);
     }
   }
 
@@ -290,7 +292,9 @@ void PathFinderTask()
             .offset = offset};
         Send(partialPathTask, (const char *)&pp_request, sizeof(PartialPathFinderRequest), (char *)&pp_response, sizeof(PathFinderResponse));
 
+        render_command("Before zone wait");
         zone_wait(reserve_server, train, zone);
+        render_command("after zone wait");
         if (!zone_reserve(reserve_server, train, zone))
         {
           render_command("[ERROR] should have claimed zone");

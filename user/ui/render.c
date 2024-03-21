@@ -123,6 +123,12 @@ void render_init()
   uart_printf(CONSOLE, "│     55                                                ticks            mm     │\r\n");
   uart_printf(CONSOLE, "│     58                                                ticks            mm     │\r\n");
   uart_printf(CONSOLE, "│     77                                                ticks            mm     │\r\n");
+  uart_printf(CONSOLE, "│─[zone-system]─────────────────────────────────────────────────────────────────┤\r\n");
+  uart_printf(CONSOLE, "│     00 --       01 --       02 --       03 --       04 --       05 --         │\r\n");
+  uart_printf(CONSOLE, "│     06 --       07 --       08 --       09 --       10 --       11 --         │\r\n");
+  uart_printf(CONSOLE, "│     12 --       13 --       14 --       15 --       16 --       17 --         │\r\n");
+  uart_printf(CONSOLE, "│     18 --       19 --       20 --       21 --       22 --       23 --         │\r\n");
+  uart_printf(CONSOLE, "│     24 --       25 --       26 --       27 --       28 --       29 --         │\r\n");
   uart_printf(CONSOLE, "╰───────────────────────────────────────────────────────────────────────────────╯\r\n");
 
   UIState = (TermUIState){
@@ -212,12 +218,39 @@ void render_predict_current_sensor(int train, int sensor_id)
   string sensorString = get_sensor_string(sensor_id);
   print("\033[%u;%uH%s", 26 + 35 + train_index, 22, sensorString.data);
 }
+
 void render_predict_next_sensor(int train, int sensor_id)
 {
   int train_index = get_train_index(train);
   string sensorString = get_sensor_string(sensor_id);
   print("\033[%u;%uH%s", 26 + 35 + train_index, 39, sensorString.data);
 }
+
+void render_reserve_zone(int train, int zone_id)
+{
+  int col = (10) + (zone_id % 6) * 12;
+  int row = (26 + 35 + 7) + zone_id / 6;
+
+  char trainString[3];
+  i2a(train, trainString);
+  if (train <= 9)
+  {
+    print("\033[%u;%uH0%s", row, col, trainString);
+  }
+  else
+  {
+    print("\033[%u;%uH%s", row, col, trainString);
+  }
+}
+
+void render_unreserve_zone(int zone_id)
+{
+  int col = (10) + (zone_id % 6) * 12;
+  int row = (26 + 35 + 7) + zone_id / 6;
+
+  print("\033[%u;%uH%s", row, col, "--");
+}
+
 void render_predict_error(int train, int terr, int derr)
 {
 
@@ -270,6 +303,7 @@ void render_prompt_clear()
 
 void clear_console()
 {
+  UIState.cmd_line_history = 0;
   for (int i = 0; i < COMMAND_LINE_HISTORY; ++i)
   {
     print("\033[%u;2H                                                                             ", 10 + i);
@@ -286,7 +320,6 @@ void render_command(char *fmt, ...)
   if (UIState.cmd_line_history >= COMMAND_LINE_HISTORY)
   {
     clear_console();
-    UIState.cmd_line_history = 0;
   }
 
   print("\033[%u;3H%s", 10 + UIState.cmd_line_history, command.data);

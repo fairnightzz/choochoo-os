@@ -66,6 +66,11 @@ void trainsys_execute_command(CommandResult cres)
     PlanPath(new_path);
     break;
   }
+  case CLEAR_COMMAND:
+  {
+    clear_console();
+    break;
+  }
   default:
     break;
   }

@@ -28,7 +28,11 @@ void render_debug_log(int message);
 void render_predict_current_sensor(int train, int sensor_id);
 void render_predict_next_sensor(int train, int sensor_id);
 void render_predict_error(int train, int terr, int derr); // terr in ticks, derr in mm
+void render_reserve_zone(int train, int zone);
+void render_unreserve_zone(int zone);
 void clear_screen();
+void clear_console();
+string get_sensor_string(int sensor_id);
 
 /*
 void update_switch(const char* prompt);

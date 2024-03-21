@@ -113,6 +113,10 @@ void ZoneServer()
     if (request.type == ZONE_RESERVE)
     {
       bool ret = _zone_reserve(request.train, request.zone);
+      if (ret)
+      {
+        render_reserve_zone(request.train, request.zone);
+      }
 
       response = (ZoneResponse){
           .type = ZONE_RESERVE,
@@ -125,6 +129,11 @@ void ZoneServer()
     else if (request.type == ZONE_UNRESERVE)
     {
       bool ret = _zone_unreserve(request.train, request.zone);
+
+      if (ret)
+      {
+        render_unreserve_zone(request.zone);
+      }
 
       response = (ZoneResponse){
           .type = ZONE_UNRESERVE,
@@ -143,6 +152,7 @@ void ZoneServer()
         if (reservations[i] == request.unreserve_all)
         {
           reservations[i] = 0;
+          render_unreserve_zone(i);
           reservationWaitUnblock(zone_requests, i);
         }
       }
@@ -173,7 +183,7 @@ void ZoneServer()
       int zone = request.zone;
 
       // if the train is already holding the zone, return
-      if (!_zone_is_reserved(zone, train))
+      if (!_zone_is_reserved(train, zone))
       {
         render_command("Zone server train %d is alreading holding zone %d, unblocking", train, zone);
         response = (ZoneResponse){

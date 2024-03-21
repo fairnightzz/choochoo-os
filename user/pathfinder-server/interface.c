@@ -13,7 +13,7 @@ int PlanPath(Path path)
     int trainsys_server = WhoIs(TrainSystemAddress);
     // TODO
     int start_sensor = TrainSystemGetTrainPosition(trainsys_server, path.train);
-    render_command("[PlanPath INFO] Train: %d Source Sensor: %d Destination Sensor: %s", path.train, start_sensor, path.dest);
+    render_command("[PlanPath INFO] Train: %d Source Sensor: %s Destination Sensor: %s", path.train, get_sensor_string(start_sensor), path.dest);
     if (start_sensor == -1)
     {
         render_command("[PlanPath INFO] Train %d has unknown current position, aborting PlanPath", path.train);
@@ -21,10 +21,12 @@ int PlanPath(Path path)
     }
 
     bool success;
-    int dest = (int)(intptr_t)hashmap_get(nodeMap, path.dest, &success);;
-    if (!success) {
-      render_command("[PlanPath ERROR]: Invalid Destination.");
-      return 0;
+    int dest = (int)(intptr_t)hashmap_get(nodeMap, path.dest, &success);
+    ;
+    if (!success)
+    {
+        render_command("[PlanPath ERROR]: Invalid Destination.");
+        return 0;
     }
     //  ULOG_INFO_M(LOG_MASK_PATH, "routing train %d from %d to %d", path.train, start_sensor, dest_sensor);
 

@@ -162,6 +162,12 @@ parse_command(string *command)
         .command_type = RESET_TRACK_COMMAND,
     };
   }
+  else if (strcmp(get_data(&cmd_name), "clear") == 0)
+  {
+    return (CommandResult){
+        .command_type = CLEAR_COMMAND,
+    };
+  }
   else if (strcmp(get_data(&cmd_name), "path") == 0)
   {
     skip_whitespace(data, &it);
