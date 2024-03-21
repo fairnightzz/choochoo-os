@@ -6,16 +6,22 @@
 track_node traintrack[TRACK_MAX];
 int trackType;
 HashMap *NodeIndexMap;
-void train_data_init()
+void train_data_init(char ch)
 {
     NodeIndexMap = hashmap_new();
 
     // Init track A or B?
-    // init_tracka(traintrack, NodeIndexMap);
-    // trackType = 0; // A
 
-    init_trackb(traintrack, NodeIndexMap);
-    trackType = 1; // B
+    if (ch == 'A')
+    {
+        init_tracka(traintrack, NodeIndexMap);
+        trackType = 0; // A
+    }
+    else
+    {
+        init_trackb(traintrack, NodeIndexMap);
+        trackType = 1; // B
+    }
 }
 
 track_node *
