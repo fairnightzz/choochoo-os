@@ -9,7 +9,6 @@
 
 typedef struct
 {
-  int source;
   int train;
   int speed;
   int offset; /* offset in millimeters from sensor */
@@ -20,8 +19,8 @@ typedef struct
 typedef struct
 {
   int trainsys_server;
-  track_node* track;
-  track_edge** path;
+  track_node *track;
+  track_edge **path;
   int edge_count;
   int train;
   int speed;
@@ -33,12 +32,13 @@ typedef struct
   bool success;
 } PathFinderResponse;
 
-typedef struct {
-    int train;
-    int speed;
-    int offset;
-    char* dest;
-    bool allow_reversal;
+typedef struct
+{
+  int train;
+  int speed;
+  int offset;
+  char *dest;
+  bool allow_reversal;
 } Path;
 
 int PlanPath(Path path);

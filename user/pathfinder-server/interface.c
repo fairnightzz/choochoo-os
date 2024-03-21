@@ -12,13 +12,6 @@ int PlanPath(Path path)
     HashMap *nodeMap = get_node_map();
     int trainsys_server = WhoIs(TrainSystemAddress);
     // TODO
-    int start_sensor = TrainSystemGetTrainPosition(trainsys_server, path.train);
-    render_command("[PlanPath INFO] Train: %d Source Sensor: %s Destination Sensor: %s", path.train, get_sensor_string(start_sensor), path.dest);
-    if (start_sensor == -1)
-    {
-        render_command("[PlanPath INFO] Train %d has unknown current position, aborting PlanPath", path.train);
-        return 0;
-    }
 
     bool success;
     int dest = (int)(intptr_t)hashmap_get(nodeMap, path.dest, &success);
@@ -32,7 +25,6 @@ int PlanPath(Path path)
 
     PathFinderResponse response;
     PathFinderRequest send_buf = (PathFinderRequest){
-        .source = start_sensor,
         .destination = dest,
         .train = path.train,
         .speed = path.speed,

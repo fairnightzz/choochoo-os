@@ -120,15 +120,15 @@ int TrainSystemReverse(int trainstate_server, int train)
   return 0;
 }
 
-int TrainSystemGetTrainPosition(int system_server, int train)
+TrainSystemResponse TrainSystemGetTrainPosition(int system_server, int train)
 {
+  TrainSystemResponse response;
   if (!(1 <= train && train <= 100))
   {
     LOG_WARN("invalid train number %d", train);
-    return -1;
+    return response;
   }
 
-  TrainSystemResponse response;
   TrainSystemRequest request = (TrainSystemRequest){
       .type = SYSTEM_GET_TRAIN_POSITION,
       .train = train,
@@ -136,8 +136,8 @@ int TrainSystemGetTrainPosition(int system_server, int train)
   int ret = Send(system_server, (const char *)&request, sizeof(TrainSystemRequest), (char *)&response, sizeof(TrainSystemResponse));
   if (ret < 0)
   {
-    LOG_WARN("TrainstateReverse errored");
-    return -1;
+    LOG_WARN("get train position errored");
+    return response;
   }
-  return response.position;
+  return response;
 }

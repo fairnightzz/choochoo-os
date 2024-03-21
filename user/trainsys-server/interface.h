@@ -52,6 +52,6 @@ TrainSystemResponse TrainSystemSensorToTrain(int system_server, int sensor_id);
 uint8_t TrainSystemGetTrainState(int system_server, int train);
 void TrainSystemSwitchToTrain(int system_server, int switch_id);
 int TrainSystemReverse(int system_server, int train);
-int TrainSystemGetTrainPosition(int system_server, int train);
+TrainSystemResponse TrainSystemGetTrainPosition(int system_server, int train);
 
 #endif // __TRAIN_SYSTEM_INTERFACE_H__

@@ -21,6 +21,7 @@ void setSwitchesInZone(int switch_server, track_node *track, int zone, SwitchMod
     int switch_idx = 80 + i * 2;
     if (track[switch_idx].zone == zone && desired_switches[i] != SWITCH_MODE_UNKNOWN)
     {
+      render_command("setting switch %d in zone %d", track[switch_idx].num, zone);
       int switch_id = (0 <= i && i <= 17) ? i + 1 : i + 135;
       SwitchSet(switch_server, switch_id, desired_switches[i]);
     }
@@ -68,34 +69,37 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
       break;
     }
   }
+  render_command("stopping distance %d on train speed %d", stopping_distance, train_speed);
+
   // render_command("Found Waiting Sensor: %s", waiting_sensor->name);
 
   // compute desired switches
+  /*
   SwitchMode desired_switch_modes[SWITCH_COUNT];
   for (int i = 0; i < SWITCH_COUNT; i++)
   {
     desired_switch_modes[i] = SWITCH_MODE_UNKNOWN;
   }
-
+*/
   for (int i = 0; i < edge_count; i++)
   {
     track_edge *edge = simple_path[i];
     if (edge->src->type == NODE_BRANCH)
     {
       int switch_num = edge->src->num;
-      switch_num = (1 <= switch_num && switch_num <= 18) ? switch_num - 1 : switch_num - 135;
       if (track_edge_cmp(edge->src->edge[DIR_STRAIGHT], *edge))
       {
-        desired_switch_modes[switch_num] = SWITCH_MODE_S;
+        SwitchSet(switch_server, switch_num, SWITCH_MODE_S);
       }
       else
       {
-        desired_switch_modes[switch_num] = SWITCH_MODE_C;
+        SwitchSet(switch_server, switch_num, SWITCH_MODE_C);
       }
     }
   }
 
   int distance_from_sensor = -stopping_distance;
+  /*
   track_edge *first_edge = simple_path[0];
   int my_zone = first_edge->src->reverse->zone;
   int next_zone = track_next_sensor(switch_server, first_edge->src)->reverse->zone;
@@ -105,7 +109,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     int zone = immediate_zones[i];
     setSwitchesInZone(switch_server, track, zone, desired_switch_modes);
   }
-
+*/
   if (waiting_sensor == 0 || simple_path[0]->src == waiting_sensor)
   {
     render_command("starting short move");
@@ -123,30 +127,11 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
   else
   {
     TrainSystemSetSpeed(trainsys_server, train, train_speed);
-    for (int i = 1; i < edge_count; i++)
-    {
-      track_edge *edge = simple_path[i];
-      if (edge->src->type == NODE_SENSOR)
-      {
-        render_command("waiting on sensor %s", edge->src->name);
-        int new_pos = WaitOnSensor(sensor_server, edge->src->num);
-        track_node *node = track + new_pos;
-        track_node *next_node = track_next_sensor(switch_server, node);
+    render_command("waiting on sensor %s", waiting_sensor->name);
 
-        int next_zone = next_node->reverse->zone;
-        setSwitchesInZone(switch_server, track, next_zone, desired_switch_modes);
-
-        if (node->zone != -1)
-        {
-          zone_unreserve(reserve_server, train, node->zone);
-        }
-
-        if (edge->src->num == waiting_sensor->num)
-          break;
-      }
-    }
-
-    Delay(clock_server, distance_from_sensor * 100 / train_vel);
+    WaitOnSensor(sensor_server, waiting_sensor->num);
+    render_command("distance_from_sensor %d train_vel %d", distance_from_sensor, train_vel);
+    Delay(clock_server, distance_from_sensor * 100 / train_vel + offset);
     TrainSystemSetSpeed(trainsys_server, train, 0);
     Delay(clock_server, train_data_stop_time(train, TRAIN_DATA_SHORT_MOVE_SPEED) / 10 + 100);
   }
@@ -179,7 +164,7 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
       render_command("reversal edge detected");
       if (sind > 1)
       {
-        PatherSimplePath(track, simple_path, sind, train, speed, 300);
+        PatherSimplePath(track, simple_path, sind, train, speed, 30);
       }
       TrainSystemReverse(trainsys_server, train);
       for (int j = 0; j < sind; j++)
@@ -187,7 +172,7 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
         simple_path[j] = 0;
       }
       sind = 0;
-      Delay(clock_server, 1);
+      Delay(clock_server, 0);
     }
   }
 
@@ -223,6 +208,7 @@ void PathFinderTask()
 {
   int trainsys_server = WhoIs(TrainSystemAddress);
   int reserve_server = WhoIs(ZoneAddress);
+  int switch_server = WhoIs(SwitchAddress);
 
   track_node *track = get_track();
   int from_tid;
@@ -241,7 +227,6 @@ void PathFinderTask()
 
   response = (PathFinderResponse){.success = true};
 
-  int src = request.source;
   int dest = request.destination;
   int train = request.train;
   int speed = request.speed;
@@ -249,6 +234,17 @@ void PathFinderTask()
   bool allow_reversal = request.allow_reversal;
 
   Reply(from_tid, (char *)&response, sizeof(PathFinderResponse));
+
+  TrainSystemResponse resp = TrainSystemGetTrainPosition(trainsys_server, train);
+
+  int src = (resp.train_state & TRAIN_SPEED_MASK) == 0 ? resp.position : track_next_sensor(switch_server, track + resp.next_sensor_id)->num;
+  render_command("[PathFinderTask INFO] Train: %d Source Sensor: %s Destination Sensor: %s", train, get_sensor_string(src), get_sensor_string(dest));
+  if (src == -1)
+  {
+    render_command("[PathFinderTask INFO] Train %d has unknown current position, aborting PlanPath", train);
+    Exit();
+    return;
+  }
 
   // render_command("PathFinderTask: pathing from %d to %d on train %d", src, dest, train);
   if (src == dest || src == track[dest].reverse - track)
