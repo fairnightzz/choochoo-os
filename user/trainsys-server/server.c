@@ -111,16 +111,20 @@ void TrainSystemServer()
   for (int i = 0; i < TRAIN_DATA_TRAIN_COUNT; i++)
   {
     train_positions[i] = -1;
-  }
+}
+
+  train_positions[2] = 22;
+  train_positions[3] = 26;
+  train_positions[4] = 24;
 
   bool reversed[TRAINS_COUNT] = {0};
   int reverse_tasks[TRAINS_COUNT] = {0}; // 0 means no task is reversing
   int train_next_sensors[TRAIN_DATA_TRAIN_COUNT][SENSOR_DEPTH] = {
       {0, 44},  // 2   A1 -> C13
       {12, 44}, // 47  A13 -> C13
-      {9, 38},  // 54  A10 -> C7
-      {7, 38},  // 55  A8 -> C7
-      {4, 38},  // 58  A5 -> C7
+      {9, 38},  // 54  (B7) A10 -> C7
+      {7, 38},  // 55  (B11) A8 -> C7
+      {4, 38},  // 58  (B9) A5 -> C7
       {35, 37}  // 77  C4 -> C6
   };
 
