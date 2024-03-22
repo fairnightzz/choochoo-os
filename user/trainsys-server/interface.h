@@ -23,6 +23,7 @@ typedef enum
   SYSTEM_REVERSE_REVERSE, // for the reverse task
   SYSTEM_REVERSE_RESTART, // for the reverse restart task
   SYSTEM_GET_TRAIN_POSITION,
+  SYSTEM_STOP_TRAIN
 } TrainSystemRequestType;
 
 typedef struct
@@ -53,5 +54,6 @@ uint8_t TrainSystemGetTrainState(int system_server, int train);
 void TrainSystemSwitchToTrain(int system_server, int switch_id);
 int TrainSystemReverse(int system_server, int train);
 TrainSystemResponse TrainSystemGetTrainPosition(int system_server, int train);
+int TrainSystemStop(int system_server, int train);
 
 #endif // __TRAIN_SYSTEM_INTERFACE_H__

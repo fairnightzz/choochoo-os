@@ -28,17 +28,17 @@ void setSwitchesInZone(int switch_server, track_node *track, int zone, SwitchMod
   }
 }
 
-void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_count, int train, int speed, int offset)
+void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_count, int train, int speed, int offset, bool final_destination)
 {
   render_command("Simple Command: %s -> %s, edge_count %d", simple_path[0]->src->name, simple_path[edge_count - 1]->dest->name, edge_count);
-  int clock_server = WhoIs(ClockAddress);
+  // int clock_server = WhoIs(ClockAddress);
   int sensor_server = WhoIs(SensorAddress);
   int switch_server = WhoIs(SwitchAddress);
   int trainsys_server = WhoIs(TrainSystemAddress);
   int reserve_server = WhoIs(ZoneAddress);
 
   int stopping_distance = 0;
-  int train_vel = 0;
+  // int train_vel = 0;
 
   track_node *waiting_sensor = 0;
   int train_speed = speed;
@@ -47,7 +47,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     train_speed = TRAIN_DATA_SPEEDS[idx];
     stopping_distance = train_data_stop_dist(train, train_speed) - offset;
     // render_command("stopping distance: %d train_speed: %d", stopping_distance, train_speed);
-    train_vel = train_data_vel(train, train_speed);
+    // train_vel = train_data_vel(train, train_speed);
 
     waiting_sensor = 0;
     int last_edge_idx = (edge_count > 1) ? edge_count - 1 : 0;
@@ -98,8 +98,8 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     }
   }
 
-  int distance_from_sensor = -stopping_distance;
   /*
+  int distance_from_sensor = -stopping_distance;
   track_edge *first_edge = simple_path[0];
   int my_zone = first_edge->src->reverse->zone;
   int next_zone = track_next_sensor(switch_server, first_edge->src)->reverse->zone;
@@ -110,30 +110,31 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     setSwitchesInZone(switch_server, track, zone, desired_switch_modes);
   }
 */
+
+  int dest = simple_path[edge_count - 1]->type == EDGE_REVERSE ? simple_path[edge_count - 1]->src - track : simple_path[edge_count - 1]->dest - track;
   if (waiting_sensor == 0 || simple_path[0]->src == waiting_sensor)
   {
     render_command("starting short move");
-    int distance_to_dest = 0;
-    for (int i = 0; i < edge_count; ++i)
-    {
-      track_edge *edge = simple_path[i];
-      distance_to_dest += edge->dist;
-    }
     TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED);
-    Delay(clock_server, train_data_short_move_time(train, distance_to_dest) / 10);
-    TrainSystemSetSpeed(trainsys_server, train, 0);
-    Delay(clock_server, train_data_stop_time(train, TRAIN_DATA_SHORT_MOVE_SPEED) / 10 + 100);
+    WaitOnSensor(sensor_server, dest);
+    if (final_destination) {
+      TrainSystemStop(trainsys_server, train);
+    } else {
+      TrainSystemSetSpeed(trainsys_server, train, 0);
+    }
   }
   else
   {
     TrainSystemSetSpeed(trainsys_server, train, train_speed);
     render_command("waiting on sensor %s", waiting_sensor->name);
-
     WaitOnSensor(sensor_server, waiting_sensor->num);
-    render_command("distance_from_sensor %d train_vel %d", distance_from_sensor, train_vel);
-    Delay(clock_server, distance_from_sensor * 100 / train_vel + offset);
-    TrainSystemSetSpeed(trainsys_server, train, 0);
-    Delay(clock_server, train_data_stop_time(train, TRAIN_DATA_SHORT_MOVE_SPEED) / 10 + 100);
+    TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED);
+    WaitOnSensor(sensor_server, dest);
+    if (final_destination) {
+      TrainSystemStop(trainsys_server, train);
+    } else {
+      TrainSystemSetSpeed(trainsys_server, train, 0);
+    }
   }
 
   zone_unreserve_all(reserve_server, train);
@@ -164,7 +165,7 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
       render_command("reversal edge detected");
       if (sind > 1)
       {
-        PatherSimplePath(track, simple_path, sind, train, speed, 30);
+        PatherSimplePath(track, simple_path, sind, train, speed, 200, true);
       }
       TrainSystemReverse(trainsys_server, train);
       for (int j = 0; j < sind; j++)
@@ -178,7 +179,7 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
 
   if (sind > 0)
   {
-    PatherSimplePath(track, simple_path, sind, train, speed, offset);
+    PatherSimplePath(track, simple_path, sind, train, speed, offset, false);
   }
 }
 

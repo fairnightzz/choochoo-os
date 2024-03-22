@@ -13,6 +13,18 @@ void io_marklin_set_train(int io_server, int train, int speed)
     Puts(io_server, s, countof(s));
 }
 
+void io_marklin_reverse_train_0(int io_server, int train, int speed, int zero_speed)
+{
+    char s[] = {speed, train, zero_speed, train};
+    Puts(io_server, s, countof(s));
+}
+
+void io_marklin_stop_train(int io_server, int train, int speed, int zero_speed)
+{
+    char s[] = {speed, train, zero_speed, train, speed, train, zero_speed, train};
+    Puts(io_server, s, countof(s));
+}
+
 void io_marklin_set_switch(int io_server, int switch_id, SwitchMode mode)
 {
     char s[] = {mode, switch_id, 32};

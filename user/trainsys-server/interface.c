@@ -141,3 +141,23 @@ TrainSystemResponse TrainSystemGetTrainPosition(int system_server, int train)
   }
   return response;
 }
+
+int TrainSystemStop(int system_server, int train) {
+  if (!(1 <= train && train <= 100))
+  {
+    LOG_WARN("invalid train number %d", train);
+    return -1;
+  }
+  TrainSystemResponse response;
+  TrainSystemRequest request = (TrainSystemRequest){
+      .type = SYSTEM_STOP_TRAIN,
+      .train = train,
+  };
+  int ret = Send(system_server, (const char *)&request, sizeof(TrainSystemRequest), (char *)&response, sizeof(TrainSystemResponse));
+  if (ret < 0)
+  {
+    LOG_WARN("TrainSystemStop errored");
+    return -1;
+  }
+  return ret;
+}
