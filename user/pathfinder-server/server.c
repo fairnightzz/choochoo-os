@@ -115,15 +115,18 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
   if (waiting_sensor == 0 || simple_path[0]->src == waiting_sensor)
   {
     render_command("starting short move");
-    TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED);
+    TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED[get_train_index(train)]);
     render_command("waiting on destination sensor %s", get_sensor_string(dest));
     WaitOnSensor(sensor_server, dest);
-    if (final_destination) {
+    if (final_destination)
+    {
       TrainSystemStop(trainsys_server, train);
       Delay(clock_server, 10);
       TrainSystemStop(trainsys_server, train);
       Delay(clock_server, 10);
-    } else {
+    }
+    else
+    {
       TrainSystemSetSpeed(trainsys_server, train, 0);
     }
   }
@@ -132,15 +135,18 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     TrainSystemSetSpeed(trainsys_server, train, train_speed);
     render_command("waiting on sensor %s", waiting_sensor->name);
     WaitOnSensor(sensor_server, waiting_sensor->num);
-    TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED);
+    TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED[get_train_index(train)]);
     render_command("waiting on destination sensor %s", get_sensor_string(dest));
     WaitOnSensor(sensor_server, dest);
-    if (final_destination) {
+    if (final_destination)
+    {
       TrainSystemStop(trainsys_server, train);
       Delay(clock_server, 10);
       TrainSystemStop(trainsys_server, train);
       Delay(clock_server, 10);
-    } else {
+    }
+    else
+    {
       TrainSystemSetSpeed(trainsys_server, train, 0);
     }
   }
