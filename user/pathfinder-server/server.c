@@ -35,7 +35,6 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
   int sensor_server = WhoIs(SensorAddress);
   int switch_server = WhoIs(SwitchAddress);
   int trainsys_server = WhoIs(TrainSystemAddress);
-  int reserve_server = WhoIs(ZoneAddress);
 
   int stopping_distance = 0;
   // int train_vel = 0;
@@ -141,23 +140,23 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     if (final_destination)
     {
       TrainSystemStop(trainsys_server, train);
-      Delay(clock_server, 10);
+      Delay(clock_server, 100);
       TrainSystemStop(trainsys_server, train);
-      Delay(clock_server, 10);
+      Delay(clock_server, 100);
     }
     else
     {
+      Delay(clock_server, 15);
       TrainSystemSetSpeed(trainsys_server, train, 0);
     }
   }
-
-  zone_unreserve_all(reserve_server, train);
-  int dest_zone = simple_path[edge_count - 1]->dest->reverse->zone;
-  zone_reserve(reserve_server, train, dest_zone);
 }
+
 void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path, int edge_count, int train, int speed, int offset)
 {
   int clock_server = WhoIs(ClockAddress);
+  int reserve_server = WhoIs(ZoneAddress);
+  
   render_command("Starting Complex Path...");
   // no work to do
   if (path[0] == 0)
@@ -182,7 +181,7 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
         PatherSimplePath(track, simple_path, sind, train, speed, 0, false);
       }
       TrainSystemReverse(trainsys_server, train);
-      Delay(clock_server, 10);
+      Delay(clock_server, 100);
       for (int j = 0; j < sind; j++)
       {
         simple_path[j] = 0;
@@ -196,6 +195,10 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
   {
     PatherSimplePath(track, simple_path, sind, train, speed, offset, true);
   }
+  
+  zone_unreserve_all(reserve_server, train);
+  int dest_zone = simple_path[edge_count - 1]->dest->reverse->zone;
+  zone_reserve(reserve_server, train, dest_zone);
 }
 
 void PartialPathFinderTask()
@@ -273,7 +276,7 @@ void PathFinderTask()
   track_edge *route_edges[TRACK_MAX + 1];
   // render_command("doing djikstra reversal: %d", allow_reversal);
   int edge_count = do_djikstra(track, train, src, dest, allow_reversal, true, route_edges);
-  render_command("edge count %d", edge_count);
+  // render_command("edge count %d", edge_count);
   if (edge_count == -1)
   {
     render_command("[PATHER] djikstra cannot find path, recompute a blocking path");
@@ -284,6 +287,7 @@ void PathFinderTask()
 
   track_edge *complex_path[TRACK_MAX + 1] = {0};
   int cind = 0;
+  int last_sensor_dest_edge = -1;
   for (int i = 0; i < edge_count; i++)
   {
     track_edge *edge = route_edges[i];
@@ -291,38 +295,49 @@ void PathFinderTask()
     int zone = edge->dest->reverse->zone;
     if (zone != -1)
     {
+      // render_command("partial path edge_count: %d", last_sensor_dest_edge + 1);
       if (!zone_reserve(reserve_server, train, zone))
       {
-        int partialPathTask = Create(5, &PartialPathFinderTask);
-        PathFinderResponse pp_response;
-        PartialPathFinderRequest pp_request = (PartialPathFinderRequest){
-            .trainsys_server = trainsys_server,
-            .track = track,
-            .path = complex_path,
-            .edge_count = cind,
-            .train = train,
-            .speed = speed,
-            .offset = offset};
-        Send(partialPathTask, (const char *)&pp_request, sizeof(PartialPathFinderRequest), (char *)&pp_response, sizeof(PathFinderResponse));
+        if (last_sensor_dest_edge != -1) {
+          int partialPathTask = Create(5, &PartialPathFinderTask);
+          PathFinderResponse pp_response;
+          PartialPathFinderRequest pp_request = (PartialPathFinderRequest){
+              .trainsys_server = trainsys_server,
+              .track = track,
+              .path = complex_path,
+              .edge_count = last_sensor_dest_edge + 1,
+              .train = train,
+              .speed = speed,
+              .offset = offset};
+          Send(partialPathTask, (const char *)&pp_request, sizeof(PartialPathFinderRequest), (char *)&pp_response, sizeof(PathFinderResponse));
 
-        render_command("Before zone wait");
+          for (int j = last_sensor_dest_edge + 1; j < TRACK_MAX + 1; j++)
+          {
+            complex_path[j-last_sensor_dest_edge + 1] = complex_path[j];
+          }
+          cind = cind - (last_sensor_dest_edge + 1);
+          last_sensor_dest_edge = -1;
+        }
+
+        render_command("Before zone wait %d ", zone);
         zone_wait(reserve_server, train, zone);
         render_command("after zone wait");
         if (!zone_reserve(reserve_server, train, zone))
         {
           render_command("[ERROR] should have claimed zone");
         }
-
-        for (int i = 0; i < TRACK_MAX + 1; i++)
-        {
-          complex_path[i] = 0;
-        }
-        cind = 0;
       }
     }
 
     complex_path[cind] = edge;
+    if (edge->dest->type == NODE_SENSOR) {
+      last_sensor_dest_edge = cind;
+    }
     cind += 1;
+  }
+  render_command("cind: %d", cind);
+  for (int j = 0; j < cind; j ++) {
+    render_command("[EDGE]: %s -> %s", complex_path[j]->src->name, complex_path[j]->dest->name);
   }
 
   PatherComplexPath(trainsys_server, track, complex_path, cind, train, speed, offset);

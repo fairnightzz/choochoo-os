@@ -50,16 +50,23 @@ typedef struct
 
 void reservationWaitUnblock(LList *zone_buffer_requests, int updated_zone)
 {
+
   LListIter *it = llist_iter(zone_buffer_requests);
   while (it->current)
   {
     ZoneBufferRequest *zone_buffer_req = (ZoneBufferRequest *)llist_next(it);
+    if (updated_zone == 7) {
+      render_command("reservation wait unblock zone %d", updated_zone);
+      render_command("zone_buffer_req->zone %d, train: %d", zone_buffer_req->zone, zone_buffer_req->train);
+      render_command("reservation at 7 %d",reservations[updated_zone]);
+    }
     if (zone_buffer_req->zone != updated_zone)
       continue;
 
-    if (!_zone_is_reserved(updated_zone, zone_buffer_req->train))
+    if (!_zone_is_reserved(zone_buffer_req->train, updated_zone))
     {
 
+      render_command("freeing zone %d for train %d",updated_zone, zone_buffer_req->train);
       ZoneResponse reply_buf = (ZoneResponse){
           .type = ZONE_WAIT,
       };

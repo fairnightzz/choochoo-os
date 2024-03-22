@@ -113,9 +113,9 @@ void TrainSystemServer()
     train_positions[i] = -1;
 }
 
-  train_positions[2] = 22;
-  train_positions[3] = 26;
-  train_positions[4] = 24;
+  train_positions[2] = 22; // B7
+  train_positions[3] = 26; // B11
+  train_positions[4] = 24; // B9
 
   bool reversed[TRAINS_COUNT] = {0};
   int reverse_tasks[TRAINS_COUNT] = {0}; // 0 means no task is reversing
@@ -275,7 +275,7 @@ void TrainSystemServer()
     }
     case SYSTEM_SET_SPEED:
     {
-      render_command("setting train speed of train %d to %d", request.train, request.speed);
+      // render_command("setting train speed of train %d to %d", request.train, request.speed);
 
       int train = request.train;
       int speed = request.speed;
@@ -293,7 +293,7 @@ void TrainSystemServer()
     }
     case SYSTEM_STOP_TRAIN:
     {
-      render_command("stopping train %d", request.train);
+      // render_command("stopping train %d", request.train);
       int train = request.train;
       int speed = 15;
       int temp_state = (train_states[train] & ~TRAIN_SPEED_MASK) | speed;
@@ -330,12 +330,12 @@ void TrainSystemServer()
       int train = request.train;
       int speed = train_states[train] & TRAIN_SPEED_MASK;
 
-      render_command("[TSS Reverse]: train %d speed %d", request.train, speed);
+      // render_command("[TSS Reverse]: train %d speed %d", request.train, speed);
 
       bool was_already_reversing;
       if (reverse_tasks[train] != 0)
       {
-        render_command("[TSS Reverse]: train %d speed %d is already reversing", request.train, speed);
+        // render_command("[TSS Reverse]: train %d speed %d is already reversing", request.train, speed);
 
         was_already_reversing = true;
       }
@@ -419,11 +419,12 @@ void TrainSystemServer()
       {
         LOG_ERROR("Couldn't find train associated with reverse task");
       }
-      render_command("[TSS Reverse Reverse]: train %d", train);
+      // render_command("[TSS Reverse Reverse]: train %d", train);
 
       uint8_t temp_state = train_states[train];
       int speed = 15;
       temp_state = (temp_state & ~TRAIN_SPEED_MASK) | speed;
+      // io_marklin_set_train(marklin_io, train, temp_state);
       io_marklin_reverse_train_0(marklin_io, train, temp_state, train_states[train] & ~TRAIN_SPEED_MASK);
 
       // set the train state to reversed
@@ -483,7 +484,7 @@ void TrainSystemServer()
         LOG_ERROR("Couldn't find train associated with reverse task");
       }
 
-      render_command("[TSS Reverse RESTART]: train %d", train);
+      //render_command("[TSS Reverse RESTART]: train %d", train);
       io_marklin_set_train(marklin_io, train, train_states[train]);
       reverse_tasks[train] = 0;
 
