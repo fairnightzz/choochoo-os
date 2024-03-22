@@ -247,7 +247,8 @@ void PathFinderTask()
 
   TrainSystemResponse resp = TrainSystemGetTrainPosition(trainsys_server, train);
 
-  int src = (resp.train_state & TRAIN_SPEED_MASK) == 0 ? resp.position : track_next_sensor(switch_server, track + resp.next_sensor_id)->num;
+  int start_position = track[resp.position].reverse->num == resp.next_sensor_id ? resp.next_sensor_id : resp.position;
+  int src = (resp.train_state & TRAIN_SPEED_MASK) == 0 ? start_position : track_next_sensor(switch_server, track + resp.next_sensor_id)->num;
   render_command("[PathFinderTask INFO] Train: %d Source Sensor: %s Destination Sensor: %s", train, get_sensor_string(src), get_sensor_string(dest));
   if (src == -1)
   {
