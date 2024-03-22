@@ -10,7 +10,6 @@ void io_marklin_dump_sensors(int io_server, uint8_t count);
 void io_marklin_get_sensor(int io_server, uint8_t index);
 void io_marklin_go(int io_server);
 void io_marklin_stop(int io_server);
-void io_marklin_stop_train(int io_server, int train, int speed, int zero_speed);
 void io_marklin_reverse_train_0(int io_server, int train, int speed, int zero_speed);
 
 #endif // __IO_MARKLIN_H__

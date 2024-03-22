@@ -295,7 +295,7 @@ void TrainSystemServer()
       int temp_state = (train_states[train] & ~TRAIN_SPEED_MASK) | speed;
       train_states[train] = train_states[train] & ~TRAIN_SPEED_MASK;
 
-      io_marklin_stop_train(marklin_io, train, temp_state, train_states[train]);
+      io_marklin_reverse_train_0(marklin_io, train, temp_state, train_states[train]);
       response = (TrainSystemResponse){
           .type = SYSTEM_STOP_TRAIN,
           .train = train};
@@ -343,8 +343,8 @@ void TrainSystemServer()
           uint8_t temp_state = train_states[train];
           speed = 15;
           temp_state = (temp_state & ~TRAIN_SPEED_MASK) | speed;
-          // io_marklin_set_train(marklin_io, train, temp_state);
           io_marklin_reverse_train_0(marklin_io, train, temp_state, train_states[train]);
+          // io_marklin_reverse_train_0(marklin_io, train, temp_state, train_states[train]);
 
           // update the next two sensors
           int train_idx = get_train_index(train);
@@ -362,11 +362,11 @@ void TrainSystemServer()
                 new_next_next_sens = is_unknown2 ? -1 : new_next_next_sens;
                 train_next_sensors[train_idx][0] = new_next_sens;
                 train_next_sensors[train_idx][1] = new_next_next_sens;
-                render_command("updating next sensor on reverse: %s  old pos: %s", get_sensor_string(new_next_sens), get_sensor_string(train_positions[train_idx]));
+                // render_command("updating next sensor on reverse: %s  old pos: %s", get_sensor_string(new_next_sens), get_sensor_string(train_positions[train_idx]));
                 render_predict_next_sensor(train, new_next_sens);
             } else {
               int new_next_sens = find_next_sensor(current_next_sens, switch_server, &is_unknown, &dist);
-              render_command("updating next sensor on reverse: %s  old pos: %s", get_sensor_string(current_next_sens), get_sensor_string(train_positions[train_idx]));
+              // render_command("updating next sensor on reverse: %s  old pos: %s", get_sensor_string(current_next_sens), get_sensor_string(train_positions[train_idx]));
               new_next_sens = is_unknown ? -1 : new_next_sens;
               train_next_sensors[train_idx][0] = current_next_sens;
               train_next_sensors[train_idx][1] = new_next_sens;
@@ -417,7 +417,7 @@ void TrainSystemServer()
       uint8_t temp_state = train_states[train];
       int speed = 15;
       temp_state = (temp_state & ~TRAIN_SPEED_MASK) | speed;
-      io_marklin_set_train(marklin_io, train, temp_state);
+      io_marklin_reverse_train_0(marklin_io, train, temp_state, train_states[train] & ~TRAIN_SPEED_MASK);
 
       // set the train state to reversed
       reversed[train] = !reversed[train];
@@ -443,11 +443,11 @@ void TrainSystemServer()
             new_next_next_sens = is_unknown2 ? -1 : new_next_next_sens;
             train_next_sensors[train_idx][0] = new_next_sens;
             train_next_sensors[train_idx][1] = new_next_next_sens;
-            render_command("updating next sensor on reverse: %s  old pos: %s", get_sensor_string(new_next_sens), get_sensor_string(train_positions[train_idx]));
+            // render_command("updating next sensor on reverse: %s  old pos: %s", get_sensor_string(new_next_sens), get_sensor_string(train_positions[train_idx]));
             render_predict_next_sensor(train, new_next_sens);
         } else {
           int new_next_sens = find_next_sensor(current_next_sens, switch_server, &is_unknown, &dist);
-          render_command("updating next sensor on reverse: %s  old pos: %s", get_sensor_string(current_next_sens), get_sensor_string(train_positions[train_idx]));
+          // render_command("updating next sensor on reverse: %s  old pos: %s", get_sensor_string(current_next_sens), get_sensor_string(train_positions[train_idx]));
           new_next_sens = is_unknown ? -1 : new_next_sens;
           train_next_sensors[train_idx][0] = current_next_sens;
           train_next_sensors[train_idx][1] = new_next_sens;
