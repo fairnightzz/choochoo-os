@@ -197,7 +197,7 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
   }
   
   zone_unreserve_all(reserve_server, train);
-  int dest_zone = simple_path[edge_count - 1]->dest->reverse->zone;
+  int dest_zone = path[edge_count - 1]->dest->reverse->zone;
   zone_reserve(reserve_server, train, dest_zone);
 }
 
@@ -298,6 +298,7 @@ void PathFinderTask()
       // render_command("partial path edge_count: %d", last_sensor_dest_edge + 1);
       if (!zone_reserve(reserve_server, train, zone))
       {
+        render_command("could not reserve");
         if (last_sensor_dest_edge != -1) {
           int partialPathTask = Create(5, &PartialPathFinderTask);
           PathFinderResponse pp_response;
@@ -328,7 +329,7 @@ void PathFinderTask()
         }
       }
     }
-
+    render_command("cind %d, last sensor %d", cind, last_sensor_dest_edge);
     complex_path[cind] = edge;
     if (edge->dest->type == NODE_SENSOR) {
       last_sensor_dest_edge = cind;
