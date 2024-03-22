@@ -57,7 +57,7 @@ static const uint32_t TRAIN_DATA_SHORT_MOVE_DIST[TRAIN_DATA_TRAIN_COUNT][TRAIN_D
     {0, 17, 58, 97, 154, 209, 300, 351, 405, 458, 515, 570, 634, 690, 745, 805, 849},  // 77
 };
 
-void train_data_init();
+void train_data_init(char ch);
 track_node *get_track();
 HashMap *get_node_map();
 uint32_t train_data_vel(uint32_t train, uint32_t speed);

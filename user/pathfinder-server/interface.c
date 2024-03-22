@@ -10,7 +10,7 @@
 int PlanPath(Path path)
 {
     HashMap *nodeMap = get_node_map();
-    int trainsys_server = WhoIs(TrainSystemAddress);
+    // int trainsys_server = WhoIs(TrainSystemAddress);
     // TODO
 
     bool success;
