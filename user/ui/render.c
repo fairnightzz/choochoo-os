@@ -115,14 +115,14 @@ void render_init()
   uart_printf(CONSOLE, "│─[performance]─────────────────────────────────────────────────────────────────┤\r\n");
   uart_printf(CONSOLE, "│ Idle Task Execution Percentage:                                               │\r\n");
   uart_printf(CONSOLE, "│─[train-system]────────────────────────────────────────────────────────────────┤\r\n");
-  uart_printf(CONSOLE, "│   Train #  │  Current Sensor  │  Next Sensor  │  Time Err.  │  Distance Err.  │\r\n");
+  uart_printf(CONSOLE, "│   Train #  │  Current  │ Next │  Time Err.  │  Distance Err.  │  Destination  |\r\n");
   uart_printf(CONSOLE, "│───────────────────────────────────────────────────────────────────────────────│\r\n");
-  uart_printf(CONSOLE, "│     02                                                ticks            mm     │\r\n");
-  uart_printf(CONSOLE, "│     47                                                ticks            mm     │\r\n");
-  uart_printf(CONSOLE, "│     54                                                ticks            mm     │\r\n");
-  uart_printf(CONSOLE, "│     55                                                ticks            mm     │\r\n");
-  uart_printf(CONSOLE, "│     58                                                ticks            mm     │\r\n");
-  uart_printf(CONSOLE, "│     77                                                ticks            mm     │\r\n");
+  uart_printf(CONSOLE, "│     02                                ticks            mm                     |\r\n");
+  uart_printf(CONSOLE, "│     47                                ticks            mm                     │\r\n");
+  uart_printf(CONSOLE, "│     54                                ticks            mm                     │\r\n");
+  uart_printf(CONSOLE, "│     55                                ticks            mm                     │\r\n");
+  uart_printf(CONSOLE, "│     58                                ticks            mm                     │\r\n");
+  uart_printf(CONSOLE, "│     77                                ticks            mm                     │\r\n");
   uart_printf(CONSOLE, "│─[zone-system]─────────────────────────────────────────────────────────────────┤\r\n");
   uart_printf(CONSOLE, "│     00 --       01 --       02 --       03 --       04 --       05 --         │\r\n");
   uart_printf(CONSOLE, "│     06 --       07 --       08 --       09 --       10 --       11 --         │\r\n");
@@ -216,14 +216,14 @@ void render_predict_current_sensor(int train, int sensor_id)
 {
   int train_index = get_train_index(train);
   string sensorString = get_sensor_string(sensor_id);
-  print("\033[%u;%uH%s", 26 + 35 + train_index, 22, sensorString.data);
+  print("\033[%u;%uH%s", 26 + 35 + train_index, 18, sensorString.data);
 }
 
 void render_predict_next_sensor(int train, int sensor_id)
 {
   int train_index = get_train_index(train);
   string sensorString = get_sensor_string(sensor_id);
-  print("\033[%u;%uH%s", 26 + 35 + train_index, 39, sensorString.data);
+  print("\033[%u;%uH%s", 26 + 35 + train_index, 28, sensorString.data);
 }
 
 void render_reserve_zone(int train, int zone_id)
@@ -259,7 +259,7 @@ void render_predict_t_error(int train, int terr)
 
   string toffset = to_string(tstring);
 
-  print("\033[%u;%uH   %d ticks", 26 + 35 + train_index, 53 - toffset.length, terr);
+  print("\033[%u;%uH   %d ticks", 26 + 35 + train_index, 38 - toffset.length, terr);
 }
 
 void render_predict_d_error(int train, int derr)
@@ -270,7 +270,14 @@ void render_predict_d_error(int train, int derr)
 
   string doffset = to_string(dstring);
 
-  print("\033[%u;%uH   %d mm", 26 + 35 + train_index, 70 - doffset.length, derr);
+  print("\033[%u;%uH   %d mm", 26 + 35 + train_index, 55 - doffset.length, derr);
+}
+
+void render_train_destination(int train, int sensor_id)
+{
+  int train_index = get_train_index(train);
+  string sensorString = get_sensor_string(sensor_id);
+  print("\033[%u;%uH%s", 26 + 35 + train_index, 71, sensorString.data);
 }
 
 void render_debug_log(int message)
