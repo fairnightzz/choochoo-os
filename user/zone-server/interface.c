@@ -54,6 +54,23 @@ void zone_unreserve_all(int zone_server, int train)
   }
 }
 
+void zone_unreserve_all_except(int zone_server, int train, int target_zone)
+{
+  ZoneResponse response;
+  ZoneRequest request = (ZoneRequest){
+      .type = ZONE_UNRESERVE_ALL_EXCEPT,
+      .unreserve_all = train,
+      .zone = target_zone,
+  };
+
+  int returnValue = Send(zone_server, (const char *)&request, sizeof(ZoneRequest), (char *)&response, sizeof(ZoneResponse));
+
+  if (returnValue < 0)
+  {
+    LOG_WARN("Zone unreserve all except failed");
+  }
+}
+
 void zone_wait(int zone_server, int train, int zone)
 {
   ZoneResponse response;

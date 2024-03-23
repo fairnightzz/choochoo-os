@@ -55,10 +55,11 @@ void reservationWaitUnblock(LList *zone_buffer_requests, int updated_zone)
   while (it->current)
   {
     ZoneBufferRequest *zone_buffer_req = (ZoneBufferRequest *)llist_next(it);
-    if (updated_zone == 7) {
+    if (updated_zone == 7)
+    {
       render_command("reservation wait unblock zone %d", updated_zone);
       render_command("zone_buffer_req->zone %d, train: %d", zone_buffer_req->zone, zone_buffer_req->train);
-      render_command("reservation at 7 %d",reservations[updated_zone]);
+      render_command("reservation at 7 %d", reservations[updated_zone]);
     }
     if (zone_buffer_req->zone != updated_zone)
       continue;
@@ -66,7 +67,7 @@ void reservationWaitUnblock(LList *zone_buffer_requests, int updated_zone)
     if (!_zone_is_reserved(zone_buffer_req->train, updated_zone))
     {
 
-      render_command("freeing zone %d for train %d",updated_zone, zone_buffer_req->train);
+      render_command("freeing zone %d for train %d", updated_zone, zone_buffer_req->train);
       ZoneResponse reply_buf = (ZoneResponse){
           .type = ZONE_WAIT,
       };
@@ -157,6 +158,25 @@ void ZoneServer()
       for (int i = 0; i < NUM_ZONES; ++i)
       {
         if (reservations[i] == request.unreserve_all)
+        {
+          reservations[i] = 0;
+          render_unreserve_zone(i);
+          reservationWaitUnblock(zone_requests, i);
+        }
+      }
+
+      response = (ZoneResponse){
+          .type = ZONE_UNRESERVE_ALL,
+      };
+      Reply(from_tid, (char *)&request, sizeof(ZoneRequest));
+
+      unblockAllWaiting(&wait_change_requests);
+    }
+    else if (request.type == ZONE_UNRESERVE_ALL_EXCEPT)
+    {
+      for (int i = 0; i < NUM_ZONES; ++i)
+      {
+        if (reservations[i] == request.unreserve_all && i != request.zone) // only reserve if i != zone
         {
           reservations[i] = 0;
           render_unreserve_zone(i);
