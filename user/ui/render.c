@@ -251,21 +251,25 @@ void render_unreserve_zone(int zone_id)
   print("\033[%u;%uH%s", row, col, "--");
 }
 
-void render_predict_error(int train, int terr, int derr)
+void render_predict_t_error(int train, int terr)
 {
-
   int train_index = get_train_index(train);
   char tstring[10];
   i2a(terr, tstring);
+
+  string toffset = to_string(tstring);
+
+  print("\033[%u;%uH   %d ticks", 26 + 35 + train_index, 53 - toffset.length, terr);
+}
+
+void render_predict_d_error(int train, int derr)
+{
+  int train_index = get_train_index(train);
   char dstring[10];
   i2a(derr, dstring);
 
-  string toffset = to_string(tstring);
   string doffset = to_string(dstring);
 
-  // print("\033[%u;%uH     ", 26 + 15, 51, terr);
-  // print("\033[%u;%uH     ", 26 + 15, 68, derr);
-  print("\033[%u;%uH   %d ticks", 26 + 35 + train_index, 53 - toffset.length, terr);
   print("\033[%u;%uH   %d mm", 26 + 35 + train_index, 70 - doffset.length, derr);
 }
 

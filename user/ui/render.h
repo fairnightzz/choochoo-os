@@ -27,7 +27,8 @@ void render_perf_stats(int percentage);
 void render_debug_log(int message);
 void render_predict_current_sensor(int train, int sensor_id);
 void render_predict_next_sensor(int train, int sensor_id);
-void render_predict_error(int train, int terr, int derr); // terr in ticks, derr in mm
+void render_predict_t_error(int train, int terr); // terr in ticks
+void render_predict_d_error(int train, int derr); // derr in mm
 void render_reserve_zone(int train, int zone);
 void render_unreserve_zone(int zone);
 void clear_screen();

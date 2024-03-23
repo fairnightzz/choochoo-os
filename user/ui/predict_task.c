@@ -68,7 +68,16 @@ void predictTask()
 
     int t_err = elapsed - predicted_sensor_time[train_index];
     int d_err = (t_err * train_vel) / 100;
-    render_predict_error(train, t_err, d_err);
+
+    // If too high, just don't render
+    if (t_err < 500)
+    {
+      render_predict_t_error(train, t_err);
+    }
+    if (d_err < 500)
+    {
+      render_predict_d_error(train, d_err);
+    }
 
     predicted_sensor_time[train_index] = (dist_to_next / train_vel) * 100; // in ticks
   }
