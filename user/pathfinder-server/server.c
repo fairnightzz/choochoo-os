@@ -294,6 +294,8 @@ void PathFinderTask()
     edge_count = do_djikstra(track, train, src, dest, allow_reversal, false, route_edges);
   }
 
+  render_train_destination(train, route_edges[edge_count - 1]->dest->num);
+
   // render_command("starting complex pathing :((()))");
 
   track_edge *complex_path[TRACK_MAX + 1] = {0};
