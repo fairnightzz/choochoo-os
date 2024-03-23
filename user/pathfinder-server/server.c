@@ -28,14 +28,14 @@ void setSwitchesInZone(int switch_server, track_node *track, int zone, SwitchMod
   }
 }
 
-void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_count, int train, int speed, int offset, bool final_destination)
+void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_count, int train, int speed, int offset, bool final_destination, int *reservations)
 {
   render_command("Simple Command: %s -> %s, edge_count %d", simple_path[0]->src->name, simple_path[edge_count - 1]->dest->name, edge_count);
-  int clock_server = WhoIs(ClockAddress);
   int sensor_server = WhoIs(SensorAddress);
+  int clock_server = WhoIs(ClockAddress);
   int switch_server = WhoIs(SwitchAddress);
   int trainsys_server = WhoIs(TrainSystemAddress);
-
+  int reserve_server = WhoIs(ZoneAddress);
   int stopping_distance = 0;
   // int train_vel = 0;
 
@@ -80,6 +80,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     desired_switch_modes[i] = SWITCH_MODE_UNKNOWN;
   }
 */
+  int cur_path_reserv[ZONE_COUNT + 1] = {0}; 
   for (int i = 0; i < edge_count; i++)
   {
     track_edge *edge = simple_path[i];
@@ -94,6 +95,9 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
       {
         SwitchSet(switch_server, switch_num, SWITCH_MODE_C);
       }
+    }
+    if (edge->dest->type == NODE_SENSOR) {
+      cur_path_reserv[edge->dest->zone] += 1;
     }
   }
 
@@ -150,9 +154,16 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
       TrainSystemSetSpeed(trainsys_server, train, 0);
     }
   }
+
+  for (int i = 0; i < ZONE_COUNT; i++) {
+    if (reservations[i] > 0 && reservations[i] - cur_path_reserv[i] == 0) {
+      reservations[i] = 0;
+      zone_unreserve(reserve_server, train, i);
+    }
+  }
 }
 
-void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path, int edge_count, int train, int speed, int offset)
+void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path, int edge_count, int train, int speed, int offset, int *reservations)
 {
   int clock_server = WhoIs(ClockAddress);
   int reserve_server = WhoIs(ZoneAddress);
@@ -178,7 +189,7 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
       render_command("reversal edge detected");
       if (sind > 1)
       {
-        PatherSimplePath(track, simple_path, sind, train, speed, 0, false);
+        PatherSimplePath(track, simple_path, sind, train, speed, 0, false, reservations);
       }
       TrainSystemReverse(trainsys_server, train);
       Delay(clock_server, 100);
@@ -193,12 +204,12 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
 
   if (sind > 0)
   {
-    PatherSimplePath(track, simple_path, sind, train, speed, offset, true);
+    PatherSimplePath(track, simple_path, sind, train, speed, offset, true, reservations);
   }
-  
-  zone_unreserve_all(reserve_server, train);
+
   int dest_zone = path[edge_count - 1]->dest->reverse->zone;
-  zone_reserve(reserve_server, train, dest_zone);
+  zone_unreserve_all_except(reserve_server, train, dest_zone);
+
 }
 
 void PartialPathFinderTask()
@@ -217,7 +228,7 @@ void PartialPathFinderTask()
     return;
   }
 
-  PatherComplexPath(request.trainsys_server, request.track, request.path, request.edge_count, request.train, request.speed, request.offset);
+  PatherComplexPath(request.trainsys_server, request.track, request.path, request.edge_count, request.train, request.speed, request.offset, request.path_reservations);
   response = (PathFinderResponse){.success = true};
   Reply(from_tid, (char *)&response, sizeof(PathFinderResponse));
   Exit();
@@ -286,6 +297,9 @@ void PathFinderTask()
   // render_command("starting complex pathing :((()))");
 
   track_edge *complex_path[TRACK_MAX + 1] = {0};
+  int zone_sem[ZONE_COUNT + 1] = {0};
+  render_command("[PATHER] source zone: %d", track[src].reverse->zone);
+  zone_sem[track[src].reverse->zone] = 1;
   int cind = 0;
   int last_sensor_dest_edge = -1;
   for (int i = 0; i < edge_count; i++)
@@ -309,7 +323,8 @@ void PathFinderTask()
               .edge_count = last_sensor_dest_edge + 1,
               .train = train,
               .speed = speed,
-              .offset = offset};
+              .offset = offset,
+              .path_reservations = zone_sem};
           Send(partialPathTask, (const char *)&pp_request, sizeof(PartialPathFinderRequest), (char *)&pp_response, sizeof(PathFinderResponse));
 
           for (int j = last_sensor_dest_edge + 1; j < TRACK_MAX + 1; j++)
@@ -326,7 +341,11 @@ void PathFinderTask()
         if (!zone_reserve(reserve_server, train, zone))
         {
           render_command("[ERROR] should have claimed zone");
+        } else {
+          zone_sem[zone] += 1;
         }
+      } else {
+        zone_sem[zone] += 1;
       }
     }
     render_command("cind %d, last sensor %d", cind, last_sensor_dest_edge);
@@ -341,7 +360,7 @@ void PathFinderTask()
     render_command("[EDGE]: %s -> %s", complex_path[j]->src->name, complex_path[j]->dest->name);
   }
 
-  PatherComplexPath(trainsys_server, track, complex_path, cind, train, speed, offset);
+  PatherComplexPath(trainsys_server, track, complex_path, cind, train, speed, offset, zone_sem);
 
   Exit();
 }

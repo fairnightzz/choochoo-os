@@ -25,6 +25,7 @@ typedef struct
   int train;
   int speed;
   int offset;
+  int *path_reservations;
 } PartialPathFinderRequest;
 
 typedef struct

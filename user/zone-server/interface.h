@@ -5,8 +5,8 @@
 #include "lib/stdlib.h"
 #include <stdbool.h>
 
+#define ZONE_COUNT 32
 #define ZoneAddress "ZONE-SERVER"
-
 typedef enum
 {
   ZONE_RESERVE,
