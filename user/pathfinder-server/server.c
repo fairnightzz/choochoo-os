@@ -122,9 +122,9 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     if (final_destination)
     {
       TrainSystemStop(trainsys_server, train);
-      Delay(clock_server, 10);
+      Delay(clock_server, 100);
       TrainSystemStop(trainsys_server, train);
-      Delay(clock_server, 10);
+      Delay(clock_server, 100);
     }
     else
     {
@@ -171,7 +171,6 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     }
     else
     {
-      Delay(clock_server, 15);
       TrainSystemSetSpeed(trainsys_server, train, 0);
       Delay(clock_server, 100);
     }
@@ -207,13 +206,12 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
         PatherSimplePath(track, simple_path, sind, train, speed, 0, false, reservations);
       }
       TrainSystemReverse(trainsys_server, train);
-      Delay(clock_server, 100);
+      Delay(clock_server, 50);
       for (int j = 0; j < sind; j++)
       {
         simple_path[j] = 0;
       }
       sind = 0;
-      Delay(clock_server, 0);
     }
   }
 
