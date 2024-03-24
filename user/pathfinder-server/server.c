@@ -28,7 +28,7 @@ void setSwitchesInZone(int switch_server, track_node *track, int zone, SwitchMod
   }
 }
 
-void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_count, int train, int speed, int offset, bool final_destination, int *reservations)
+void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_count, int train, int speed, int offset, bool final_destination, int *reservations, bool src_is_rev)
 {
   render_command("Simple Command: %s -> %s, edge_count %d", simple_path[0]->src->name, simple_path[edge_count - 1]->dest->name, edge_count);
   int sensor_server = WhoIs(SensorAddress);
@@ -119,6 +119,25 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED[get_train_index(train)]);
     render_command("waiting on destination sensor %s", get_sensor_string(dest));
     WaitOnSensor(sensor_server, dest);
+    if (src_is_rev) {
+      int src_zone = simple_path[0]->src->zone;
+      if (reservations[src_zone] > 0 && reservations[src_zone] - 1 == 0) {
+          zone_unreserve(reserve_server, train, src_zone);
+      }
+      reservations[src_zone] -= 1;
+      src_is_rev = false;
+    }
+    for (int i = edge_cutoff; i < edge_count; i++) {
+      track_edge *past_edge = simple_path[i];
+      int res_zone = past_edge->dest->zone;
+      if (res_zone != -1) {
+        render_command("reservations at zone %d: %d", res_zone, reservations[res_zone]);
+        if (reservations[res_zone] > 0 && reservations[res_zone] - 1 == 0) {
+          zone_unreserve(reserve_server, train, res_zone);
+        }
+        reservations[res_zone] -= 1;
+      }
+    } 
     if (final_destination)
     {
       TrainSystemStop(trainsys_server, train);
@@ -138,13 +157,40 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     render_command("waiting on sensor %s", waiting_sensor->name);
 
     int last_triggered = -1;
-    while (last_triggered != waiting_sensor->num) {
+    int wait_for_sensor = waiting_sensor->num;
+    while (last_triggered != wait_for_sensor) {
       last_triggered = WaitOnSensor(sensor_server, -1);
+      if (last_triggered == dest && wait_for_sensor == dest) {
+        if (final_destination)
+        {
+          TrainSystemStop(trainsys_server, train);
+          Delay(clock_server, 100);
+          TrainSystemStop(trainsys_server, train);
+          Delay(clock_server, 100);
+        }
+        else
+        {
+          TrainSystemSetSpeed(trainsys_server, train, 0);
+          Delay(clock_server, 100);
+        }
+      } else if (last_triggered == wait_for_sensor && wait_for_sensor == waiting_sensor->num) {
+        TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED[get_train_index(train)]);
+        wait_for_sensor = dest;
+        render_command("waiting on destination sensor %s", get_sensor_string(dest));
+      }
       for (int i = edge_cutoff; i < edge_count; i++) {
         track_edge *edge = simple_path[i];
         if (edge->dest->num == last_triggered) {
+          if (src_is_rev) {
+            int src_zone = simple_path[0]->src->zone;
+            if (reservations[src_zone] > 0 && reservations[src_zone] - 1 == 0) {
+                zone_unreserve(reserve_server, train, src_zone);
+            }
+            reservations[src_zone] -= 1;
+            src_is_rev = false;
+          }
           for (int j = edge_cutoff; j <= i; j++) {
-            track_edge *past_edge = simple_path[i];
+            track_edge *past_edge = simple_path[j];
             int res_zone = past_edge->dest->zone;
             if (res_zone != -1) {
               if (reservations[res_zone] > 0 && reservations[res_zone] - 1 == 0) {
@@ -156,23 +202,6 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
           edge_cutoff = i + 1;
         }
       }
-    }
-
-    // WaitOnSensor(sensor_server, waiting_sensor->num);
-    TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED[get_train_index(train)]);
-    render_command("waiting on destination sensor %s", get_sensor_string(dest));
-    WaitOnSensor(sensor_server, dest);
-    if (final_destination)
-    {
-      TrainSystemStop(trainsys_server, train);
-      Delay(clock_server, 100);
-      TrainSystemStop(trainsys_server, train);
-      Delay(clock_server, 100);
-    }
-    else
-    {
-      TrainSystemSetSpeed(trainsys_server, train, 0);
-      Delay(clock_server, 100);
     }
   }
 }
@@ -188,6 +217,7 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
     return;
 
   // break path into simple paths (no reversals)
+  bool src_is_rev = false;
   track_edge *simple_path[TRACK_MAX + 1] = {0};
   int sind = 0;
   for (int i = 0; i < edge_count; ++i)
@@ -203,9 +233,10 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
       // render_command("reversal edge detected");
       if (sind > 1)
       {
-        PatherSimplePath(track, simple_path, sind, train, speed, 0, false, reservations);
+        PatherSimplePath(track, simple_path, sind, train, speed, 0, false, reservations, src_is_rev);
       }
       TrainSystemReverse(trainsys_server, train);
+      src_is_rev = true;
       Delay(clock_server, 50);
       for (int j = 0; j < sind; j++)
       {
@@ -217,7 +248,7 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
 
   if (sind > 0)
   {
-    PatherSimplePath(track, simple_path, sind, train, speed, offset, true, reservations);
+    PatherSimplePath(track, simple_path, sind, train, speed, offset, true, reservations, src_is_rev);
   }
 
   int dest_zone = path[edge_count - 1]->dest->reverse->zone;
