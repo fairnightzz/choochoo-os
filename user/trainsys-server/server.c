@@ -53,7 +53,7 @@ void ReverseTask()
   };
   Send(MyParentTid(), (const char *)&trainsys_request, sizeof(TrainSystemRequest), (char *)&trainsys_response, sizeof(TrainSystemResponse));
 
-  Delay(clock_server, 10); // TODO arbitrary delay
+  Delay(clock_server, 50);
   trainsys_request = (TrainSystemRequest){
       .type = SYSTEM_REVERSE_RESTART,
   };
