@@ -96,7 +96,8 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
         SwitchSet(switch_server, switch_num, SWITCH_MODE_C);
       }
     }
-    if (edge->dest->type == NODE_SENSOR) {
+    if (edge->dest->zone != -1) {
+      // render_command("reservation on simple path: %s - node, %d - zone", edge->dest->name, edge->dest->zone);
       cur_path_reserv[edge->dest->zone] += 1;
     }
   }
@@ -131,6 +132,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     else
     {
       TrainSystemSetSpeed(trainsys_server, train, 0);
+      Delay(clock_server, 100);
     }
   }
   else
@@ -152,14 +154,17 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     {
       Delay(clock_server, 15);
       TrainSystemSetSpeed(trainsys_server, train, 0);
+      Delay(clock_server, 100);
     }
   }
 
   for (int i = 0; i < ZONE_COUNT; i++) {
+    if (reservations[i] > 0)
+      render_command("reservations %d cur_path res %d train %d zone %d", reservations[i], cur_path_reserv[i], train, i);
     if (reservations[i] > 0 && reservations[i] - cur_path_reserv[i] == 0) {
-      reservations[i] = 0;
       zone_unreserve(reserve_server, train, i);
     }
+    reservations[i] -= cur_path_reserv[i];
   }
 }
 
@@ -186,7 +191,7 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
     // check for reversal
     if (cur_edge->type == EDGE_REVERSE)
     {
-      render_command("reversal edge detected");
+      // render_command("reversal edge detected");
       if (sind > 1)
       {
         PatherSimplePath(track, simple_path, sind, train, speed, 0, false, reservations);
@@ -300,7 +305,7 @@ void PathFinderTask()
 
   track_edge *complex_path[TRACK_MAX + 1] = {0};
   int zone_sem[ZONE_COUNT + 1] = {0};
-  render_command("[PATHER] source zone: %d", track[src].reverse->zone);
+  // render_command("[PATHER] source zone: %d", track[src].reverse->zone);
   zone_sem[track[src].reverse->zone] = 1;
   int cind = 0;
   int last_sensor_dest_edge = -1;
@@ -314,7 +319,7 @@ void PathFinderTask()
       // render_command("partial path edge_count: %d", last_sensor_dest_edge + 1);
       if (!zone_reserve(reserve_server, train, zone))
       {
-        render_command("could not reserve");
+        // render_command("could not reserve");
         if (last_sensor_dest_edge != -1) {
           int partialPathTask = Create(5, &PartialPathFinderTask);
           PathFinderResponse pp_response;
@@ -331,18 +336,18 @@ void PathFinderTask()
 
           for (int j = last_sensor_dest_edge + 1; j < TRACK_MAX + 1; j++)
           {
-            complex_path[j-last_sensor_dest_edge + 1] = complex_path[j];
+            complex_path[j-(last_sensor_dest_edge + 1)] = complex_path[j];
           }
           cind = cind - (last_sensor_dest_edge + 1);
           last_sensor_dest_edge = -1;
         }
 
-        render_command("Before zone wait %d ", zone);
+        // render_command("Before zone wait %d ", zone);
         zone_wait(reserve_server, train, zone);
-        render_command("after zone wait");
+        // render_command("after zone wait");
         if (!zone_reserve(reserve_server, train, zone))
         {
-          render_command("[ERROR] should have claimed zone");
+          render_command("[ERROR] nde have claimed zone");
         } else {
           zone_sem[zone] += 1;
         }
@@ -350,17 +355,17 @@ void PathFinderTask()
         zone_sem[zone] += 1;
       }
     }
-    render_command("cind %d, last sensor %d", cind, last_sensor_dest_edge);
+   // render_command("cind %d, last sensor %d", cind, last_sensor_dest_edge);
     complex_path[cind] = edge;
     if (edge->dest->type == NODE_SENSOR) {
       last_sensor_dest_edge = cind;
     }
     cind += 1;
   }
-  render_command("cind: %d", cind);
-  for (int j = 0; j < cind; j ++) {
-    render_command("[EDGE]: %s -> %s", complex_path[j]->src->name, complex_path[j]->dest->name);
-  }
+  // render_command("cind: %d", cind);
+  // for (int j = 0; j < cind; j ++) {
+  //  render_command("[EDGE]: %s -> %s", complex_path[j]->src->name, complex_path[j]->dest->name);
+  // }
 
   PatherComplexPath(trainsys_server, track, complex_path, cind, train, speed, offset, zone_sem);
 

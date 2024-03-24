@@ -143,6 +143,7 @@ void post_track(track_node *track, int *sensors, int *switches)
   for (int i = 0; i < 22; i++)
   {
     track[80 + 2 * i].zone = switches[i];
+    track[80 + 2 * i + 1].zone = switches[i];
   }
 
   // set zones

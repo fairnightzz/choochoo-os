@@ -259,7 +259,7 @@ void render_predict_t_error(int train, int terr)
 
   string toffset = to_string(tstring);
 
-  print("\033[%u;%uH   %d ticks", 26 + 35 + train_index, 38 - toffset.length, terr);
+  print("\033[%u;%uH   %d ticks", 26 + 35 + train_index, 37 - toffset.length, terr);
 }
 
 void render_predict_d_error(int train, int derr)
@@ -270,7 +270,7 @@ void render_predict_d_error(int train, int derr)
 
   string doffset = to_string(dstring);
 
-  print("\033[%u;%uH   %d mm", 26 + 35 + train_index, 55 - doffset.length, derr);
+  print("\033[%u;%uH   %d mm", 26 + 35 + train_index, 54 - doffset.length, derr);
 }
 
 void render_train_destination(int train, int sensor_id)

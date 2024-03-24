@@ -7,6 +7,7 @@
 #include "user/switch-server/interface.h"
 #include "user/ui/render.h"
 #include "user/clock-server/interface.h"
+#include "user/zone-server/interface.h"
 
 #define SENSOR_DEPTH 2
 
@@ -26,6 +27,7 @@ typedef struct
 void ReverseTask()
 {
   int clock_server = WhoIs(ClockAddress);
+  
   ReverseRequest request;
   int requestTid;
   Receive(&requestTid, (char *)&request, sizeof(ReverseRequest));
@@ -101,6 +103,8 @@ void TrainSystemServer()
   RegisterAs(TrainSystemAddress);
   int marklin_io = WhoIs(MarklinIOAddress);
   int switch_server = WhoIs(SwitchAddress);
+  int reserve_server = WhoIs(ZoneAddress);
+
 
   HashMap *NodeIndexMap = get_node_map();
   train_sys_track = get_track();
@@ -108,14 +112,6 @@ void TrainSystemServer()
   uint8_t train_states[TRAINS_COUNT] = {0};
   int train_positions[TRAIN_DATA_TRAIN_COUNT] = {0};
 
-  for (int i = 0; i < TRAIN_DATA_TRAIN_COUNT; i++)
-  {
-    train_positions[i] = -1;
-}
-
-  train_positions[2] = 22; // B7
-  train_positions[3] = 26; // B11
-  train_positions[4] = 24; // B9
 
   bool reversed[TRAINS_COUNT] = {0};
   int reverse_tasks[TRAINS_COUNT] = {0}; // 0 means no task is reversing
@@ -127,6 +123,24 @@ void TrainSystemServer()
       {4, 38},  // 58  (B9) A5 -> C7
       {35, 37}  // 77  C4 -> C6
   };
+
+  train_positions[2] = 22; // B7
+  train_positions[3] = 26; // B11
+  train_positions[4] = 24; // B9
+
+  for (int i = 0; i < TRAIN_DATA_TRAIN_COUNT; i++)
+  {
+    if (train_positions[i] == 0) {
+      train_positions[i] = -1;
+    } else {    
+      int train = TRAIN_DATA_TRAINS[i];
+      int zone = zone_getid_by_sensor_id(train_next_sensors[i][0]);
+      if (!zone_reserve(reserve_server, train, zone)) {
+        LOG_ERROR("failed to initialize reservation for train %d", train);
+      }
+    }
+  }
+
 
   TrainSystemRequest request;
   TrainSystemResponse response;
@@ -243,7 +257,7 @@ void TrainSystemServer()
       int next_sensor_node_idx = find_next_sensor(cur_node_idx, switch_server, &is_unknown, &dist_to_next);
       if (is_unknown)
       {
-        render_command("[TrainSystem Sensor Hit ERROR]: no next sensor found");
+        // render_command("[TrainSystem Sensor Hit ERROR]: no next sensor found");
         train_next_sensors[train_idx][0] = -1;
         train_next_sensors[train_idx][1] = -1;
         Reply(from_tid, (char *)&response, sizeof(TrainSystemResponse));
@@ -263,7 +277,7 @@ void TrainSystemServer()
       if (is_unknown)
       {
         train_next_sensors[train_idx][1] = -1;
-        render_command("[TrainSystem Sensor Hit ERROR]: no next next sensor found");
+        // render_command("[TrainSystem Sensor Hit ERROR]: no next next sensor found");
       }
       else
       {

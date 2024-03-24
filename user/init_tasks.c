@@ -14,6 +14,7 @@
 #include "user/pathfinder-server/server.h"
 #include "user/traindata/train_data.h"
 #include "user/zone-server/server.h"
+#include "user/ui/render.h"
 
 void idleTask()
 {
@@ -64,6 +65,8 @@ void initTask()
 
   io_marklin_init(marklin_server);
   train_data_init('A');
+  render_init();
+
 
   Create(2, &SensorServer);
   Create(2, &SwitchServer);

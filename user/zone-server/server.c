@@ -121,11 +121,12 @@ void ZoneServer()
     if (request.type == ZONE_RESERVE)
     {
       bool ret = _zone_reserve(request.train, request.zone);
+      
       if (ret)
       {
         render_reserve_zone(request.train, request.zone);
       }
-
+      
       response = (ZoneResponse){
           .type = ZONE_RESERVE,
           .reserve = ret,

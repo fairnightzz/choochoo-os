@@ -87,7 +87,6 @@ void renderSensorTask()
 
 void UITask()
 {
-  render_init();
 
   trainsys_init();
 
