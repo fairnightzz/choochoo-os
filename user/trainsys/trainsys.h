@@ -18,11 +18,14 @@ typedef struct
   int system_tid;
   int clock_tid;
   int switch_tid;
+  int rand_tid;
 } TrainSystemState;
 
 void trainsys_init();
 void trainsys_init_track(TrackSwitchPlans track_plan);
 void trainsys_init_trains();
 void trainsys_execute_command(CommandResult cres);
+void trainsys_start_rand_routing();
+void trainsys_end_rand_routing();
 
 #endif // __TRAINSYS_H__

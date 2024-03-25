@@ -6,6 +6,7 @@
 #include "user/trainsys-server/interface.h"
 #include "user/switch-server/interface.h"
 #include "user/pathfinder-server/interface.h"
+#include "user/random-dest-server/interface.h"
 
 static TrainSystemState SystemState;
 
@@ -81,10 +82,12 @@ void trainsys_init()
   int system_tid = WhoIs(TrainSystemAddress);
   int clock_tid = WhoIs(ClockAddress);
   int switch_tid = WhoIs(SwitchAddress);
+  int rand_tid = WhoIs(RandomDestAddress);
   SystemState = (TrainSystemState){
       .system_tid = system_tid,
       .clock_tid = clock_tid,
       .switch_tid = switch_tid,
+      .rand_tid = rand_tid
   };
 }
 
@@ -115,4 +118,14 @@ void trainsys_init_trains()
   {
     TrainSystemSetSpeed(SystemState.system_tid, TRAIN_DATA_TRAINS[i], 0);
   }
+}
+
+void trainsys_start_rand_routing()
+{
+  StartRandomRouting(SystemState.rand_tid);
+}
+
+void trainsys_end_rand_routing()
+{
+  EndRandomRouting(SystemState.rand_tid);
 }
