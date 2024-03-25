@@ -14,5 +14,6 @@
 #include "string.h"
 #include "switch.h"
 #include "command_parser.h"
+#include "rand.h"
 
 #endif // __STDLIB_H__

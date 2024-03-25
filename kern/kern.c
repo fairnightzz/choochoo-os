@@ -26,6 +26,7 @@ void kernel_init()
   // string_init();
   gic_target_and_enable(97);
   gic_target_and_enable(153);
+  rand_init();
 }
 
 static int next_tid = 0;
