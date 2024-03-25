@@ -131,14 +131,37 @@ void scheduler_delete_task(int tid)
 
 void scheduler_unblock_events(EventType eventType)
 {
-  for (uint8_t i = 0; i < NUM_PRIORITY_LEVELS; i++) {
-    SchedulerNode* current = mlfq[i];
-    for (uint8_t j = 0; j < scheduler_count_tasks(mlfq[i]); j++) {
-      TaskDescriptor* task = get_task(current->tid);
-      if (task->status == EVENT_WAIT && task->eventWaitType == eventType) {
+  for (uint8_t i = 0; i < NUM_PRIORITY_LEVELS; i++)
+  {
+    SchedulerNode *current = mlfq[i];
+    for (uint8_t j = 0; j < scheduler_count_tasks(mlfq[i]); j++)
+    {
+      TaskDescriptor *task = get_task(current->tid);
+      if (task->status == EVENT_WAIT && task->eventWaitType == eventType)
+      {
         // unblock
         task->status = READY;
         task->eventWaitType = EVENT_NONE;
+      }
+      current = current->next;
+    }
+  }
+}
+
+void scheduler_unblock_event(EventType eventType, int exitedTaskTid)
+{
+  for (uint8_t i = 0; i < NUM_PRIORITY_LEVELS; i++)
+  {
+    SchedulerNode *current = mlfq[i];
+    for (uint8_t j = 0; j < scheduler_count_tasks(mlfq[i]); j++)
+    {
+      TaskDescriptor *task = get_task(current->tid);
+      if (task->status == EVENT_WAIT && task->eventWaitType == eventType)
+      {
+        // unblock
+        task->status = READY;
+        task->eventWaitType = EVENT_NONE;
+        task->switch_frame->x0 = exitedTaskTid;
       }
       current = current->next;
     }

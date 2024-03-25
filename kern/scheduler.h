@@ -19,5 +19,6 @@ int scheduler_add_task(int tid, uint8_t priority); // Returns -1 if the priority
 int scheduler_next_task();                         // return 0 if no tasks
 void scheduler_delete_task(int tid);
 void scheduler_unblock_events(EventType eventType);
+void scheduler_unblock_event(EventType eventType, int exitedTaskTid);
 
 #endif // __SCHEDULER_H__
