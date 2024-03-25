@@ -4,6 +4,7 @@
 #include "lib/stdlib.h"
 #include "user/nameserver.h"
 #include "user/ui/render.h"
+#include "user/clock-server/interface.h"
 
 static int reservations[NUM_ZONES]; // zero means no train has the zone reserved
 
@@ -46,6 +47,7 @@ typedef struct
   int tid;
   int train;
   int zone;
+  int time;
 } ZoneBufferRequest;
 
 void reservationWaitUnblock(LList *zone_buffer_requests, int updated_zone)
@@ -55,12 +57,6 @@ void reservationWaitUnblock(LList *zone_buffer_requests, int updated_zone)
   while (it->current)
   {
     ZoneBufferRequest *zone_buffer_req = (ZoneBufferRequest *)llist_next(it);
-    if (updated_zone == 7)
-    {
-      render_command("reservation wait unblock zone %d", updated_zone);
-      render_command("zone_buffer_req->zone %d, train: %d", zone_buffer_req->zone, zone_buffer_req->train);
-      render_command("reservation at 7 %d", reservations[updated_zone]);
-    }
     if (zone_buffer_req->zone != updated_zone)
       continue;
 
@@ -70,6 +66,7 @@ void reservationWaitUnblock(LList *zone_buffer_requests, int updated_zone)
       render_command("freeing zone %d for train %d", updated_zone, zone_buffer_req->train);
       ZoneResponse reply_buf = (ZoneResponse){
           .type = ZONE_WAIT,
+          .time_out = false,
       };
       Reply(zone_buffer_req->tid, (char *)&reply_buf, sizeof(ZoneResponse));
       llist_remove_item(zone_buffer_requests, zone_buffer_req);
@@ -83,7 +80,9 @@ void reservationWaitUnblock(LList *zone_buffer_requests, int updated_zone)
 void unblockAllWaiting(BQueue *wait_change_requests)
 {
   ZoneResponse response = (ZoneResponse){
-      .type = ZONE_WAIT_CHANGE};
+      .type = ZONE_WAIT,
+      .time_out = false,
+  };
   while (length(wait_change_requests) > 0)
   {
     int from_tid = (int)pop(wait_change_requests);
@@ -91,9 +90,51 @@ void unblockAllWaiting(BQueue *wait_change_requests)
   }
 }
 
+void unblockStaleRequests(int time, LList *zone_buffer_requests)
+{
+  LListIter *it = llist_iter(zone_buffer_requests);
+  while (it->current)
+  {
+    ZoneBufferRequest *zone_buffer_req = (ZoneBufferRequest *)llist_next(it);
+    if (zone_buffer_req->time < time - 1000)
+    {
+      ZoneResponse reply_buf = (ZoneResponse){
+          .type = ZONE_WAIT,
+          .time_out = true,
+      };
+      Reply(zone_buffer_req->tid, (char *)&reply_buf, sizeof(ZoneResponse));
+      llist_remove_item(zone_buffer_requests, zone_buffer_req);
+      free(zone_buffer_req, ZONE_BUFFER_REQUEST);
+      return; // currently unblocks one request at a time
+    }
+  }
+}
+
+void zoneDeadlockNotifier()
+{
+  int clockServer = WhoIs(ClockAddress);
+  int parentTid = MyParentTid();
+  for (;;)
+  {
+    Delay(clockServer, 1000);
+    ZoneResponse response;
+    ZoneRequest request = (ZoneRequest){
+        .type = ZONE_DEADLOCK,
+    };
+
+    int returnValue = Send(parentTid, (const char *)&request, sizeof(ZoneRequest), (char *)&response, sizeof(ZoneResponse));
+
+    if (returnValue < 0)
+    {
+      LOG_WARN("Zone deadlock request check failed");
+    }
+  }
+}
+
 void ZoneServer()
 {
   RegisterAs(ZoneAddress);
+  int clockServer = WhoIs(ClockAddress);
   alloc_init(ZONE_BUFFER_REQUEST, sizeof(ZoneBufferRequest));
 
   // track_node *track = get_track();
@@ -106,6 +147,7 @@ void ZoneServer()
   LList *zone_requests = llist_new();
   BQueue wait_change_requests = new_byte_queue();
 
+  Create(4, &zoneDeadlockNotifier);
   ZoneRequest request;
   ZoneResponse response;
   int from_tid;
@@ -121,12 +163,12 @@ void ZoneServer()
     if (request.type == ZONE_RESERVE)
     {
       bool ret = _zone_reserve(request.train, request.zone);
-      
+
       if (ret)
       {
         render_reserve_zone(request.train, request.zone);
       }
-      
+
       response = (ZoneResponse){
           .type = ZONE_RESERVE,
           .reserve = ret,
@@ -204,6 +246,14 @@ void ZoneServer()
       };
       Reply(from_tid, (char *)&response, sizeof(ZoneResponse));
     }
+    else if (request.type == ZONE_DEADLOCK)
+    {
+      unblockStaleRequests(Time(clockServer), zone_requests);
+      response = (ZoneResponse){
+          .type = ZONE_DEADLOCK,
+      };
+      Reply(from_tid, (char *)&response, sizeof(ZoneResponse));
+    }
     else if (request.type == ZONE_WAIT)
     {
 
@@ -216,6 +266,7 @@ void ZoneServer()
         render_command("Zone server train %d is alreading holding zone %d, unblocking", train, zone);
         response = (ZoneResponse){
             .type = ZONE_WAIT,
+            .time_out = false,
         };
         Reply(from_tid, (char *)&response, sizeof(ZoneResponse));
         continue;
@@ -227,7 +278,7 @@ void ZoneServer()
           .tid = from_tid,
           .train = train,
           .zone = zone,
-      };
+          .time = Time(clockServer)};
       llist_append(zone_requests, request_buffer_req);
     }
     else if (request.type == ZONE_WAIT_CHANGE)

@@ -71,7 +71,7 @@ void zone_unreserve_all_except(int zone_server, int train, int target_zone)
   }
 }
 
-void zone_wait(int zone_server, int train, int zone)
+bool zone_wait(int zone_server, int train, int zone)
 {
   ZoneResponse response;
   ZoneRequest request = (ZoneRequest){
@@ -86,6 +86,8 @@ void zone_wait(int zone_server, int train, int zone)
   {
     LOG_WARN("Zone wait failed");
   }
+
+  return response.time_out;
 }
 
 bool zone_is_reserved(int zone_server, int train, int zone)
