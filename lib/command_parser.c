@@ -203,7 +203,18 @@ parse_command(string *command)
                 .dest_node = dest_node,
             }}};
   }
-
+  else if (strcmp(get_data(&cmd_name), "srp") == 0)
+  {
+    return (CommandResult){
+        .command_type = START_RANDOMPATH_COMMAND,
+    };
+  }
+  else if (strcmp(get_data(&cmd_name), "erp") == 0)
+  {
+    return (CommandResult){
+        .command_type = END_RANDOMPATH_COMMAND,
+    };
+  }
   return (CommandResult){
       .command_type = ERROR_COMMAND,
   };

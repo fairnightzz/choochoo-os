@@ -67,6 +67,16 @@ void trainsys_execute_command(CommandResult cres)
     PlanPath(new_path);
     break;
   }
+  case START_RANDOMPATH_COMMAND:
+  {
+    trainsys_start_rand_routing();
+    break;
+  }
+  case END_RANDOMPATH_COMMAND:
+  {
+    trainsys_end_rand_routing();
+    break;
+  }
   case CLEAR_COMMAND:
   {
     clear_console();
@@ -87,8 +97,7 @@ void trainsys_init()
       .system_tid = system_tid,
       .clock_tid = clock_tid,
       .switch_tid = switch_tid,
-      .rand_tid = rand_tid
-  };
+      .rand_tid = rand_tid};
 }
 
 void trainsys_init_track(TrackSwitchPlans track_plan)

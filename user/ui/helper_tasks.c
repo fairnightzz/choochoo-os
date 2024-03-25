@@ -66,6 +66,18 @@ string cres_to_string(CommandResult cres)
     string dest_node = cres.command_args.path_args.dest_node;
     return string_format("[path]: Pathing train #%u with speed %u to node %s", train, speed, dest_node.data);
   }
+  case CLEAR_COMMAND:
+  {
+    return string_format("");
+  }
+  case START_RANDOMPATH_COMMAND:
+  {
+    return string_format("[srp]: Start random pathing");
+  }
+  case END_RANDOMPATH_COMMAND:
+  {
+    return string_format("[erp]: End random pathing");
+  }
   default:
   {
     return to_string("[ERROR]: Invalid Command. Please Try Again.");
