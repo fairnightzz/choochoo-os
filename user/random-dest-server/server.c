@@ -61,7 +61,7 @@ void SingleTrainRandDestServer() {
           .train = request.train
         };
         int tid = PlanPath(new_path);
-        if (tid != 0) WaitTid(tid);
+        if (tid != 0) AwaitTid(tid);
 
         RandDestRequest dest_reached = (RandDestRequest) {
           .destination = request.destination,
@@ -162,7 +162,7 @@ void RandomDestinationServer() {
           RandDestResponse exit_resp;
           Send(helper_tids[index], (const char *)&exit_req, sizeof(PathFinderRequest), (char *)&exit_resp, sizeof(PathFinderResponse));
 
-          WaitTid(helper_tids[index]);
+          AwaitTid(helper_tids[index]);
           helper_tids[index] = -1;
           if (helper_tids[0] == -1 && helper_tids[1] == -1) {
             render_command("[RandDestServer INFO]: finished exiting random path routing");
