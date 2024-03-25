@@ -66,7 +66,7 @@ int create_task(uint32_t priority, void (*entrypoint)())
 
 TaskDescriptor *get_task(int tid)
 {
-  if (0 < tid && tid < TASK_SIZE && task_list.tasks[tid] == 0)
+  if (0 < tid && tid < TASK_SIZE) //  && task_list.tasks[tid] == 0)
   {
     LOG_WARN("getting invalid tid %d", tid);
     return 0;

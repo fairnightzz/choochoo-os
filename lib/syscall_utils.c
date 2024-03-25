@@ -10,7 +10,7 @@ void AwaitTid(int tid)
 {
   for (;;)
   {
-    if (get_task(tid)->status == FINISHED)
+    if (get_task(tid) == 0)
     {
       return;
     }
