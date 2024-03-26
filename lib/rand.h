@@ -5,5 +5,6 @@
 
 void rand_init(void);
 uint32_t rand_int(void);
+uint32_t get_rand_seed(void);
 
 #endif // __RAND_H__

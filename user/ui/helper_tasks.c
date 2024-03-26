@@ -72,7 +72,7 @@ string cres_to_string(CommandResult cres)
   }
   case START_RANDOMPATH_COMMAND:
   {
-    return string_format("[srp]: Start random pathing");
+    return string_format("[srp]: Start random pathing, seed = %d", get_rand_seed());
   }
   case END_RANDOMPATH_COMMAND:
   {
