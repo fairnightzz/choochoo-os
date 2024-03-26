@@ -116,17 +116,17 @@ void TrainSystemServer()
   bool reversed[TRAINS_COUNT] = {0};
   int reverse_tasks[TRAINS_COUNT] = {0}; // 0 means no task is reversing
   int train_next_sensors[TRAIN_DATA_TRAIN_COUNT][SENSOR_DEPTH] = {
-      {0, 44},  // 2   A1 -> C13
-      {12, 44}, // 47  A13 -> C13
+      {-1, -1}, // {0, 44},  // 2   A1 -> C13
+      {-1, -1}, //{12, 44}, // 47  A13 -> C13
       {9, 38},  // 54  (B7) A10 -> C7
       {7, 38},  // 55  (B11) A8 -> C7
-      {4, 38},  // 58  (B9) A5 -> C7
-      {14, 44}  // 77  A15 -> C13
+      {-1, -1}, //{4, 38},  // 58  (B9) A5 -> C7
+      {-1, -1} // {14, 44}  // 77  A15 -> C13
   };
 
   train_positions[2] = 22; // B7
   train_positions[3] = 26; // B11
-  train_positions[4] = 24; // B9
+  // train_positions[4] = 24; // B9
 
   for (int i = 0; i < TRAIN_DATA_TRAIN_COUNT; i++)
   {
@@ -170,33 +170,30 @@ void TrainSystemServer()
     {
       response = (TrainSystemResponse){
           .type = SYSTEM_SWITCH_CHANGE};
-      int switch_id = request.switch_triggered;
+      // int switch_id = request.switch_triggered;
       Reply(from_tid, (char *)&response, sizeof(TrainSystemResponse));
 
       int train;
       int train_idx = -1;
-      int switch_zone_id = zone_getid_by_switch_id(switch_id);
+      // int switch_zone_id = zone_getid_by_switch_id(switch_id);
       for (int i = 0; i < TRAIN_DATA_TRAIN_COUNT; i++)
       {
-        if (zone_getid_by_sensor_id(train_next_sensors[i][0]) == switch_zone_id)
+        train = TRAIN_DATA_TRAINS[i];
+        train_idx = i;
+    
+        if (train_positions[train_idx] != -1)
         {
-          train = TRAIN_DATA_TRAINS[i];
-          train_idx = i;
-     
-          if (train_positions[train_idx] != -1)
-          {
-            bool is_unknown = false;
-            bool is_unknown2 = false;
-            int dist;
-            int current_next_sens = train_sys_track[train_positions[train_idx]].reverse - train_sys_track;
-            int new_next_sens = find_next_sensor(current_next_sens, switch_server, &is_unknown, &dist);
-            int new_next_next_sens = find_next_sensor(new_next_sens, switch_server, &is_unknown2, &dist);
-            new_next_sens = is_unknown ? -1 : new_next_sens;
-            new_next_next_sens = is_unknown2 ? -1 : new_next_next_sens;
-            train_next_sensors[train_idx][0] = new_next_sens;
-            train_next_sensors[train_idx][1] = new_next_next_sens;
-            render_predict_next_sensor(train, new_next_sens);
-          }
+          bool is_unknown = false;
+          bool is_unknown2 = false;
+          int dist;
+          int current_next_sens = train_sys_track[train_positions[train_idx]].reverse->num == train_next_sensors[train_idx][0] ? train_next_sensors[train_idx][0] : train_positions[train_idx];
+          int new_next_sens = find_next_sensor(current_next_sens, switch_server, &is_unknown, &dist);
+          int new_next_next_sens = find_next_sensor(new_next_sens, switch_server, &is_unknown2, &dist);
+          new_next_sens = is_unknown ? -1 : new_next_sens;
+          new_next_next_sens = is_unknown2 ? -1 : new_next_next_sens;
+          train_next_sensors[train_idx][0] = new_next_sens;
+          train_next_sensors[train_idx][1] = new_next_next_sens;
+          render_predict_next_sensor(train, new_next_sens);
         }
       }
       break;
@@ -375,27 +372,12 @@ void TrainSystemServer()
             int dist;
             int current_position = train_positions[train_idx];
             int current_next_sens = train_sys_track[current_position].reverse - train_sys_track;
-            if (train_next_sensors[train_idx][0] == current_next_sens)
-            {
-              bool is_unknown2;
-              int new_next_sens = find_next_sensor(current_position, switch_server, &is_unknown, &dist);
-              int new_next_next_sens = find_next_sensor(new_next_sens, switch_server, &is_unknown2, &dist);
-              new_next_sens = is_unknown ? -1 : new_next_sens;
-              new_next_next_sens = is_unknown2 ? -1 : new_next_next_sens;
-              train_next_sensors[train_idx][0] = new_next_sens;
-              train_next_sensors[train_idx][1] = new_next_next_sens;
-              // render_command("updating next sensor on reverse: %s  old pos: %s", get_sensor_string(new_next_sens), get_sensor_string(train_positions[train_idx]));
-              render_predict_next_sensor(train, new_next_sens);
-            }
-            else
-            {
-              int new_next_sens = find_next_sensor(current_next_sens, switch_server, &is_unknown, &dist);
-              // render_command("updating next sensor on reverse: %s  old pos: %s", get_sensor_string(current_next_sens), get_sensor_string(train_positions[train_idx]));
-              new_next_sens = is_unknown ? -1 : new_next_sens;
-              train_next_sensors[train_idx][0] = current_next_sens;
-              train_next_sensors[train_idx][1] = new_next_sens;
-              render_predict_next_sensor(train, current_next_sens);
-            }
+            int new_next_sens = find_next_sensor(current_next_sens, switch_server, &is_unknown, &dist);
+            // render_command("updating next sensor on reverse: %s  old pos: %s", get_sensor_string(current_next_sens), get_sensor_string(train_positions[train_idx]));
+            new_next_sens = is_unknown ? -1 : new_next_sens;
+            train_next_sensors[train_idx][0] = current_next_sens;
+            train_next_sensors[train_idx][1] = new_next_sens;
+            render_predict_next_sensor(train, current_next_sens);
           }
         }
         else

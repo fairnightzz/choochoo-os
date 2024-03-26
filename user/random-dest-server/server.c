@@ -8,7 +8,7 @@
 #include "user/traindata/train_data.h"
 #include <string.h>
 
-#define ROUTE_TRAIN_COUNT 1
+#define ROUTE_TRAIN_COUNT 2
 
 char* BLACKLIST[] = { "A1", "A2", "A5","A6", "A6", "A7", "A8", "A9", "A10", "A13", "A14", "A15", "A16", "A11", "A12", "B7", "B8", "B11", "B12", "B9", "B10", "A9", "A10", "A7", "A8", "A5", "A6", "C3", "C4", 0 };
 
@@ -96,8 +96,8 @@ void RandomDestinationServer() {
   int from_tid;
 
   RegisterAs(RandomDestAddress);
-  int route_trains[ROUTE_TRAIN_COUNT] = { 54 };
-  int helper_tids[ROUTE_TRAIN_COUNT] = { -1 };
+  int route_trains[ROUTE_TRAIN_COUNT] = { 54, 55 };
+  int helper_tids[ROUTE_TRAIN_COUNT] = { -1, -1 };
   bool exiting = false;
 
   while (1) {
