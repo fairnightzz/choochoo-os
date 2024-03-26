@@ -63,7 +63,7 @@ void reservationWaitUnblock(LList *zone_buffer_requests, int updated_zone)
     if (!_zone_is_reserved(zone_buffer_req->train, updated_zone))
     {
 
-      render_command("freeing zone %d for train %d", updated_zone, zone_buffer_req->train);
+      // render_command("freeing zone %d for train %d", updated_zone, zone_buffer_req->train);
       ZoneResponse reply_buf = (ZoneResponse){
           .type = ZONE_WAIT,
           .time_out = false,

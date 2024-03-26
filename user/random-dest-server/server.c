@@ -8,16 +8,16 @@
 #include "user/traindata/train_data.h"
 #include <string.h>
 
-#define ROUTE_TRAIN_COUNT 2
+#define ROUTE_TRAIN_COUNT 1
 
-char* BLACKLIST[] = { "A1", "A2", "A13", "A14", "A15", "A16", "A11", "A12", "B7", "B8", "B11", "B12", "B9", "B10", "A9", "A10", "A7", "A8", "A5", "A6", "C3", "C4", 0 };
+char* BLACKLIST[] = { "A1", "A2", "A5","A6", "A6", "A7", "A8", "A9", "A10", "A13", "A14", "A15", "A16", "A11", "A12", "B7", "B8", "B11", "B12", "B9", "B10", "A9", "A10", "A7", "A8", "A5", "A6", "C3", "C4", 0 };
 
 char* getRandomDest() {
   track_node *track = get_track();
   while (1) {
     bool works = true;
     int dest_n = rand_int() % 80;
-    char *dest = get_sensor_string(dest_n).data;
+    char *dest = track[dest_n].name;
 
     char** blacklist_node = BLACKLIST;
     for (; *blacklist_node != 0; ++blacklist_node) {
@@ -51,7 +51,6 @@ void SingleTrainRandDestServer() {
           .type = NEW_DESTINATION,
           .train = request.train
         };
-        Reply(from_tid, (char *)&response, sizeof(RandDestResponse));
 
         Path new_path = (Path) {
           .allow_reversal = true,
@@ -60,6 +59,9 @@ void SingleTrainRandDestServer() {
           .speed = 14,
           .train = request.train
         };
+        Reply(from_tid, (char *)&response, sizeof(RandDestResponse));
+        render_command("[RandDestServer INFO]: routing train %d to %s", new_path.train, new_path.dest);
+
         int tid = PlanPath(new_path);
         if (tid != 0) AwaitTid(tid);
 
@@ -94,8 +96,8 @@ void RandomDestinationServer() {
   int from_tid;
 
   RegisterAs(RandomDestAddress);
-  int route_trains[ROUTE_TRAIN_COUNT] = { 54,  58 };
-  int helper_tids[ROUTE_TRAIN_COUNT] = { -1, -1 };
+  int route_trains[ROUTE_TRAIN_COUNT] = { 54 };
+  int helper_tids[ROUTE_TRAIN_COUNT] = { -1 };
   bool exiting = false;
 
   while (1) {
@@ -115,9 +117,8 @@ void RandomDestinationServer() {
         exiting = false;
 
         for (int i = 0; i < ROUTE_TRAIN_COUNT; i++) {
-          helper_tids[i] = Create(5, &SingleTrainRandDestServer);
           char *new_dest = getRandomDest();
-          render_command("[RandDestServer INFO]: routing train %d to %s", route_trains[i], new_dest);
+          helper_tids[i] = Create(5, &SingleTrainRandDestServer);
           RandDestRequest new_dest_req = (RandDestRequest) {
             .destination = new_dest,
             .train = route_trains[i],
@@ -144,7 +145,7 @@ void RandomDestinationServer() {
 
         if (!exiting) {
           char *new_dest = getRandomDest();
-          render_command("[RandDestServer INFO]: completed previous route. routing train %d to %s", route_trains[index], new_dest);
+          render_command("[RandDestServer INFO]: routing train %d to %s", route_trains[index], new_dest);
 
           RandDestRequest new_dest_req = (RandDestRequest) {
             .destination = new_dest,
@@ -164,7 +165,7 @@ void RandomDestinationServer() {
 
           AwaitTid(helper_tids[index]);
           helper_tids[index] = -1;
-          if (helper_tids[0] == -1 && helper_tids[1] == -1) {
+          if (helper_tids[0] == -1) { //&& helper_tids[1] == -1) {
             render_command("[RandDestServer INFO]: finished exiting random path routing");
           }
         }

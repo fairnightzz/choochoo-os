@@ -65,7 +65,7 @@ void initTask()
   int marklin_server = Create(2, &MarklinIOServer);
 
   io_marklin_init(marklin_server);
-  train_data_init('A');
+  train_data_init('B');
   render_init();
 
 

@@ -19,7 +19,7 @@ int do_edge_trace(int cur_node, int src_node, int iter_count, uint32_t *prev, tr
     return -1;
   }
   int tot_iterations = do_edge_trace(prev[cur_node], src_node, iter_count + 1, prev, edges, edge_graph);
-  render_command("[Edge Trace]: %s -> %s, dist %d, type %d", edges[cur_node]->src->name, edges[cur_node]->dest->name, edges[cur_node]->dist,edges[cur_node]->type);
+  // render_command("[Edge Trace]: %s -> %s, dist %d, type %d", edges[cur_node]->src->name, edges[cur_node]->dest->name, edges[cur_node]->dist,edges[cur_node]->type);
   edge_graph[tot_iterations - iter_count] = edges[cur_node];
   // string render_string = string_format("edge trace: tot_iterations - iter_count: %d, src: %s, dest: %s, dist: %d", tot_iterations - iter_count, edges[cur_node]->src->name, edges[cur_node]->dest->name, edges[cur_node]->dist);
   // render_command(&render_string);

@@ -31,7 +31,7 @@ int PlanPath(Path path)
         .offset = path.offset,
         .allow_reversal = path.allow_reversal};
 
-    int pather_task = Create(2, &PathFinderTask);
+    int pather_task = Create(5, &PathFinderTask);
     Send(pather_task, (const char *)&send_buf, sizeof(PathFinderRequest), (char *)&response, sizeof(PathFinderResponse));
 
     return pather_task;

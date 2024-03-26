@@ -167,7 +167,7 @@ void post_track(track_node *track, int *sensors, int *switches)
   //   if (switch_id == 0)
   //     break;
   //   track_node *node = track_node_by_branch_id(track, switch_id);
-  //   node->zone = zone_id;
+//   node->zone = zone_id;
   //   node->reverse->zone = zone_id;
   // }
   // }

@@ -30,7 +30,7 @@ void setSwitchesInZone(int switch_server, track_node *track, int zone, SwitchMod
 
 void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_count, int train, int speed, int offset, bool final_destination, int *reservations, bool src_is_rev)
 {
-  render_command("Simple Command: %s -> %s, edge_count %d", simple_path[0]->src->name, simple_path[edge_count - 1]->dest->name, edge_count);
+  // render_command("Simple Command: %s -> %s, edge_count %d", simple_path[0]->src->name, simple_path[edge_count - 1]->dest->name, edge_count);
   int sensor_server = WhoIs(SensorAddress);
   int clock_server = WhoIs(ClockAddress);
   int switch_server = WhoIs(SwitchAddress);
@@ -115,9 +115,9 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
   int edge_cutoff = 0;
   if (waiting_sensor == 0 || simple_path[0]->src == waiting_sensor)
   {
-    render_command("starting short move");
+    // render_command("starting short move");
     TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED[get_train_index(train)]);
-    render_command("waiting on destination sensor %s", get_sensor_string(dest));
+    render_command("[PathFinderServer INFO]: train %d waiting on destination sensor %s", train, get_sensor_string(dest));
     WaitOnSensor(sensor_server, dest);
     if (src_is_rev) {
       int src_zone = simple_path[0]->src->zone;
@@ -131,7 +131,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
       track_edge *past_edge = simple_path[i];
       int res_zone = past_edge->dest->zone;
       if (res_zone != -1) {
-        render_command("reservations at zone %d: %d", res_zone, reservations[res_zone]);
+        // render_command("reservations at zone %d: %d", res_zone, reservations[res_zone]);
         if (reservations[res_zone] > 0 && reservations[res_zone] - 1 == 0) {
           zone_unreserve(reserve_server, train, res_zone);
         }
@@ -154,7 +154,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
   else
   {
     TrainSystemSetSpeed(trainsys_server, train, train_speed);
-    render_command("waiting on sensor %s", waiting_sensor->name);
+    render_command("[PathFinderServer INFO]: train %d waiting on sensor %s", train, waiting_sensor->name);
 
     int last_triggered = -1;
     int wait_for_sensor = waiting_sensor->num;
@@ -176,7 +176,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
       } else if (last_triggered == wait_for_sensor && wait_for_sensor == waiting_sensor->num) {
         TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED[get_train_index(train)]);
         wait_for_sensor = dest;
-        render_command("waiting on destination sensor %s", get_sensor_string(dest));
+        render_command("[PathFinderServer INFO]: train %d waiting on destination sensor %s", train, get_sensor_string(dest));
       }
       for (int i = edge_cutoff; i < edge_count; i++) {
         track_edge *edge = simple_path[i];
@@ -204,6 +204,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
       }
     }
   }
+  
 }
 
 void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path, int edge_count, int train, int speed, int offset, int *reservations)
@@ -211,7 +212,7 @@ void PatherComplexPath(int trainsys_server, track_node *track, track_edge **path
   int clock_server = WhoIs(ClockAddress);
   int reserve_server = WhoIs(ZoneAddress);
   
-  render_command("Starting Complex Path...");
+  // render_command("Starting Complex Path...");
   // no work to do
   if (path[0] == 0)
     return;
@@ -309,6 +310,7 @@ void PathFinderTask()
 
   Reply(from_tid, (char *)&response, sizeof(PathFinderResponse));
 
+deadlock_recompute: ;
   TrainSystemResponse resp = TrainSystemGetTrainPosition(trainsys_server, train);
 
   int start_position = track[resp.position].reverse->num == resp.next_sensor_id ? resp.next_sensor_id : resp.position;
@@ -382,11 +384,15 @@ void PathFinderTask()
         }
 
         // render_command("Before zone wait %d ", zone);
-        zone_wait(reserve_server, train, zone);
+        bool deadlock = zone_wait(reserve_server, train, zone);
+        if (deadlock)  {
+          render_command("[PathFinderServer INFO]: deadlock detected -> recomputing path on train %d", train);
+          goto deadlock_recompute;
+        }
         // render_command("after zone wait");
         if (!zone_reserve(reserve_server, train, zone))
         {
-          render_command("[ERROR] nde have claimed zone");
+          render_command("[ERROR] should have claimed zone");
         } else {
           zone_sem[zone] += 1;
         }
