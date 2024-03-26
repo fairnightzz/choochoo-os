@@ -143,6 +143,8 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
         reservations[res_zone] -= 1;
       }
     }
+    // TrainSystemSetSpeed(trainsys_server, train, 0);
+    // Delay(clock_server, 100);
     if (final_destination)
     {
       TrainSystemStop(trainsys_server, train);
@@ -162,12 +164,13 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
     render_command("[PathFinderServer INFO]: train %d waiting on sensor %s", train, waiting_sensor->name);
 
     int last_triggered = -1;
-    int wait_for_sensor = waiting_sensor->num;
-    while (last_triggered != wait_for_sensor)
+    while (last_triggered != dest)
     {
       last_triggered = WaitOnSensor(sensor_server, -1);
-      if (last_triggered == dest && wait_for_sensor == dest)
+      if (last_triggered == dest)
       {
+        // TrainSystemSetSpeed(trainsys_server, train, 0);
+        // Delay(clock_server, 100);
         if (final_destination)
         {
           TrainSystemStop(trainsys_server, train);
@@ -181,10 +184,9 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
           Delay(clock_server, 100);
         }
       }
-      else if (last_triggered == wait_for_sensor && wait_for_sensor == waiting_sensor->num)
+      else if (last_triggered == waiting_sensor->num)
       {
         TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED[get_train_index(train)]);
-        wait_for_sensor = dest;
         render_command("[PathFinderServer INFO]: train %d waiting on destination sensor %s", train, get_sensor_string(dest));
       }
       for (int i = edge_cutoff; i < edge_count; i++)
