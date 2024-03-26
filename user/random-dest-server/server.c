@@ -96,7 +96,7 @@ void RandomDestinationServer() {
   int from_tid;
 
   RegisterAs(RandomDestAddress);
-  int route_trains[ROUTE_TRAIN_COUNT] = { 2, 55 };
+  int route_trains[ROUTE_TRAIN_COUNT] = { 2, 54 };
   int helper_tids[ROUTE_TRAIN_COUNT] = { -1, -1 };
   bool exiting = false;
 

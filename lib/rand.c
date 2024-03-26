@@ -5,7 +5,7 @@ uint32_t rand_num;
 uint32_t seed;
 void rand_init(void)
 {
-    seed = 17648103;
+    seed = get_rand_seed();
     rand_num = seed;
 }
 
