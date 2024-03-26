@@ -63,6 +63,27 @@ parse_command(string *command)
                 .train = train,
             }}};
   }
+  else if (strcmp(get_data(&cmd_name), "rvi") == 0)
+  {
+
+    skip_whitespace(data, &it);
+
+    int train = get_i(data, &it);
+
+    if (train > 80 || train < 1)
+    {
+      return (CommandResult){
+          .command_type = ERROR_COMMAND,
+      };
+    }
+
+    return (CommandResult){
+        .command_type = REVERSE_INITIAL_COMMAND,
+        .command_args = {
+            .reverse_args = {
+                .train = train,
+            }}};
+  }
   else if (strcmp(get_data(&cmd_name), "sw") == 0)
   {
 

@@ -34,6 +34,12 @@ void trainsys_execute_command(CommandResult cres)
     TrainSystemReverse(SystemState.system_tid, train);
     break;
   }
+  case REVERSE_INITIAL_COMMAND:
+  {
+    uint32_t train = cres.command_args.reverse_args.train;
+    TrainSystemStop(SystemState.system_tid, train);
+    break;
+  }
   case SWITCH_COMMAND:
   {
     uint32_t switch_id = cres.command_args.switch_args.switch_id;

@@ -47,6 +47,11 @@ string cres_to_string(CommandResult cres)
     uint32_t train = cres.command_args.reverse_args.train;
     return string_format("[rv]: Reversing direction for train #%u", train);
   }
+  case REVERSE_INITIAL_COMMAND:
+  {
+    uint32_t train = cres.command_args.reverse_args.train;
+    return string_format("[rvi]: Reversing initial direction for train #%u", train);
+  }
   case SWITCH_COMMAND:
   {
     uint32_t switch_id = cres.command_args.switch_args.switch_id;

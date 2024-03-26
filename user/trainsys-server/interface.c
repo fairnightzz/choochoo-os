@@ -142,7 +142,8 @@ TrainSystemResponse TrainSystemGetTrainPosition(int system_server, int train)
   return response;
 }
 
-int TrainSystemStop(int system_server, int train) {
+int TrainSystemStop(int system_server, int train)
+{
   if (!(1 <= train && train <= 100))
   {
     LOG_WARN("invalid train number %d", train);
