@@ -1,5 +1,7 @@
 #include "stdlib.h"
 #include "kern/task_descriptor.h"
+#include "user/ui/render.h"
+
 
 void USER_TASK_EXIT()
 {

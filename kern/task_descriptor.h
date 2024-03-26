@@ -30,7 +30,7 @@ typedef enum
   EVENT_CONSOLE_RECEIVE,
   EVENT_CONSOLE_SEND,
   EVENT_TASK_FINISHED,
-  EVENT_MAX = 6,
+  EVENT_MAX = 7,
 } EventType;
 
 // SRR Buffers

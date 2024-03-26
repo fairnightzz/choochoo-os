@@ -74,9 +74,9 @@ void handle_svc()
   }
   case (EXIT):
   {
+    scheduler_unblock_event(EVENT_TASK_FINISHED, curr_task->tid);
     scheduler_delete_task(curr_task->tid);
     delete_task(curr_task->tid);
-    scheduler_unblock_event(EVENT_TASK_FINISHED, curr_task->tid);
 
     next_tid = scheduler_next_task();
     if (next_tid == 0)
