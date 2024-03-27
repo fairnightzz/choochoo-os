@@ -111,13 +111,14 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
   }
 */
 
+  int slow_speed = final_destination ? TRAIN_DATA_SHORT_MOVE_SPEED[get_train_index(train)] - 2 : TRAIN_DATA_SHORT_MOVE_SPEED[get_train_index(train)];
   int dest = simple_path[edge_count - 1]->type == EDGE_REVERSE ? simple_path[edge_count - 1]->src - track : simple_path[edge_count - 1]->dest - track;
   int edge_cutoff = 0;
   if (waiting_sensor == 0 || simple_path[0]->src == waiting_sensor)
   {
     // render_command("starting short move");
-    TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED[get_train_index(train)]);
-    render_command("[PathFinderServer INFO]: train %d waiting on destination sensor %s", train, get_sensor_string(dest));
+    TrainSystemSetSpeed(trainsys_server, train, slow_speed);
+    render_command("[PFS INFO]: train %d waiting on destination sensor %s", train, get_sensor_string(dest));
     WaitOnSensor(sensor_server, dest);
     if (src_is_rev)
     {
@@ -161,7 +162,7 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
   else
   {
     TrainSystemSetSpeed(trainsys_server, train, train_speed);
-    render_command("[PathFinderServer INFO]: train %d waiting on sensor %s", train, waiting_sensor->name);
+    render_command("[PFS INFO]: train %d waiting on sensor %s", train, waiting_sensor->name);
 
     int last_triggered = -1;
     while (last_triggered != dest)
@@ -186,8 +187,8 @@ void PatherSimplePath(track_node *track, track_edge **simple_path, int edge_coun
       }
       else if (last_triggered == waiting_sensor->num)
       {
-        TrainSystemSetSpeed(trainsys_server, train, TRAIN_DATA_SHORT_MOVE_SPEED[get_train_index(train)]);
-        render_command("[PathFinderServer INFO]: train %d waiting on destination sensor %s", train, get_sensor_string(dest));
+        TrainSystemSetSpeed(trainsys_server, train, slow_speed);
+        render_command("[PFS INFO]: train %d waiting on destination sensor %s", train, get_sensor_string(dest));
       }
       for (int i = edge_cutoff; i < edge_count; i++)
       {
@@ -326,7 +327,16 @@ void PathFinderTask()
 
   Reply(from_tid, (char *)&response, sizeof(PathFinderResponse));
 
+  int deadlock_counter = 0;
+
 deadlock_recompute:;
+
+  if (deadlock_counter > 2) {
+    render_command("[PathFinderTask INFO]: Hard deadlock detected. Aborting path on train %d.", train);
+    Exit();
+    return;
+  }
+
   TrainSystemResponse resp = TrainSystemGetTrainPosition(trainsys_server, train);
 
   int start_position = track[resp.position].reverse->num == resp.next_sensor_id ? resp.next_sensor_id : resp.position;
@@ -404,7 +414,8 @@ deadlock_recompute:;
         bool deadlock = zone_wait(reserve_server, train, zone);
         if (deadlock)
         {
-          render_command("[PathFinderServer INFO]: deadlock detected -> recomputing path on train %d", train);
+          render_command("[PFS INFO]: deadlock detected -> recomputing path on train %d", train);
+          deadlock_counter += 1;
           goto deadlock_recompute;
         }
         // render_command("after zone wait");
