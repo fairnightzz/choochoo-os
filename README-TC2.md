@@ -15,7 +15,7 @@ Run the following on a `linux.student.cs` environment:
 ```bash
 git clone https://git.uwaterloo.ca/z2252zha/choochoo-os.git
 cd choochoo-os
-git checkout <fill out>
+git checkout 061b14272c1a9098b0c29796ad7085e583a1c32f
 make
 ```
 
