@@ -61,7 +61,7 @@ Should a sensor outside of this range be detected, it is consider a spurious sen
 # 5.2 Zoning (`user/zone-server`)
 To prevent trains from crashing into each other, we implemented a zone server which allows trains
 to reserve parts of the track. It behaves similarly to a lock and enforces atomicity through a server.
-We drew a zone picture (`zones.png`) which is in the `calibration-data` folder. Note that the picture is only for track A, but we also incorporated this for track B.
+We drew a zone picture (`zones-track-a.png`) which is in the `calibration-data` folder. Note that the picture is only for track A, but we also incorporated this for track B.
 
 # 6 Pathfinding & Routing (`user/pathfinder-server`)
 
