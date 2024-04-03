@@ -2,7 +2,7 @@
 #include "user/nameserver.h"
 #include "user/io-server/interface.h"
 #include "user/io-server/io_marklin.h"
-
+#include "user/ui/render.h"
 int get_switch_index(int switch_id)
 {
   if (1 <= switch_id && switch_id <= 18)
@@ -104,6 +104,7 @@ void SwitchServer()
           switch_states[other_switch_index] = other_mode;
           io_marklin_set_switch(marklin_io, other_switch, other_mode);
           unblock_on_switch(requests_queue, other_switch, other_mode);
+          render_switch(other_switch, other_mode);
         }
       }
 
@@ -117,6 +118,7 @@ void SwitchServer()
           switch_states[other_switch_index] = other_mode;
           io_marklin_set_switch(marklin_io, other_switch, other_mode);
           unblock_on_switch(requests_queue, other_switch, other_mode);
+          render_switch(other_switch, other_mode);
         }
       }
 
