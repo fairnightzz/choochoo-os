@@ -17,6 +17,14 @@
 
 static TermUIState UIState;
 
+// Define sensor_ui_pos as a two-dimensional array of integers
+const int sensor_ui_pos[80][2] = {
+    {7, 0}, {7, 0}, {18, 4}, {18, 4}, {10, 14}, {10, 14}, {8, 12}, {8, 12}, {6, 10}, {6, 10}, {1, 8}, {1, 8}, {5, 2}, {5, 2}, {3, 4}, {3, 4}, {35, 10}, {35, 10}, {33, 9}, {33, 9}, {35, 2}, {35, 2}, {1, 10}, {1, 10}, {1, 14}, {1, 14}, {1, 12}, {1, 12}, {38, 8}, {38, 8}, {18, 8}, {18, 8}, {34, 8}, {34, 8}, {47, 14}, {47, 14}, {24, 12}, {24, 12}, {24, 14}, {24, 14}, {24, 10}, {24, 10}, {25, 2}, {25, 2}, {30, 0}, {30, 0}, {34, 12}, {34, 12}, {38, 4}, {38, 4}, {37, 2}, {37, 2}, {48, 2}, {48, 2}, {51, 1}, {51, 1}, {51, 11}, {51, 11}, {38, 12}, {38, 12}, {37, 10}, {37, 10}, {39, 9}, {39, 9}, {34, 4}, {34, 4}, {39, 3}, {39, 3}, {44, 2}, {44, 2}, {42, 0}, {42, 0}, {48, 10}, {48, 10}, {47, 12}, {47, 12}, {44, 10}, {44, 10}, {33, 3}, {33, 3}};
+
+// Define switch_ui_pos as a two-dimensional array of integers
+const int switch_ui_pos[22][2] = {
+    {10, 10}, {12, 12}, {14, 14}, {10, 2}, {42, 14}, {28, 12}, {44, 12}, {52, 10}, {52, 2}, {40, 2}, {22, 0}, {12, 0}, {32, 2}, {20, 2}, {20, 10}, {32, 10}, {40, 10}, {30, 14}, {35, 7}, {37, 7}, {37, 5}, {35, 5}};
+
 void print(char *fmt, ...)
 {
   va_list va;
@@ -65,59 +73,59 @@ void render_init()
   uart_printf(CONSOLE, "│ 011 .    012 .    013 .    014 .    015 . │                                   │\r\n");
   uart_printf(CONSOLE, "│ 016 .    017 .    018 .    153 .    154 . │                                   │\r\n");
   uart_printf(CONSOLE, "│ 155 .    156 .                            │                                   │\r\n");
-  uart_printf(CONSOLE, "├─[console]─────────────────────────────────────────────────────────────────────┤\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │\r\n");
-  uart_printf(CONSOLE, "│╭─────────────────────────────────────────────────────────────────────────────╮│\r\n");
+  uart_printf(CONSOLE, "├─[console]─────────────────────────────────────────────────────────────────────┤──[pac-train-game]────────────────────────────────────────────╮\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "├───────────────────────────────────────────────────────────────────────────────┤──────────────────────────────────────────────────────────────╯\r\n");
+  uart_printf(CONSOLE, "│╭─────────────────────────────────────────────────────────────────────────────╮│\r\n"); // 112
   uart_printf(CONSOLE, "││>                                                                            ││\r\n");
   uart_printf(CONSOLE, "│╰─────────────────────────────────────────────────────────────────────────────╯│\r\n");
   uart_printf(CONSOLE, "│─[performance]─────────────────────────────────────────────────────────────────┤\r\n");
   uart_printf(CONSOLE, "│ Idle Task Execution Percentage:                                               │\r\n");
   uart_printf(CONSOLE, "│─[train-system]────────────────────────────────────────────────────────────────┤\r\n");
-  uart_printf(CONSOLE, "│   Train #  │  Current  │ Next │  Time Err.  │  Distance Err.  │  Destination  |\r\n");
+  uart_printf(CONSOLE, "│   Train #  │  Current  │ Next │  Time Err.  │  Distance Err.  │  Destination  │\r\n");
   uart_printf(CONSOLE, "│───────────────────────────────────────────────────────────────────────────────│\r\n");
-  uart_printf(CONSOLE, "│     02                                ticks            mm                     |\r\n");
+  uart_printf(CONSOLE, "│     02                                ticks            mm                     │\r\n");
   uart_printf(CONSOLE, "│     47                                ticks            mm                     │\r\n");
   uart_printf(CONSOLE, "│     54                                ticks            mm                     │\r\n");
   uart_printf(CONSOLE, "│     55                                ticks            mm                     │\r\n");
@@ -131,12 +139,63 @@ void render_init()
   uart_printf(CONSOLE, "│     24 --       25 --       26 --       27 --       28 --       29 --         │\r\n");
   uart_printf(CONSOLE, "╰───────────────────────────────────────────────────────────────────────────────╯\r\n");
 
+  // print for track now
+  // string trackPosition = string_format("\033[%d;%dH", 9, 80);
+  int row = 12;
+  int column = 84;
+  if (getTrackType() == 0)
+  {
+    uart_printf(CONSOLE, "\033[%d;%dH-------X----O---------O-------X-----------X--------\r\n", row, column);
+    uart_printf(CONSOLE, "\033[%d;%dH           /         /                             X\r\n", row + 1, column);
+    uart_printf(CONSOLE, "\033[%d;%dH-----X----O         O----X------O--X-X--O---X---X---O\r\n", row + 2, column);
+    uart_printf(CONSOLE, "\033[%d;%dH         /         /             X     X             \\\r\n", row + 3, column);
+    uart_printf(CONSOLE, "\033[%d;%dH---X-----         X               X │ X               \\\r\n", row + 4, column);
+    uart_printf(CONSOLE, "\033[%d;%dH                 │                 O│O                 │\r\n", row + 5, column);
+    uart_printf(CONSOLE, "\033[%d;%dH                 │                  │                  │\r\n", row + 6, column);
+    uart_printf(CONSOLE, "\033[%d;%dH                 │                 O│O                 │\r\n", row + 7, column);
+    uart_printf(CONSOLE, "\033[%d;%dH-X-------         X               X │ X               /\r\n", row + 8, column);
+    uart_printf(CONSOLE, "\033[%d;%dH         \\         \\             X     X             /\r\n", row + 9, column);
+    uart_printf(CONSOLE, "\033[%d;%dH-X----X---O         O---X-------O--X-X--O---X---X---O\r\n", row + 10, column);
+    uart_printf(CONSOLE, "\033[%d;%dH           \\         \\                             X\r\n", row + 11, column);
+    uart_printf(CONSOLE, "\033[%d;%dH-X------X---O         --X---O-----X---X-----O--X---\r\n", row + 12, column);
+    uart_printf(CONSOLE, "\033[%d;%dH             \\               \\             /\r\n", row + 13, column);
+    uart_printf(CONSOLE, "\033[%d;%dH-X--------X---O---------X-----O-----------O----X--------\r\n", row + 14, column);
+    for (int i = 0; i < 80; i++)
+    {
+      int x = sensor_ui_pos[i][0];
+      int y = sensor_ui_pos[i][1];
+
+      string pacmanPosition = string_format("\033[%d;%dH", row + y, column + x);
+      uart_printf(CONSOLE, "%sᗣ", pacmanPosition.data);
+    }
+
+    for (int i = 0; i < 22; i++)
+    {
+      int x = switch_ui_pos[i][0];
+      int y = switch_ui_pos[i][1];
+
+      string switchPosition = string_format("\033[%d;%dH", row + y, column + x);
+      uart_printf(CONSOLE, "%sC", switchPosition.data);
+    }
+  }
+
   UIState = (TermUIState){
       .cmd_line_history = 0,
       .sensor_count = 0,
       .output_queue = new_byte_queue(),
       .console_server_tid = console_server_tid,
   };
+}
+
+void render_pacman(int sensor_id)
+{
+  int row = 12;
+  int column = 84;
+  int x = sensor_ui_pos[sensor_id][0] + column;
+  int y = sensor_ui_pos[sensor_id][1] + row;
+
+  string pacmanPosition = string_format("\033[%d;%dH", y, x);
+  print("%sᗣ", pacmanPosition.data);
 }
 
 // every tick is 10ms
@@ -367,6 +426,14 @@ void render_switch(int32_t switch_id, SwitchMode switch_mode)
     out = "X";
   }
   print("\033[%u;%uH%s", row, col, out);
+
+  int r = 12;
+  int c = 84;
+  int x = switch_ui_pos[position_id][0] + c;
+  int y = switch_ui_pos[position_id][1] + r;
+
+  string switchPosition = string_format("\033[%d;%dH", y, x);
+  print("%sC", switchPosition.data);
 }
 
 void render_sensor(char bank, unsigned int sensor_number)

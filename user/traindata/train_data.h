@@ -67,6 +67,7 @@ int get_train_index(uint32_t train);
 int get_speed_index(uint32_t speed);
 int zone_getid_by_sensor_id(int sensorId);
 int zone_getid_by_switch_id(int switchId);
+int getTrackType();
 
 uint32_t train_data_stop_time(uint32_t train, uint32_t speed);
 uint32_t train_data_short_move_time(uint32_t train, uint32_t dist);

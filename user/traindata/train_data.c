@@ -24,6 +24,11 @@ void train_data_init(char ch)
     }
 }
 
+int getTrackType()
+{
+    return trackType;
+}
+
 track_node *
 get_track()
 {
