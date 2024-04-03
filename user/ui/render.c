@@ -17,13 +17,35 @@
 
 static TermUIState UIState;
 
-// Define sensor_ui_pos as a two-dimensional array of integers
 const int sensor_ui_pos[80][2] = {
     {7, 0}, {7, 0}, {18, 4}, {18, 4}, {10, 14}, {10, 14}, {8, 12}, {8, 12}, {6, 10}, {6, 10}, {1, 8}, {1, 8}, {5, 2}, {5, 2}, {3, 4}, {3, 4}, {35, 10}, {35, 10}, {33, 9}, {33, 9}, {35, 2}, {35, 2}, {1, 10}, {1, 10}, {1, 14}, {1, 14}, {1, 12}, {1, 12}, {38, 8}, {38, 8}, {18, 8}, {18, 8}, {34, 8}, {34, 8}, {47, 14}, {47, 14}, {24, 12}, {24, 12}, {24, 14}, {24, 14}, {24, 10}, {24, 10}, {25, 2}, {25, 2}, {30, 0}, {30, 0}, {34, 12}, {34, 12}, {38, 4}, {38, 4}, {37, 2}, {37, 2}, {48, 2}, {48, 2}, {51, 1}, {51, 1}, {51, 11}, {51, 11}, {38, 12}, {38, 12}, {37, 10}, {37, 10}, {39, 9}, {39, 9}, {34, 4}, {34, 4}, {39, 3}, {39, 3}, {44, 2}, {44, 2}, {42, 0}, {42, 0}, {48, 10}, {48, 10}, {47, 12}, {47, 12}, {44, 10}, {44, 10}, {33, 3}, {33, 3}};
 
-// Define switch_ui_pos as a two-dimensional array of integers
 const int switch_ui_pos[22][2] = {
     {10, 10}, {12, 12}, {14, 14}, {10, 2}, {42, 14}, {28, 12}, {44, 12}, {52, 10}, {52, 2}, {40, 2}, {22, 0}, {12, 0}, {32, 2}, {20, 2}, {20, 10}, {32, 10}, {40, 10}, {30, 14}, {35, 7}, {37, 7}, {37, 5}, {35, 5}};
+
+const char switch_display[22][2] = {
+    {'\\', '-'},
+    {'\\', '-'},
+    {'-', '\\'},
+    {'/', '-'},
+    {'-', '/'},
+    {'-', '\\'},
+    {'-', '/'},
+    {'|', '/'},
+    {'|', '\\'},
+    {'-', '/'},
+    {'-', '/'},
+    {'-', '/'},
+    {'-', '\\'},
+    {'/', '-'},
+    {'\\', '-'},
+    {'-', '/'},
+    {'-', '\\'},
+    {'-', '\\'},
+    {'|', '/'},
+    {'|', '\\'},
+    {'|', '/'},
+    {'|', '\\'}};
 
 void print(char *fmt, ...)
 {
@@ -433,7 +455,13 @@ void render_switch(int32_t switch_id, SwitchMode switch_mode)
   int y = switch_ui_pos[position_id][1] + r;
 
   string switchPosition = string_format("\033[%d;%dH", y, x);
-  print("%sC", switchPosition.data);
+  int switch_display_type = 0;
+  if (switch_mode == SWITCH_MODE_C)
+  {
+    switch_display_type = 1;
+  }
+  char character_data[2] = {switch_display[position_id][switch_display_type], '\0'};
+  print("%s%s", switchPosition.data, character_data);
 }
 
 void render_sensor(char bank, unsigned int sensor_number)
