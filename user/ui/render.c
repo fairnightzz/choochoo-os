@@ -17,13 +17,13 @@
 
 static TermUIState UIState;
 
-const int sensor_ui_pos[80][2] = {
+static const int sensor_ui_pos[80][2] = {
     {7, 0}, {7, 0}, {18, 4}, {18, 4}, {10, 14}, {10, 14}, {8, 12}, {8, 12}, {6, 10}, {6, 10}, {1, 8}, {1, 8}, {5, 2}, {5, 2}, {3, 4}, {3, 4}, {35, 10}, {35, 10}, {33, 9}, {33, 9}, {35, 2}, {35, 2}, {1, 10}, {1, 10}, {1, 14}, {1, 14}, {1, 12}, {1, 12}, {38, 8}, {38, 8}, {18, 8}, {18, 8}, {34, 8}, {34, 8}, {47, 14}, {47, 14}, {24, 12}, {24, 12}, {24, 14}, {24, 14}, {24, 10}, {24, 10}, {25, 2}, {25, 2}, {30, 0}, {30, 0}, {34, 12}, {34, 12}, {38, 4}, {38, 4}, {37, 2}, {37, 2}, {48, 2}, {48, 2}, {51, 1}, {51, 1}, {51, 11}, {51, 11}, {38, 12}, {38, 12}, {37, 10}, {37, 10}, {39, 9}, {39, 9}, {34, 4}, {34, 4}, {39, 3}, {39, 3}, {44, 2}, {44, 2}, {42, 0}, {42, 0}, {48, 10}, {48, 10}, {47, 12}, {47, 12}, {44, 10}, {44, 10}, {33, 3}, {33, 3}};
 
-const int switch_ui_pos[22][2] = {
+static const int switch_ui_pos[22][2] = {
     {10, 10}, {12, 12}, {14, 14}, {10, 2}, {42, 14}, {28, 12}, {44, 12}, {52, 10}, {52, 2}, {40, 2}, {22, 0}, {12, 0}, {32, 2}, {20, 2}, {20, 10}, {32, 10}, {40, 10}, {30, 14}, {35, 7}, {37, 7}, {37, 5}, {35, 5}};
 
-const char switch_display[22][2] = {
+static const char switch_display[22][2] = {
     {'\\', '-'},
     {'\\', '-'},
     {'-', '\\'},
@@ -97,7 +97,6 @@ void render_init()
   uart_printf(CONSOLE, "│ 155 .    156 .                            │                                   │\r\n");
   uart_printf(CONSOLE, "├─[console]─────────────────────────────────────────────────────────────────────┤──[pac-train-game]────────────────────────────────────────────╮\r\n");
   uart_printf(CONSOLE, "│                                                                               │                             SCORE                            │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                             00000                            │\r\n");
   uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
   uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
   uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
@@ -138,7 +137,8 @@ void render_init()
   uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
   uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
   uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "├───────────────────────────────────────────────────────────────────────────────┤──────────────────────────────────────────────────────────────╯\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │──────────────────────────────────────────────────────────────╯\r\n");
   uart_printf(CONSOLE, "│╭─────────────────────────────────────────────────────────────────────────────╮│\r\n"); // 112
   uart_printf(CONSOLE, "││>                                                                            ││\r\n");
   uart_printf(CONSOLE, "│╰─────────────────────────────────────────────────────────────────────────────╯│\r\n");
@@ -209,9 +209,25 @@ void render_init()
   };
 }
 
+void padWithZeros(int number, char *str)
+{
+  int i;
+  for (i = 4; i >= 0; i--)
+  {
+    str[i] = (char)('0' + (number % 10));
+    number /= 10;
+  }
+  str[5] = '\0'; // Null-terminate the string
+}
+
 void render_pacman_score(int score)
 {
-  print("\033[%u;%uH%d", 1, 1, score);
+  char str[6]; // Array to hold the resulting string
+
+  padWithZeros(score, str); // Function to pad the number with zeros
+
+  // 114
+  print("\033[%u;%uH%s", 11, 111, str);
 }
 
 void render_on_sensor(int sensor_id, const char *character)
@@ -237,7 +253,7 @@ void render_food(int sensor_id)
 
 void render_pacman(int sensor_id)
 {
-  render_on_sensor(sensor_id, "<");
+  render_on_sensor(sensor_id, "☻");
 }
 
 void render_ghost(int sensor_id)
