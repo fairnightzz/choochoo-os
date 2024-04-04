@@ -16,6 +16,7 @@
 #include "user/zone-server/server.h"
 #include "user/ui/render.h"
 #include "user/random-dest-server/server.h"
+#include "user/pactrain-server/server.h"
 
 void idleTask()
 {
@@ -76,7 +77,7 @@ void initTask()
   Create(4, &TrainSystemServer);
   // Create(4, &PathFinderServer);
   Create(5, &RandomDestinationServer);
-
+  Create(5, &PacTrainServer);
   // UI Task
   Create(4, &UITask);
   // Create(5, &putcTestTask);
