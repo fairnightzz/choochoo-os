@@ -8,7 +8,7 @@
 #include "user/traindata/train_data.h"
 #include <string.h>
 
-#define ROUTE_TRAIN_COUNT 2
+#define PACTRAIN_COUNT 4
 
 char* BLACKLIST[] = { "A1", "A2", "A5","A6", "A7", "A8", "A9", "A10", "A11", "A12", "A13", "A14", "A15", "A16", "B7", "B8", "B9", "B10", "B11", "B12", "B15", "B16", "C3", "C4", "C11", "C12", "E5", "E6", "E11", "E12", "E13", "E14", 0 };
 
@@ -91,17 +91,23 @@ void SingleTrainRandDestServer() {
 }
 
 void RandomDestinationServer() {
-  RandDestRequest request;
-  RandDestResponse response;
+  PacTrainRequest request;
+  PacTrainResponse response;
   int from_tid;
 
-  RegisterAs(RandomDestAddress);
-int route_trains[ROUTE_TRAIN_COUNT] = { 2, 54 };
-  int helper_tids[ROUTE_TRAIN_COUNT] = { -1, -1 };
+  RegisterAs(PacTrainAddress);
+
+
+  int route_trains[PACTRAIN_COUNT] = { -1, -1, -1, -1 };
+  int helper_tids[PACTRAIN_COUNT] = { -1, -1, -1, -1 };
+  int food_sensors[80] = {0};
+
   bool exiting = false;
 
+  bool running = false;
+
   while (1) {
-    int req_len = Receive(&from_tid, (char *)&request, sizeof(RandDestRequest));
+    int req_len = Receive(&from_tid, (char *)&request, sizeof(PacTrainRequest));
     if (req_len < 0) {
       LOG_WARN("[RandDestServer]: error on receiving request");
       continue;
@@ -109,67 +115,91 @@ int route_trains[ROUTE_TRAIN_COUNT] = { 2, 54 };
 
     switch (request.type)
     {
-      case START_ROUTING: {
-        response = (RandDestResponse) {
-          .type = START_ROUTING
+      case START_GAME: {
+        response = (PacTrainResponse) {
+          .type = START_GAME
         };
-        Reply(from_tid, (char *)&response, sizeof(RandDestResponse));
+        route_trains[0] = request.pactrain;
+        route_trains[1] = request.ghost1;
+        route_trains[2] = request.ghost2;
+        route_trains[3] = request.ghost3;
+        running = true;
         exiting = false;
+        Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
 
-        for (int i = 0; i < ROUTE_TRAIN_COUNT; i++) {
+        for (int i = 0; i < 1; i++) {
           char *new_dest = getRandomDest();
           helper_tids[i] = Create(5, &SingleTrainRandDestServer);
-          RandDestRequest new_dest_req = (RandDestRequest) {
+          PacTrainRequest new_dest_req = (PacTrainRequest) {
             .destination = new_dest,
             .train = route_trains[i],
-            .type = NEW_DESTINATION
+            .type = NEW_FOOD_DEST
           };
-          RandDestResponse new_dest_resp;
-          Send(helper_tids[i], (const char *)&new_dest_req, sizeof(RandDestRequest), (char *)&new_dest_resp, sizeof(RandDestResponse));
+          PacTrainResponse new_dest_resp;
+          Send(helper_tids[i], (const char *)&new_dest_req, sizeof(PacTrainRequest), (char *)&new_dest_resp, sizeof(PacTrainResponse));
         }
         break;
-      } case END_ROUTING: {
-        response = (RandDestResponse) {
-          .type = END_ROUTING
+      } case END_GAME: {
+        response = (PacTrainResponse) {
+          .type = END_GAME
         };
-        Reply(from_tid, (char *)&response, sizeof(RandDestResponse));
+        Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
         exiting = true;
         break;
-      } case REACHED_DESTINATION: {
-        response = (RandDestResponse) {
-          .type = REACHED_DESTINATION,
+      } case REACHED_FOOD_DEST: {
+        response = (PacTrainResponse) {
+          .type = REACHED_FOOD_DEST,
           .train = request.train
         };
-        Reply(from_tid, (char *)&response, sizeof(RandDestResponse));
-        int index = request.train == route_trains[0] ? 0 : 1;
+        Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
+        int index = -1;
+        for (int i = 0; i < PACTRAIN_COUNT; i++) {
+          if (route_trains[i] == request.train) {
+            index = i;
+            break;
+          }
+        }
 
         if (!exiting) {
           char *new_dest = getRandomDest();
-          render_command("[RandDestServer INFO]: routing train %d to %s", route_trains[index], new_dest);
+          render_command("[PacTrainServer INFO]: routing train %d to %s", route_trains[index], new_dest);
 
-          RandDestRequest new_dest_req = (RandDestRequest) {
+          PacTrainRequest new_dest_req = (PacTrainRequest) {
             .destination = new_dest,
             .train = route_trains[index],
-            .type = NEW_DESTINATION
+            .type = NEW_FOOD_DEST
           };
-          RandDestResponse new_dest_resp;
-          Send(helper_tids[index], (const char *)&new_dest_req, sizeof(RandDestRequest), (char *)&new_dest_resp, sizeof(RandDestResponse));
+          PacTrainResponse new_dest_resp;
+          Send(helper_tids[index], (const char *)&new_dest_req, sizeof(PacTrainRequest), (char *)&new_dest_resp, sizeof(PacTrainResponse));
         } else {
-          RandDestRequest exit_req = (RandDestRequest) {
+          PacTrainRequest exit_req = (PacTrainRequest) {
             .destination = 0,
             .train = route_trains[index],
-            .type = END_ROUTING
+            .type = END_GAME
           };
-          RandDestResponse exit_resp;
-          Send(helper_tids[index], (const char *)&exit_req, sizeof(RandDestRequest), (char *)&exit_resp, sizeof(RandDestResponse));
+          PacTrainResponse exit_resp;
+          Send(helper_tids[index], (const char *)&exit_req, sizeof(PacTrainRequest), (char *)&exit_resp, sizeof(PacTrainResponse));
 
           AwaitTid(helper_tids[index]);
           helper_tids[index] = -1;
-          if (helper_tids[0] == -1 && helper_tids[1] == -1) {
+          if (helper_tids[0] == -1) { //&& helper_tids[1] == -1) {
             render_command("[RandDestServer INFO]: finished exiting random path routing");
           }
         }
 
+        break;
+      } case TRAIN_IDENTITY_QUERY: {
+        int idx_train = -1;
+        for (int i = 0; i < PACTRAIN_COUNT; i++) {
+          if (!exiting && request.train != -1 && route_trains[i] == request.train) {
+            idx_train = i;
+          }
+        }
+        response = (PacTrainResponse) {
+          .train = request.train,
+          .train_identity = idx_train == -1 ? NONE_TRAIN : (idx_train == 0 ? PAC_TRAIN : GHOST_TRAIN);
+        }
+        Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
         break;
       } default: {
         LOG_ERROR("[RandDestServer]: Unhandled Request Type - %d", request.type);
