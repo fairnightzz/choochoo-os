@@ -7,6 +7,7 @@
 #include "user/switch-server/interface.h"
 #include "user/pathfinder-server/interface.h"
 #include "user/random-dest-server/interface.h"
+#include "user/pactrain-server/interface.h"
 
 static TrainSystemState SystemState;
 
@@ -79,12 +80,12 @@ void trainsys_execute_command(CommandResult cres)
     uint32_t ghost_1 = cres.command_args.pacman_args.ghost_1;
     uint32_t ghost_2 = cres.command_args.pacman_args.ghost_2;
     uint32_t ghost_3 = cres.command_args.pacman_args.ghost_3;
-    // trainsys_start_pacman(pac_train, ghost_1, ghost_2, ghost_3);
+    StartGame(SystemState.pacman_tid, pac_train, ghost_1, ghost_2, ghost_3);
     break;
   }
   case END_PACMAN_COMMAND:
   {
-    // trainsys_end_pacman();
+    EndGame(SystemState.pacman_tid);
     break;
   }
   case START_RANDOMPATH_COMMAND:
@@ -113,11 +114,14 @@ void trainsys_init()
   int clock_tid = WhoIs(ClockAddress);
   int switch_tid = WhoIs(SwitchAddress);
   int rand_tid = WhoIs(RandomDestAddress);
+  int pacman_tid = WhoIs(PacTrainAddress);
   SystemState = (TrainSystemState){
       .system_tid = system_tid,
       .clock_tid = clock_tid,
       .switch_tid = switch_tid,
-      .rand_tid = rand_tid};
+      .rand_tid = rand_tid,
+      .pacman_tid = pacman_tid,
+  };
 }
 
 void trainsys_init_track(TrackSwitchPlans track_plan)

@@ -96,8 +96,8 @@ void render_init()
   uart_printf(CONSOLE, "│ 016 .    017 .    018 .    153 .    154 . │                                   │\r\n");
   uart_printf(CONSOLE, "│ 155 .    156 .                            │                                   │\r\n");
   uart_printf(CONSOLE, "├─[console]─────────────────────────────────────────────────────────────────────┤──[pac-train-game]────────────────────────────────────────────╮\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                             SCORE                            │\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                             00000                            │\r\n");
   uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
   uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
   uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
@@ -207,6 +207,11 @@ void render_init()
       .output_queue = new_byte_queue(),
       .console_server_tid = console_server_tid,
   };
+}
+
+void render_pacman_score(int score)
+{
+  print("\033[%u;%uH%d", 1, 1, score);
 }
 
 void render_on_sensor(int sensor_id, const char *character)
