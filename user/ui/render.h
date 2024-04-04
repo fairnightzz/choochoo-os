@@ -36,6 +36,7 @@ void render_empty_food(int sensor_id);
 void render_food(int sensor_id);
 void render_pacman(int sensor_id);
 void render_ghost(int sensor_id);
+void render_pacman_score(int score);
 void clear_screen();
 void clear_console();
 string get_sensor_string(int sensor_id);

@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "lib/stdlib.h"
 
-#define PacTrainAddress "ᗧ···ᗣ···ᗣ··"
+#define PacTrainAddress "pactrain"
 
 typedef enum 
 {

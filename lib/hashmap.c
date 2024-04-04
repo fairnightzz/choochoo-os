@@ -7,7 +7,7 @@
 
 typedef struct HashMapNode
 {
-    char key[20];
+    char key[40];
     value_t value;
 } HashMapNode;
 

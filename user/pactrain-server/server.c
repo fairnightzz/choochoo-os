@@ -9,9 +9,9 @@
 #include <string.h>
 
 #define PACTRAIN_COUNT 4
-#define FOOD_COUNT 29
+#define FOOD_COUNT 30
 
-char* FOODLIST[] = { "C13", "E7", "D7", "C11", "B5", "D3", "E5", "D5", "A4", "E15", "E3", "E1", "D1", "B15", "C1", "B13", "E9", "B3", "D15", "C9", "B1", "D13", "E13", "C5", "C15", "D11", "E11", "C7", "C3", 0};
+char* FOODLIST[] = { "C13", "E7", "D7", "C11", "B5", "D3", "E5", "D5", "A4", "E15", "E3", "E1", "D1", "B15", "C1", "B13", "E9", "B3", "D15", "C9", "B1", "D13", "E13", "C5", "C15", "D11", "E11", "C7", "C3", "D10", 0};
 
 void init_food(int *food_sensors) {
   track_node *track = get_track();
@@ -32,10 +32,13 @@ void init_food(int *food_sensors) {
   }
 }
 
-char* getRandomFoodDest(int *eaten, int *food_sensors) {
+char* getRandomFoodDest(int *eaten, int *food_sensors, int *score) {
   track_node *track = get_track();
   if (*eaten == FOOD_COUNT) {
+    render_command("[PacTrain INFO]: all food eaten. resetting food...");
     *eaten = 0;
+    *score += 150;
+    render_pacman_score(*score);
     init_food(food_sensors);
   }
   while (1) {
@@ -121,16 +124,17 @@ void PacTrainServer() {
   PacTrainRequest request;
   PacTrainResponse response;
   int from_tid;
-
   RegisterAs(PacTrainAddress);
 
 
   int route_trains[PACTRAIN_COUNT] = { -1, -1, -1, -1 };
   int helper_tids[PACTRAIN_COUNT] = { -1, -1, -1, -1 };
   int food_sensors[80] = {0};
+  track_node *track = get_track();
 
   bool exiting = false;
   int eaten = 0;
+  int score = 0;
 
   while (1) {
     int req_len = Receive(&from_tid, (char *)&request, sizeof(PacTrainRequest));
@@ -152,10 +156,11 @@ void PacTrainServer() {
         exiting = false;
         Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
         eaten = 0;
+        score = 0;
         init_food(food_sensors);
 
         for (int i = 0; i < 1; i++) {
-          char *new_dest = getRandomFoodDest(&eaten, food_sensors);
+          char *new_dest = getRandomFoodDest(&eaten, food_sensors, &score);
           helper_tids[i] = Create(5, &SingleTrainPacTrainDestServer);
           PacTrainRequest new_dest_req = (PacTrainRequest) {
             .destination = new_dest,
@@ -188,7 +193,7 @@ void PacTrainServer() {
         }
 
         if (!exiting) {
-          char *new_dest = getRandomFoodDest(&eaten, food_sensors);
+          char *new_dest = getRandomFoodDest(&eaten, food_sensors, &score);
           render_command("[PacTrainServer INFO]: routing train %d to %s", route_trains[index], new_dest);
 
           PacTrainRequest new_dest_req = (PacTrainRequest) {
@@ -232,8 +237,21 @@ void PacTrainServer() {
         response = (PacTrainResponse) {
           .type = ATE_FOOD
         };
-        food_sensors[request.sensor_id] = 0;
-        eaten += 1;
+        if (food_sensors[request.sensor_id] == 1) {
+          // render_command("ate food at %s. now eaten %d", get_sensor_string(request.sensor_id), eaten + 1);
+          food_sensors[request.sensor_id] = 0;
+          eaten += 1;
+          score += 5;
+          render_pacman_score(score);
+        }
+        int rev_sens = track[request.sensor_id].reverse - track;
+        if (food_sensors[rev_sens] == 1) {
+          // render_command("ate food at %s. now eaten %d", get_sensor_string(rev_sens), eaten + 1);
+          food_sensors[rev_sens] = 0;
+          eaten += 1;
+          score += 5;
+          render_pacman_score(score);
+        }   
         Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
         break;
       } case FOOD_QUERY: {
