@@ -104,7 +104,7 @@ void predictTask()
     // if ghost, ask if sensor has food on previous sensor
     // render food/no food on previous sensor
     // render ghost on current sensor
-    else if (train_type == GHOST_TRAIN)
+    else if (train_type != NONE_TRAIN)
     {
       if (prev_sensor_id != -1)
       {

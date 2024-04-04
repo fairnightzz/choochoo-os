@@ -126,7 +126,7 @@ void PacTrainServer() {
   int from_tid;
   RegisterAs(PacTrainAddress);
 
-
+  PacTrainType GHOST_TRAIN_IDS[3] = { GHOST_TRAIN_1, GHOST_TRAIN_2, GHOST_TRAIN_3 };
   int route_trains[PACTRAIN_COUNT] = { -1, -1, -1, -1 };
   int helper_tids[PACTRAIN_COUNT] = { -1, -1, -1, -1 };
   int food_sensors[80] = {0};
@@ -158,6 +158,7 @@ void PacTrainServer() {
         eaten = 0;
         score = 0;
         init_food(food_sensors);
+        render_pacman_score(score);
 
         for (int i = 0; i < 1; i++) {
           char *new_dest = getRandomFoodDest(&eaten, food_sensors, &score);
@@ -229,7 +230,7 @@ void PacTrainServer() {
         }
         response = (PacTrainResponse) {
           .train = request.train,
-          .train_identity = idx_train == -1 ? NONE_TRAIN : (idx_train == 0 ? PAC_TRAIN : GHOST_TRAIN)
+          .train_identity = idx_train == -1 ? NONE_TRAIN : (idx_train == 0 ? PAC_TRAIN : GHOST_TRAIN_IDS[idx_train - 1])
         };
         Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
         break;

@@ -9,7 +9,9 @@
 typedef enum 
 {
   PAC_TRAIN,
-  GHOST_TRAIN,
+  GHOST_TRAIN_1,
+  GHOST_TRAIN_2,
+  GHOST_TRAIN_3,
   NONE_TRAIN
 } PacTrainType;
 
