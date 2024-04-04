@@ -83,6 +83,18 @@ string cres_to_string(CommandResult cres)
   {
     return string_format("[erp]: End random pathing");
   }
+  case START_PACMAN_COMMAND:
+  {
+    uint32_t pac_train = cres.command_args.pacman_args.pac_train;
+    uint32_t ghost_1 = cres.command_args.pacman_args.ghost_1;
+    uint32_t ghost_2 = cres.command_args.pacman_args.ghost_2;
+    uint32_t ghost_3 = cres.command_args.pacman_args.ghost_3;
+    return string_format("[spm]: Start Pacman Game: PM: %d G1: %d G2: %d G3: %d", pac_train, ghost_1, ghost_2, ghost_3);
+  }
+  case END_PACMAN_COMMAND:
+  {
+    return string_format("[epm]: End Pacman Game");
+  }
   default:
   {
     return to_string("[ERROR]: Invalid Command. Please Try Again.");

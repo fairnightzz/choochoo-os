@@ -73,6 +73,20 @@ void trainsys_execute_command(CommandResult cres)
     PlanPath(new_path);
     break;
   }
+  case START_PACMAN_COMMAND:
+  {
+    uint32_t pac_train = cres.command_args.pacman_args.pac_train;
+    uint32_t ghost_1 = cres.command_args.pacman_args.ghost_1;
+    uint32_t ghost_2 = cres.command_args.pacman_args.ghost_2;
+    uint32_t ghost_3 = cres.command_args.pacman_args.ghost_3;
+    // trainsys_start_pacman(pac_train, ghost_1, ghost_2, ghost_3);
+    break;
+  }
+  case END_PACMAN_COMMAND:
+  {
+    // trainsys_end_pacman();
+    break;
+  }
   case START_RANDOMPATH_COMMAND:
   {
     trainsys_start_rand_routing();

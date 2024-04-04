@@ -22,6 +22,8 @@ typedef struct
     QUIT_COMMAND,
     START_RANDOMPATH_COMMAND,
     END_RANDOMPATH_COMMAND,
+    START_PACMAN_COMMAND,
+    END_PACMAN_COMMAND,
     ERROR_COMMAND,
   } command_type;
 
@@ -57,6 +59,15 @@ typedef struct
       int offset;
       string dest_node;
     } path_args;
+
+    struct
+    {
+      uint32_t pac_train;
+      uint32_t ghost_1;
+      uint32_t ghost_2;
+      uint32_t ghost_3;
+      uint32_t ghost_4;
+    } pacman_args;
   } command_args;
 } CommandResult;
 

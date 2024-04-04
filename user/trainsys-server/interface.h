@@ -42,6 +42,7 @@ typedef struct
   uint8_t train_state;
   int train;
   int next_sensor_id;
+  int prev_sensor_id;
   int dist_to_next;
   bool was_already_reversing;
   int position;

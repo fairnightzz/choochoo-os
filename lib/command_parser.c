@@ -236,6 +236,38 @@ parse_command(string *command)
         .command_type = END_RANDOMPATH_COMMAND,
     };
   }
+  else if (strcmp(get_data(&cmd_name), "spm") == 0)
+  {
+
+    // spm [pac_train] [ghost_1] [ghost_2] [ghost_3]
+    skip_whitespace(data, &it);
+    int pac_train = get_i(data, &it);
+
+    skip_whitespace(data, &it);
+    int ghost_1 = get_i(data, &it);
+
+    skip_whitespace(data, &it);
+    int ghost_2 = get_i(data, &it);
+
+    skip_whitespace(data, &it);
+    int ghost_3 = get_i(data, &it);
+
+    return (CommandResult){
+        .command_type = START_PACMAN_COMMAND,
+        .command_args = {
+            .pacman_args = {
+                .pac_train = pac_train,
+                .ghost_1 = ghost_1,
+                .ghost_2 = ghost_2,
+                .ghost_3 = ghost_3,
+            }}};
+  }
+  else if (strcmp(get_data(&cmd_name), "epm") == 0)
+  {
+    return (CommandResult){
+        .command_type = END_PACMAN_COMMAND,
+    };
+  }
   return (CommandResult){
       .command_type = ERROR_COMMAND,
   };

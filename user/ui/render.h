@@ -32,6 +32,10 @@ void render_predict_t_error(int train, int terr); // terr in ticks
 void render_predict_d_error(int train, int derr); // derr in mm
 void render_reserve_zone(int train, int zone);
 void render_unreserve_zone(int zone);
+void render_empty_food(int sensor_id);
+void render_food(int sensor_id);
+void render_pacman(int sensor_id);
+void render_ghost(int sensor_id);
 void clear_screen();
 void clear_console();
 string get_sensor_string(int sensor_id);

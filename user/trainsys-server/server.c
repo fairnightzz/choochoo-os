@@ -27,7 +27,7 @@ typedef struct
 void ReverseTask()
 {
   int clock_server = WhoIs(ClockAddress);
-  
+
   ReverseRequest request;
   int requestTid;
   Receive(&requestTid, (char *)&request, sizeof(ReverseRequest));
@@ -105,23 +105,21 @@ void TrainSystemServer()
   int switch_server = WhoIs(SwitchAddress);
   int reserve_server = WhoIs(ZoneAddress);
 
-
   HashMap *NodeIndexMap = get_node_map();
   train_sys_track = get_track();
 
   uint8_t train_states[TRAINS_COUNT] = {0};
   int train_positions[TRAIN_DATA_TRAIN_COUNT] = {0};
 
-
   bool reversed[TRAINS_COUNT] = {0};
   int reverse_tasks[TRAINS_COUNT] = {0}; // 0 means no task is reversing
   int train_next_sensors[TRAIN_DATA_TRAIN_COUNT][SENSOR_DEPTH] = {
-      {4, 38}, // {0, 44},  // 2   A1 -> C13
+      {4, 38},  // {0, 44},  // 2   A1 -> C13
       {-1, -1}, //{12, 44}, // 47  A13 -> C13
       {9, 38},  // 54  (B7) A10 -> C7
       {7, 38},  // 55  (B11) A8 -> C7
       {-1, -1}, //{4, 38},  // 58  (B9) A5 -> C7
-      {-1, -1} // {14, 44}  // 77  A15 -> C13
+      {-1, -1}  // {14, 44}  // 77  A15 -> C13
   };
 
   train_positions[0] = 24;
@@ -131,17 +129,20 @@ void TrainSystemServer()
 
   for (int i = 0; i < TRAIN_DATA_TRAIN_COUNT; i++)
   {
-    if (train_positions[i] == 0) {
+    if (train_positions[i] == 0)
+    {
       train_positions[i] = -1;
-    } else {    
+    }
+    else
+    {
       int train = TRAIN_DATA_TRAINS[i];
       int zone = zone_getid_by_sensor_id(train_next_sensors[i][0]);
-      if (!zone_reserve(reserve_server, train, zone)) {
+      if (!zone_reserve(reserve_server, train, zone))
+      {
         LOG_ERROR("failed to initialize reservation for train %d", train);
       }
     }
   }
-
 
   TrainSystemRequest request;
   TrainSystemResponse response;
@@ -181,18 +182,21 @@ void TrainSystemServer()
       {
         train = TRAIN_DATA_TRAINS[i];
         train_idx = i;
-    
+
         if (train_positions[train_idx] != -1)
         {
           bool is_unknown = false;
           bool is_unknown2 = false;
           int dist;
           bool is_rev = train_sys_track[train_positions[train_idx]].reverse->num == train_next_sensors[train_idx][0];
-          if (is_rev) {
+          if (is_rev)
+          {
             int new_next_next_sens = find_next_sensor(train_next_sensors[train_idx][0], switch_server, &is_unknown2, &dist);
             new_next_next_sens = is_unknown2 ? -1 : new_next_next_sens;
             train_next_sensors[train_idx][1] = new_next_next_sens;
-          } else {
+          }
+          else
+          {
             int new_next_sens = find_next_sensor(train_positions[train_idx], switch_server, &is_unknown, &dist);
             int new_next_next_sens = find_next_sensor(new_next_sens, switch_server, &is_unknown2, &dist);
             new_next_sens = is_unknown ? -1 : new_next_sens;
@@ -213,6 +217,7 @@ void TrainSystemServer()
           .train_state = 0,
           .train = -1,
           .next_sensor_id = -1,
+          .prev_sensor_id = -1,
           .dist_to_next = -1,
       };
 
@@ -227,6 +232,8 @@ void TrainSystemServer()
           if (train_next_sensors[j][i] == sensor_hit)
           {
             train = TRAIN_DATA_TRAINS[j];
+            // set the prev sensor hit
+            response.prev_sensor_id = train_positions[j];
             train_positions[j] = sensor_hit;
             train_idx = j;
             break;
@@ -490,7 +497,7 @@ void TrainSystemServer()
         LOG_ERROR("Couldn't find train associated with reverse task");
       }
 
-      //render_command("[TSS Reverse RESTART]: train %d", train);
+      // render_command("[TSS Reverse RESTART]: train %d", train);
       io_marklin_set_train(marklin_io, train, train_states[train]);
       reverse_tasks[train] = 0;
 

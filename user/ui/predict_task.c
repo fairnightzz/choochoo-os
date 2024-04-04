@@ -8,6 +8,7 @@
 #include "user/trainsys/trainsys.h"
 #include "user/ui/render.h"
 #include "user/traindata/train_data.h"
+#include "user/pactrain-server/interface.h"
 
 void predictTask()
 {
@@ -16,6 +17,7 @@ void predictTask()
   int sensor_server = WhoIs(SensorAddress);
   // int switch_server = WhoIs(SwitchAddress);
   int trainsys_server = WhoIs(TrainSystemAddress);
+  int pacman_server = WhoIs(PacTrainAddress);
 
   int last_sensor_time[TRAIN_DATA_TRAIN_COUNT] = {0};
   int predicted_sensor_time[TRAIN_DATA_TRAIN_COUNT] = {0};
@@ -37,6 +39,7 @@ void predictTask()
     int train = response.train;
     int train_speed = response.train_state & TRAIN_SPEED_MASK;
     int next_sensor_id = response.next_sensor_id;
+    int prev_sensor_id = response.prev_sensor_id;
     int dist_to_next = response.dist_to_next;
 
     if (train != -1)
@@ -80,5 +83,42 @@ void predictTask()
     }
 
     predicted_sensor_time[train_index] = (dist_to_next / train_vel) * 100; // in ticks
+
+    // Begin rendering on the pacman train server
+    // Ask pacman server if train or ghost
+    PacTrainType train_type = WhoTrain(pacman_server, train);
+
+    // if train, render no food on previous sensor
+    // render train on current sensor
+    // ate food to pacman server
+    if (train_type == PAC_TRAIN)
+    {
+      if (prev_sensor_id != -1)
+      {
+        render_empty_food(prev_sensor_id);
+      }
+      render_pacman(sensor_id);
+      AteFood(pacman_server, sensor_id);
+    }
+
+    // if ghost, ask if sensor has food on previous sensor
+    // render food/no food on previous sensor
+    // render ghost on current sensor
+    else if (train_type == GHOST_TRAIN)
+    {
+      if (prev_sensor_id != -1)
+      {
+        bool hasFood = SensorHasFood(pacman_server, prev_sensor_id);
+        if (hasFood)
+        {
+          render_food(prev_sensor_id);
+        }
+        else
+        {
+          render_empty_food(prev_sensor_id);
+        }
+      }
+      render_ghost(sensor_id);
+    }
   }
 }

@@ -188,17 +188,17 @@ void render_init()
       int y = sensor_ui_pos[i][1];
 
       string pacmanPosition = string_format("\033[%d;%dH", row + y, column + x);
-      uart_printf(CONSOLE, "%sᗣ", pacmanPosition.data);
+      uart_printf(CONSOLE, "%s○", pacmanPosition.data);
     }
 
-    for (int i = 0; i < 22; i++)
-    {
-      int x = switch_ui_pos[i][0];
-      int y = switch_ui_pos[i][1];
+    // for (int i = 0; i < 22; i++)
+    // {
+    //   int x = switch_ui_pos[i][0];
+    //   int y = switch_ui_pos[i][1];
 
-      string switchPosition = string_format("\033[%d;%dH", row + y, column + x);
-      uart_printf(CONSOLE, "%sC", switchPosition.data);
-    }
+    //   string switchPosition = string_format("\033[%d;%dH", row + y, column + x);
+    //   uart_printf(CONSOLE, "%sC", switchPosition.data);
+    // }
   }
 
   UIState = (TermUIState){
@@ -209,15 +209,35 @@ void render_init()
   };
 }
 
-void render_pacman(int sensor_id)
+void render_on_sensor(int sensor_id, const char *character)
 {
   int row = 12;
   int column = 84;
   int x = sensor_ui_pos[sensor_id][0] + column;
   int y = sensor_ui_pos[sensor_id][1] + row;
 
-  string pacmanPosition = string_format("\033[%d;%dH", y, x);
-  print("%sᗣ", pacmanPosition.data);
+  string position = string_format("\033[%d;%dH", y, x);
+  print("%s%s", position.data, character);
+}
+
+void render_empty_food(int sensor_id)
+{
+  render_on_sensor(sensor_id, "○");
+}
+
+void render_food(int sensor_id)
+{
+  render_on_sensor(sensor_id, "●");
+}
+
+void render_pacman(int sensor_id)
+{
+  render_on_sensor(sensor_id, "<");
+}
+
+void render_ghost(int sensor_id)
+{
+  render_on_sensor(sensor_id, "ᗣ");
 }
 
 // every tick is 10ms
