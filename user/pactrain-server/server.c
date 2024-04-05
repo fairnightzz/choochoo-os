@@ -260,6 +260,41 @@ void PacTrainServer() {
         };
         Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
         break;
+      } case PAC_TRAIN_DEADLOCK : {
+        response = (PacTrainResponse) {
+          .type = PAC_TRAIN_DEADLOCK
+        };
+        if (request.train == route_trains[0])
+          render_command("[PacTrainServer INFO]: GAME OVER!!!");
+        Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
+        break;
+      } case FETCH_NEW_FOOD: {
+        int counter = rand_int() % (FOOD_COUNT - eaten);
+        int dest_n = -1;
+        for (int i = 0; i < 80; i++) {
+          if (food_sensors[i] == 1 && counter == 0) {
+            dest_n = i;
+            break;
+          } else if (food_sensors[i] == 1) {
+            counter -= 1;
+          }
+        }
+        if (dest_n == -1)
+          render_command("ERR: fetching new food -1 error");
+          
+        response = (PacTrainResponse) {
+          .type = FETCH_NEW_FOOD,
+          .new_dest = dest_n
+        };
+        Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));    
+        break;
+      } case GET_PAC_TRAIN: {
+        response = (PacTrainResponse) {
+          .type = GET_PAC_TRAIN,
+          .train = route_trains[0]
+        }; 
+        Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
+        break;
       } case ATE_FOOD: {
         response = (PacTrainResponse) {
           .type = ATE_FOOD

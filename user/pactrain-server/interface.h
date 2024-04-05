@@ -24,6 +24,9 @@ typedef enum
   FOOD_QUERY,
   TRAIN_IDENTITY_QUERY,
   ATE_FOOD,
+  PAC_TRAIN_DEADLOCK,
+  FETCH_NEW_FOOD,
+  GET_PAC_TRAIN
 } PacTrainMessageType;
 
 typedef struct
@@ -45,6 +48,7 @@ typedef struct
   int train;
   bool has_food;
   PacTrainType train_identity;
+  int new_dest;
 } PacTrainResponse;
 
 int StartGame(int tid, int pactrain, int ghost1, int ghost2, int ghost3);
@@ -52,5 +56,7 @@ int EndGame(int tid);
 bool SensorHasFood(int tid, int sensor_id);
 PacTrainType WhoTrain(int tid, int train);
 int AteFood(int tid, int sensor_id);
+int NotifyPacServerDeadlock(int tid, int train);
+int FetchNewFoodDest(int tid);
 
 #endif // __PACTRAIN_INTERFACE_H__

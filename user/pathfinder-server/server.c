@@ -11,6 +11,8 @@
 #include "user/trainsys/trainsys.h"
 #include "user/zone-server/interface.h"
 #include "user/pathfinder-server/helpers.h"
+#include "user/pactrain-server/interface.h"
+
 #define INF 2147483647
 #define NONE 2147483646
 
@@ -301,6 +303,7 @@ void PathFinderTask()
   int trainsys_server = WhoIs(TrainSystemAddress);
   int reserve_server = WhoIs(ZoneAddress);
   int switch_server = WhoIs(SwitchAddress);
+  int pacman_server = WhoIs(PacTrainAddress);
 
   track_node *track = get_track();
   int from_tid;
@@ -327,14 +330,18 @@ void PathFinderTask()
 
   Reply(from_tid, (char *)&response, sizeof(PathFinderResponse));
 
+  PacTrainType train_type = WhoTrain(pacman_server, train);
   int deadlock_counter = 0;
 
 deadlock_recompute:;
 
   if (deadlock_counter > 2) {
     render_command("[PathFinderTask INFO]: Hard deadlock detected. Aborting path on train %d.", train);
+    NotifyPacServerDeadlock(pacman_server, train);
     Exit();
     return;
+  } else if (deadlock_counter > 0 && train_type == PAC_TRAIN) { // find another candy
+    dest = FetchNewFoodDest(pacman_server);
   }
 
   TrainSystemResponse resp = TrainSystemGetTrainPosition(trainsys_server, train);

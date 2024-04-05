@@ -74,3 +74,46 @@ int EndGame(int tid) {
   }
   return returnValue;
 }
+
+int NotifyPacServerDeadlock(int tid, int train) {
+  PacTrainRequest request = (PacTrainRequest) {
+    .type = PAC_TRAIN_DEADLOCK,
+    .train = train
+  };
+  PacTrainResponse response;
+  int returnValue = Send(tid, (const char *)&request, sizeof(PacTrainRequest), (char *)&response, sizeof(PacTrainResponse));
+
+  if (returnValue < 0) {
+    LOG_ERROR("tid %d, deadlock check returned negative value");
+  }
+
+  return returnValue;
+}
+
+int FetchNewFoodDest(int tid) {
+  PacTrainRequest request = (PacTrainRequest) {
+    .type = FETCH_NEW_FOOD
+  };
+  PacTrainResponse response;
+  int returnValue = Send(tid, (const char *)&request, sizeof(PacTrainRequest), (char *)&response, sizeof(PacTrainResponse));
+
+  if (returnValue < 0) {
+    LOG_ERROR("tid %d, deadlock check returned negative value");
+  }
+
+  return response.new_dest; 
+}
+
+int GetPacTrain(int tid) {
+  PacTrainRequest request = (PacTrainRequest) {
+    .type = GET_PAC_TRAIN
+  };
+  PacTrainResponse response;
+  int returnValue = Send(tid, (const char *)&request, sizeof(PacTrainRequest), (char *)&response, sizeof(PacTrainResponse));
+
+  if (returnValue < 0) {
+    LOG_ERROR("tid %d, deadlock check returned negative value");
+  }
+
+  return response.train; 
+}
