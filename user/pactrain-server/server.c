@@ -32,30 +32,41 @@ void init_food(int *food_sensors) {
   }
 }
 
-char* getRandomFoodDest(int *eaten, int *food_sensors, int *score) {
+char* getRandomFoodDest(int *eaten, int *food_sensors, int *score, PacTrainType train_type) {
   track_node *track = get_track();
-  if (*eaten == FOOD_COUNT) {
-    render_command("[PacTrain INFO]: all food eaten. resetting food...");
-    *eaten = 0;
-    *score += 150;
-    render_pacman_score(*score);
-    init_food(food_sensors);
-  }
-  while (1) {
-    int counter = rand_int() % (FOOD_COUNT - *eaten);
-    int dest_n = -1;
-    for (int i = 0; i < 80; i++) {
-      if (food_sensors[i] == 1 && counter == 0) {
-        dest_n = i;
-        break;
-      } else if (food_sensors[i] == 1) {
-        counter -= 1;
+  if (train_type == PAC_TRAIN) {
+    if (*eaten == FOOD_COUNT) {
+      render_command("[PacTrain INFO]: all food eaten. resetting food...");
+      *eaten = 0;
+      *score += 150;
+      render_pacman_score(*score);
+      init_food(food_sensors);
+    }
+    while (1) {
+      int counter = rand_int() % (FOOD_COUNT - *eaten);
+      int dest_n = -1;
+      for (int i = 0; i < 80; i++) {
+        if (food_sensors[i] == 1 && counter == 0) {
+          dest_n = i;
+          break;
+        } else if (food_sensors[i] == 1) {
+          counter -= 1;
+        }
       }
+      if (dest_n == -1) {
+        LOG_ERROR("something went horribly wrong.");
+      }
+      return track[dest_n].name;
     }
-    if (dest_n == -1) {
-      LOG_ERROR("something went horribly wrong.");
-    }
-    return track[dest_n].name;
+  } else if (train_type == GHOST_TRAIN_1) {
+    int dest_n = rand_int() % FOOD_COUNT;
+    return FOODLIST[dest_n];
+  } else if (train_type == GHOST_TRAIN_2) {
+   LOG_ERROR("not handled - invalid train type in getRandFoodDest."); 
+  } else if (train_type == GHOST_TRAIN_3) {
+   LOG_ERROR("not handled - invalid train type in getRandFoodDest."); 
+  } else {
+   LOG_ERROR("something went horribly wrong - invalid train type in getRandFoodDest."); 
   }
   return 0; // unreachable
 }
@@ -79,9 +90,10 @@ void SingleTrainPacTrainDestServer() {
       case NEW_FOOD_DEST: {
         response = (PacTrainResponse) {
           .type = NEW_FOOD_DEST,
-          .train = request.train
+          .train = request.train,
+          .train_identity = request.train_type
         };
-
+        PacTrainType train_type = request.train_type;
         Path new_path = (Path) {
           .allow_reversal = true,
           .dest = request.destination,
@@ -98,7 +110,8 @@ void SingleTrainPacTrainDestServer() {
         PacTrainRequest dest_reached = (PacTrainRequest) {
           .destination = request.destination,
           .train = request.train,
-          .type = REACHED_FOOD_DEST
+          .type = REACHED_FOOD_DEST,
+          .train_type = train_type
         };
         PacTrainResponse dest_reponse;
         Send(server, (const char *)&dest_reached, sizeof(PacTrainRequest), (char *)&dest_reponse, sizeof(PacTrainResponse));
@@ -118,6 +131,19 @@ void SingleTrainPacTrainDestServer() {
     }
   }
   Exit();
+}
+
+void PacTrainServerHelper(int *eaten, int *food_sensors, int *score, int *helper_tids, int *route_trains, PacTrainType train_type, int train_type_idx) {
+  char *new_dest = getRandomFoodDest(eaten, food_sensors, score, train_type);
+  helper_tids[train_type_idx] = Create(5, &SingleTrainPacTrainDestServer); // 0 holds pacman tid
+  PacTrainRequest new_dest_req = (PacTrainRequest) {
+    .destination = new_dest,
+    .train = route_trains[train_type_idx],
+    .type = NEW_FOOD_DEST,
+    .train_type = PAC_TRAIN
+  };
+  PacTrainResponse new_dest_resp;
+  Send(helper_tids[train_type_idx], (const char *)&new_dest_req, sizeof(PacTrainRequest), (char *)&new_dest_resp, sizeof(PacTrainResponse));
 }
 
 void PacTrainServer() {
@@ -160,17 +186,9 @@ void PacTrainServer() {
         init_food(food_sensors);
         render_pacman_score(score);
 
-        for (int i = 0; i < 1; i++) {
-          char *new_dest = getRandomFoodDest(&eaten, food_sensors, &score);
-          helper_tids[i] = Create(5, &SingleTrainPacTrainDestServer);
-          PacTrainRequest new_dest_req = (PacTrainRequest) {
-            .destination = new_dest,
-            .train = route_trains[i],
-            .type = NEW_FOOD_DEST
-          };
-          PacTrainResponse new_dest_resp;
-          Send(helper_tids[i], (const char *)&new_dest_req, sizeof(PacTrainRequest), (char *)&new_dest_resp, sizeof(PacTrainResponse));
-        }
+        // Path Pacman
+        PacTrainServerHelper(&eaten, food_sensors, &score, helper_tids, route_trains, PAC_TRAIN, 0);
+
         break;
       } case END_GAME: {
         response = (PacTrainResponse) {
@@ -182,8 +200,10 @@ void PacTrainServer() {
       } case REACHED_FOOD_DEST: {
         response = (PacTrainResponse) {
           .type = REACHED_FOOD_DEST,
-          .train = request.train
+          .train = request.train,
+          .train_identity = request.train_type
         };
+        PacTrainType train_type = request.train_type;
         Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
         int index = -1;
         for (int i = 0; i < PACTRAIN_COUNT; i++) {
@@ -194,13 +214,19 @@ void PacTrainServer() {
         }
 
         if (!exiting) {
-          char *new_dest = getRandomFoodDest(&eaten, food_sensors, &score);
+          char *new_dest = getRandomFoodDest(&eaten, food_sensors, &score, train_type);
+
+          if (helper_tids[1] == -1 && score >= 20) { // spawn ghost 1
+            PacTrainServerHelper(&eaten, food_sensors, &score, helper_tids, route_trains, GHOST_TRAIN_1, 1);
+          }
+
           render_command("[PacTrainServer INFO]: routing train %d to %s", route_trains[index], new_dest);
 
           PacTrainRequest new_dest_req = (PacTrainRequest) {
             .destination = new_dest,
             .train = route_trains[index],
-            .type = NEW_FOOD_DEST
+            .type = NEW_FOOD_DEST,
+            .train_type = train_type
           };
           PacTrainResponse new_dest_resp;
           Send(helper_tids[index], (const char *)&new_dest_req, sizeof(PacTrainRequest), (char *)&new_dest_resp, sizeof(PacTrainResponse));
@@ -213,10 +239,10 @@ void PacTrainServer() {
           PacTrainResponse exit_resp;
           Send(helper_tids[index], (const char *)&exit_req, sizeof(PacTrainRequest), (char *)&exit_resp, sizeof(PacTrainResponse));
 
-          AwaitTid(helper_tids[0]);
+          AwaitTid(helper_tids[index]);
           helper_tids[index] = -1;
-          if (helper_tids[0] == -1) { //&& helper_tids[1] == -1) {
-            render_command("[RandDestServer INFO]: finished exiting random path routing");
+          if (helper_tids[0] == -1 && helper_tids[1] == -1 && helper_tids[2] == -1 && helper_tids[3] == -1) { //&& helper_tids[1] == -1) {
+            render_command("[PacTrainServer INFO]: game completed");
           }
         }
 

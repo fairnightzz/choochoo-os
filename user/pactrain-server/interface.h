@@ -8,11 +8,11 @@
 
 typedef enum 
 {
-  PAC_TRAIN,
-  GHOST_TRAIN_1,
-  GHOST_TRAIN_2,
-  GHOST_TRAIN_3,
-  NONE_TRAIN
+  PAC_TRAIN = 1,
+  GHOST_TRAIN_1 = 2,
+  GHOST_TRAIN_2 = 3,
+  GHOST_TRAIN_3 = 4,
+  NONE_TRAIN = 5
 } PacTrainType;
 
 typedef enum
@@ -23,7 +23,7 @@ typedef enum
   NEW_FOOD_DEST,
   FOOD_QUERY,
   TRAIN_IDENTITY_QUERY,
-  ATE_FOOD
+  ATE_FOOD,
 } PacTrainMessageType;
 
 typedef struct
@@ -36,6 +36,7 @@ typedef struct
   int ghost3;
   int sensor_id;
   int train;
+  PacTrainType train_type;
 } PacTrainRequest;
 
 typedef struct
