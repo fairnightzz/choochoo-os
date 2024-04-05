@@ -256,7 +256,7 @@ void PacTrainServer()
       if (!exiting)
       {
         char *new_dest = getRandomFoodDest(&eaten, food_sensors, &score, train_type, &ghost2idx);
-/*
+
         if (helper_tids[1] == -1 && score >= 20)
         { // spawn ghost 1
           render_pacman_command("[PTS INFO]: spawning ghost #1 train #%d", route_trains[1]);
@@ -267,7 +267,6 @@ void PacTrainServer()
           render_pacman_command("[PTS INFO]: spawning ghost #2 train #%d", route_trains[2]);
           PacTrainServerHelper(&eaten, food_sensors, &score, helper_tids, route_trains, GHOST_TRAIN_2, 2, &ghost2idx);
         }
-*/
         if (index != 0)
         {
           render_pacman_command("[PTS INFO]: routing GHOST train %d to %s", route_trains[index], new_dest);
@@ -305,7 +304,7 @@ void PacTrainServer()
       int idx_train = -1;
       for (int i = 0; i < PACTRAIN_COUNT; i++)
       {
-        if (!exiting && request.train != -1 && route_trains[i] == request.train)
+        if (request.train != -1 && route_trains[i] == request.train)
         {
           idx_train = i;
         }
@@ -325,13 +324,13 @@ void PacTrainServer()
       Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
       break;
     }
-    case FETCH_ALL_FOOD: {
-      response = (PacTrainResponse) {
-        .type = FETCH_ALL_FOOD,
-        .all_food = food_sensors
-      };
+    case FETCH_ALL_FOOD:
+    {
+      response = (PacTrainResponse){
+          .type = FETCH_ALL_FOOD,
+          .all_food = food_sensors};
       Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
-      break;  
+      break;
     }
     case FETCH_NEW_FOOD:
     {

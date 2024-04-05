@@ -423,7 +423,7 @@ void render_pacman_command(char *fmt, ...)
   va_start(va, fmt);
   string command = _string_format(fmt, va);
   va_end(va);
-  if (UIState.cmd_line_history >= PACMAN_LINE_HISTORY)
+  if (UIState.pacman_line_history >= PACMAN_LINE_HISTORY)
   {
     clear_pacman_console();
   }

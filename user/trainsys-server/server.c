@@ -116,9 +116,9 @@ void TrainSystemServer()
   int train_next_sensors[TRAIN_DATA_TRAIN_COUNT][SENSOR_DEPTH] = {
       {4, 38},  // {0, 44},  // 2   A1 -> C13
       {-1, -1}, //{12, 44}, // 47  A13 -> C13
-      {-1, -1},  // 54  (B7) A10 -> C7
+      {-1, -1}, // 54  (B7) A10 -> C7
       {7, 38},  // 55  (B11) A8 -> C7
-      {9, 38}, //{4, 38},  // 58  (B9) A5 -> C7
+      {9, 38},  //{4, 38},  // 58  (B9) A5 -> C7
       {-1, -1}  // {14, 44}  // 77  A15 -> C13
   };
 
@@ -270,6 +270,8 @@ void TrainSystemServer()
       if (is_unknown)
       {
         // render_command("[TrainSystem Sensor Hit ERROR]: no next sensor found");
+        response.train = train;
+        response.train_state = train_states[train];
         train_next_sensors[train_idx][0] = -1;
         train_next_sensors[train_idx][1] = -1;
         render_predict_next_sensor(train, -1);

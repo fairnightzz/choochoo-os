@@ -34,6 +34,7 @@ void predictTask()
       LOG_ERROR("[predictTask ERROR]: error on getting hit sensor: %d", sensor_id);
       continue;
     }
+    // render_command("PT: after wait on sensor %s", get_sensor_string(sensor_id).data);
 
     // Ask TrainSysServer for train that this sensor pertains to
 
@@ -52,6 +53,7 @@ void predictTask()
     // Begin rendering on the pacman train server
     // Ask pacman server if train or ghost
     PacTrainType train_type = WhoTrain(pacman_server, train);
+    // render_command("train: %d, type: %d, sensor: %s", train, train_type, get_sensor_string(sensor_id).data);
 
     // if train, render no food on previous sensor
     // render train on current sensor
