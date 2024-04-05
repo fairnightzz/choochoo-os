@@ -122,7 +122,7 @@ void unblockStaleRequests(int time, LList *zone_buffer_requests, int pacman_tid)
   while (it->current)
   {
     ZoneBufferRequest *zone_buffer_req = (ZoneBufferRequest *)llist_next(it);
-    if (train_holding_zone(zone_buffer_req->zone) != pacmanTrain && zone_buffer_req->time < time - 1000)
+    if (train_holding_zone(zone_buffer_req->zone) != pacmanTrain && zone_buffer_req->time < time - 500)
     {
       ZoneResponse reply_buf = (ZoneResponse){
           .type = ZONE_WAIT,
@@ -142,7 +142,7 @@ void zoneDeadlockNotifier()
   int parentTid = MyParentTid();
   for (;;)
   {
-    Delay(clockServer, 1000);
+    Delay(clockServer, 500);
     ZoneResponse response;
     ZoneRequest request = (ZoneRequest){
         .type = ZONE_DEADLOCK,
