@@ -13,6 +13,7 @@
 #define ANSI_MOVE(r, c) "\033[" r ";" c "H"
 #define ANSI_CLEAR_LINE "\033[K"
 #define COMMAND_LINE_HISTORY 43
+#define PACMAN_LINE_HISTORY 23
 #define SENSOR_LINE_HISTORY 5
 
 static TermUIState UIState;
@@ -392,9 +393,9 @@ void clear_console()
 void clear_pacman_console()
 {
   UIState.pacman_line_history = 0;
-  for (int i = 0; i < COMMAND_LINE_HISTORY; ++i)
+  for (int i = 0; i < PACMAN_LINE_HISTORY; ++i)
   {
-    print("\033[%u;81H                                                              ", 29 + i);
+    print("\033[%u;82H                                                              ", 29 + i);
   }
 }
 
@@ -422,12 +423,12 @@ void render_pacman_command(char *fmt, ...)
   va_start(va, fmt);
   string command = _string_format(fmt, va);
   va_end(va);
-  if (UIState.cmd_line_history >= COMMAND_LINE_HISTORY)
+  if (UIState.cmd_line_history >= PACMAN_LINE_HISTORY)
   {
     clear_pacman_console();
   }
 
-  print("\033[%u;81H%s", 29 + UIState.pacman_line_history, command.data);
+  print("\033[%u;82H%s", 29 + UIState.pacman_line_history, command.data);
 
   UIState.pacman_line_history += 1;
 }
