@@ -203,7 +203,7 @@ void render_food(int sensor_id)
 
 void render_pacman(int sensor_id)
 {
-  render_on_sensor(sensor_id, "☻");
+  render_on_sensor(sensor_id, "🌙"); // 🟠 🌙
 }
 
 void render_ghost(int sensor_id)
