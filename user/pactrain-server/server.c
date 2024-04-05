@@ -36,7 +36,7 @@ char* getRandomFoodDest(int *eaten, int *food_sensors, int *score, PacTrainType 
   track_node *track = get_track();
   if (train_type == PAC_TRAIN) {
     if (*eaten == FOOD_COUNT) {
-      render_command("[PacTrain INFO]: all food eaten. resetting food...");
+      render_pacman_command("[PTS INFO]: all food eaten. resetting food...");
       *eaten = 0;
       *score += 150;
       render_pacman_score(*score);
@@ -102,7 +102,6 @@ void SingleTrainPacTrainDestServer() {
           .train = request.train
         };
         Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
-        render_command("[PacTrain INFO]: routing train %d to %s", new_path.train, new_path.dest);
 
         int tid = PlanPath(new_path);
         if (tid != 0) AwaitTid(tid);
@@ -217,10 +216,14 @@ void PacTrainServer() {
           char *new_dest = getRandomFoodDest(&eaten, food_sensors, &score, train_type);
 
           if (helper_tids[1] == -1 && score >= 20) { // spawn ghost 1
+            render_pacman_command("[PTS INFO]: spawning ghost train #1 train #%d", route_trains[1]);
             PacTrainServerHelper(&eaten, food_sensors, &score, helper_tids, route_trains, GHOST_TRAIN_1, 1);
           }
-
-          render_command("[PacTrainServer INFO]: routing train %d to %s", route_trains[index], new_dest);
+          if (index == 0) {
+            render_pacman_command("[PTS INFO]: routing PACMAN train %d to %s", route_trains[index], new_dest);
+          } else {
+            render_pacman_command("[PTS INFO]: routing GHOST train %d to %s", route_trains[index], new_dest);
+          }
 
           PacTrainRequest new_dest_req = (PacTrainRequest) {
             .destination = new_dest,
@@ -242,7 +245,7 @@ void PacTrainServer() {
           AwaitTid(helper_tids[index]);
           helper_tids[index] = -1;
           if (helper_tids[0] == -1 && helper_tids[1] == -1 && helper_tids[2] == -1 && helper_tids[3] == -1) { //&& helper_tids[1] == -1) {
-            render_command("[PacTrainServer INFO]: game completed");
+            render_pacman_command("[PTS INFO]: game completed");
           }
         }
 
@@ -265,7 +268,7 @@ void PacTrainServer() {
           .type = PAC_TRAIN_DEADLOCK
         };
         if (request.train == route_trains[0])
-          render_command("[PacTrainServer INFO]: GAME OVER!!!");
+          render_pacman_command("[PTS INFO]: GAME OVER!!!");
         Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
         break;
       } case FETCH_NEW_FOOD: {
@@ -280,8 +283,8 @@ void PacTrainServer() {
           }
         }
         if (dest_n == -1)
-          render_command("ERR: fetching new food -1 error");
-          
+          render_pacman_command("[PTS ERR]: fetching new food -1 error");
+
         response = (PacTrainResponse) {
           .type = FETCH_NEW_FOOD,
           .new_dest = dest_n
@@ -300,7 +303,7 @@ void PacTrainServer() {
           .type = ATE_FOOD
         };
         if (food_sensors[request.sensor_id] == 1) {
-          // render_command("ate food at %s. now eaten %d", get_sensor_string(request.sensor_id), eaten + 1);
+          render_pacman_command("[PTS INFO]: ate food at %s. now eaten %d", get_sensor_string(request.sensor_id), eaten + 1);
           food_sensors[request.sensor_id] = 0;
           eaten += 1;
           score += 5;
@@ -308,7 +311,7 @@ void PacTrainServer() {
         }
         int rev_sens = track[request.sensor_id].reverse - track;
         if (food_sensors[rev_sens] == 1) {
-          // render_command("ate food at %s. now eaten %d", get_sensor_string(rev_sens), eaten + 1);
+          render_pacman_command("[PTS INFO]: ate food at %s. now eaten %d", get_sensor_string(rev_sens), eaten + 1);
           food_sensors[rev_sens] = 0;
           eaten += 1;
           score += 5;
@@ -325,7 +328,7 @@ void PacTrainServer() {
         Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
         break;
       } default: {
-        LOG_ERROR("[RandDestServer]: Unhandled Request Type - %d", request.type);
+        render_pacman_command("[PTS ERROR]: Unhandled Request Type - %d", request.type);
         break;
       } 
     }

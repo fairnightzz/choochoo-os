@@ -58,5 +58,6 @@ PacTrainType WhoTrain(int tid, int train);
 int AteFood(int tid, int sensor_id);
 int NotifyPacServerDeadlock(int tid, int train);
 int FetchNewFoodDest(int tid);
+int GetPacTrain(int tid);
 
 #endif // __PACTRAIN_INTERFACE_H__
