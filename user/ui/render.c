@@ -53,26 +53,6 @@ void print(char *fmt, ...)
   va_start(va, fmt);
   string formattedString = _string_format(fmt, va);
   va_end(va);
-
-  // uart_printf(CONSOLE, formattedString.data);
-
-  // for (int i = 0; i < str_length(&formattedString); i++)
-  // {
-  //   if (!push(&UIState.output_queue, formattedString.data[i]))
-  //   {
-  //     PRINT("BUFFER OVERFLOW");
-  //   }
-  // }
-
-  // while (!isEmpty(&UIState.output_queue))
-  // {
-  //   uint8_t ch = pop(&UIState.output_queue);
-  //   Putc(UIState.console_server_tid, ch);
-  //   if (length(&UIState.output_queue) % 5 == 0)
-  //   {
-  //     Delay(WhoIs(ClockAddress), 1);
-  //   }
-  // }
   Puts(UIState.console_server_tid, formattedString.data, formattedString.length);
 }
 
@@ -97,35 +77,15 @@ void render_init()
   uart_printf(CONSOLE, "│ 155 .    156 .                            │                                   │\r\n");
   uart_printf(CONSOLE, "├─[console]─────────────────────────────────────────────────────────────────────┤──[pac-train-game]────────────────────────────────────────────╮\r\n");
   uart_printf(CONSOLE, "│                                                                               │                             SCORE                            │\r\n");
-  for (int i = 0; i < 16; i++)
+  for (int i = 0; i < 17; i++)
   {
     uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
   }
   uart_printf(CONSOLE, "│                                                                               │──[pac-train-logs]────────────────────────────────────────────┤\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n"); // 28
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  for (int i = 0; i < 23; i++)
+  {
+    uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  }
   uart_printf(CONSOLE, "│                                                                               │──────────────────────────────────────────────────────────────╯\r\n");
   uart_printf(CONSOLE, "│╭─────────────────────────────────────────────────────────────────────────────╮│\r\n"); // 112
   uart_printf(CONSOLE, "││>                                                                            ││\r\n");
@@ -191,6 +151,7 @@ void render_init()
 
   UIState = (TermUIState){
       .cmd_line_history = 0,
+      .pacman_line_history = 0,
       .sensor_count = 0,
       .output_queue = new_byte_queue(),
       .console_server_tid = console_server_tid,
@@ -428,6 +389,15 @@ void clear_console()
   }
 }
 
+void clear_pacman_console()
+{
+  UIState.pacman_line_history = 0;
+  for (int i = 0; i < COMMAND_LINE_HISTORY; ++i)
+  {
+    print("\033[%u;81H                                                              ", 29 + i);
+  }
+}
+
 void render_command(char *fmt, ...)
 {
 
@@ -443,6 +413,23 @@ void render_command(char *fmt, ...)
   print("\033[%u;3H%s", 10 + UIState.cmd_line_history, command.data);
 
   UIState.cmd_line_history += 1;
+}
+
+// 29
+void render_pacman_command(char *fmt, ...)
+{
+  va_list va;
+  va_start(va, fmt);
+  string command = _string_format(fmt, va);
+  va_end(va);
+  if (UIState.cmd_line_history >= COMMAND_LINE_HISTORY)
+  {
+    clear_pacman_console();
+  }
+
+  print("\033[%u;81H%s", 29 + UIState.pacman_line_history, command.data);
+
+  UIState.pacman_line_history += 1;
 }
 
 void clear_sensor_ui()

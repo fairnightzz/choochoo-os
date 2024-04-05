@@ -10,6 +10,7 @@ static const unsigned int SENSOR_MAX_ENTRIES = 35;
 typedef struct
 {
   int cmd_line_history;
+  int pacman_line_history;
   unsigned int sensor_count;
   BQueue output_queue;
   int console_server_tid;
@@ -18,6 +19,7 @@ typedef struct
 void render_init();
 void render_time(int time);
 void render_command(char *fmt, ...);
+void render_pacman_command(char *fmt, ...);
 void render_char(unsigned char ch, int prompt_length);
 void render_backspace(int prompt_length);
 void render_prompt_clear();

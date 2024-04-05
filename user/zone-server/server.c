@@ -5,6 +5,7 @@
 #include "user/nameserver.h"
 #include "user/ui/render.h"
 #include "user/clock-server/interface.h"
+#include "user/pactrain-server/interface.h"
 
 static int reservations[NUM_ZONES]; // zero means no train has the zone reserved
 
@@ -40,6 +41,11 @@ bool _zone_unreserve(int train, int zone)
 bool _zone_is_reserved(int train, int zone)
 {
   return reservations[zone] != 0 && reservations[zone] != train;
+}
+
+int train_holding_zone(int zone)
+{
+  return reservations[zone];
 }
 
 typedef struct
@@ -90,13 +96,33 @@ void unblockAllWaiting(BQueue *wait_change_requests)
   }
 }
 
-void unblockStaleRequests(int time, LList *zone_buffer_requests)
+void unblockStaleRequests(int time, LList *zone_buffer_requests, int pacman_tid)
 {
-  LListIter *it = llist_iter(zone_buffer_requests);
+  int pacmanTrain = GetPacTrain(pacman_tid);
+  LListIter *it;
+  // it = llist_iter(zone_buffer_requests);
+  // while (it->current)
+  // {
+  //   ZoneBufferRequest *zone_buffer_req = (ZoneBufferRequest *)llist_next(it);
+  //   if (zone_buffer_req->train == pacmanTrain && zone_buffer_req->time < time - 1000)
+  //   {
+  //     ZoneResponse reply_buf = (ZoneResponse){
+  //         .type = ZONE_WAIT,
+  //         .time_out = true,
+  //     };
+  //     Reply(zone_buffer_req->tid, (char *)&reply_buf, sizeof(ZoneResponse));
+  //     llist_remove_item(zone_buffer_requests, zone_buffer_req);
+  //     free(zone_buffer_req, ZONE_BUFFER_REQUEST);
+  //     return; // currently unblocks one request at a time
+  //   }
+  // }
+  // // try for all trains
+
+  it = llist_iter(zone_buffer_requests);
   while (it->current)
   {
     ZoneBufferRequest *zone_buffer_req = (ZoneBufferRequest *)llist_next(it);
-    if (zone_buffer_req->time < time - 1000)
+    if (train_holding_zone(zone_buffer_req->zone) != pacmanTrain && zone_buffer_req->time < time - 1000)
     {
       ZoneResponse reply_buf = (ZoneResponse){
           .type = ZONE_WAIT,
@@ -135,6 +161,7 @@ void ZoneServer()
 {
   RegisterAs(ZoneAddress);
   int clockServer = WhoIs(ClockAddress);
+  int pacmanServer = -1;
   alloc_init(ZONE_BUFFER_REQUEST, sizeof(ZoneBufferRequest));
 
   // track_node *track = get_track();
@@ -248,7 +275,11 @@ void ZoneServer()
     }
     else if (request.type == ZONE_DEADLOCK)
     {
-      unblockStaleRequests(Time(clockServer), zone_requests);
+      if (pacmanServer == -1)
+      {
+        pacmanServer = WhoIs(PacTrainAddress);
+      }
+      unblockStaleRequests(Time(clockServer), zone_requests, pacmanServer);
       response = (ZoneResponse){
           .type = ZONE_DEADLOCK,
       };
