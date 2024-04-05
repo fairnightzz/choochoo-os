@@ -97,24 +97,12 @@ void render_init()
   uart_printf(CONSOLE, "│ 155 .    156 .                            │                                   │\r\n");
   uart_printf(CONSOLE, "├─[console]─────────────────────────────────────────────────────────────────────┤──[pac-train-game]────────────────────────────────────────────╮\r\n");
   uart_printf(CONSOLE, "│                                                                               │                             SCORE                            │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
-  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  for (int i = 0; i < 16; i++)
+  {
+    uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
+  }
+  uart_printf(CONSOLE, "│                                                                               │──[pac-train-logs]────────────────────────────────────────────┤\r\n");
+  uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n"); // 28
   uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
   uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
   uart_printf(CONSOLE, "│                                                                               │                                                              │\r\n");
@@ -319,6 +307,8 @@ void render_perf_stats(int percentage)
   print("\033[%u;%uH%d%%", 22 + 35, 35, percentage);
 }
 
+const int train_row = 61;
+
 void render_train_system_train(int train)
 {
   string trainString;
@@ -331,27 +321,27 @@ void render_train_system_train(int train)
     trainString = string_format("%d", train);
   }
 
-  print("\033[%u;%uH%s", 26 + 35, 6, trainString.data);
+  print("\033[%u;%uH%s", train_row, 6, trainString.data);
 }
 
 void render_predict_current_sensor(int train, int sensor_id)
 {
   int train_index = get_train_index(train);
   string sensorString = get_sensor_string(sensor_id);
-  print("\033[%u;%uH%s", 26 + 35 + train_index, 18, sensorString.data);
+  print("\033[%u;%uH%s", train_row + train_index, 18, sensorString.data);
 }
 
 void render_predict_next_sensor(int train, int sensor_id)
 {
   int train_index = get_train_index(train);
   string sensorString = get_sensor_string(sensor_id);
-  print("\033[%u;%uH%s", 26 + 35 + train_index, 28, sensorString.data);
+  print("\033[%u;%uH%s", train_row + train_index, 28, sensorString.data);
 }
 
 void render_reserve_zone(int train, int zone_id)
 {
   int col = (10) + (zone_id % 6) * 12;
-  int row = (26 + 35 + 7) + zone_id / 6;
+  int row = (train_row + 7) + zone_id / 6;
 
   char trainString[3];
   i2a(train, trainString);
@@ -368,7 +358,7 @@ void render_reserve_zone(int train, int zone_id)
 void render_unreserve_zone(int zone_id)
 {
   int col = (10) + (zone_id % 6) * 12;
-  int row = (26 + 35 + 7) + zone_id / 6;
+  int row = (train_row + 7) + zone_id / 6;
 
   print("\033[%u;%uH%s", row, col, "--");
 }
@@ -381,7 +371,7 @@ void render_predict_t_error(int train, int terr)
 
   string toffset = to_string(tstring);
 
-  print("\033[%u;%uH   %d ticks", 26 + 35 + train_index, 37 - toffset.length, terr);
+  print("\033[%u;%uH   %d ticks", train_row + train_index, 37 - toffset.length, terr);
 }
 
 void render_predict_d_error(int train, int derr)
@@ -392,19 +382,14 @@ void render_predict_d_error(int train, int derr)
 
   string doffset = to_string(dstring);
 
-  print("\033[%u;%uH   %d mm", 26 + 35 + train_index, 54 - doffset.length, derr);
+  print("\033[%u;%uH   %d mm", train_row + train_index, 54 - doffset.length, derr);
 }
 
 void render_train_destination(int train, int sensor_id)
 {
   int train_index = get_train_index(train);
   string sensorString = get_sensor_string(sensor_id);
-  print("\033[%u;%uH%s", 26 + 35 + train_index, 71, sensorString.data);
-}
-
-void render_debug_log(int message)
-{
-  uart_printf(CONSOLE, "\033[%u;%uH%d", 23 + 35, 35, message);
+  print("\033[%u;%uH%s", train_row + train_index, 71, sensorString.data);
 }
 
 void render_char(unsigned char ch, int prompt_length)

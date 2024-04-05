@@ -22,9 +22,7 @@ void predictTask()
   int last_sensor_time[TRAIN_DATA_TRAIN_COUNT] = {0};
   int predicted_sensor_time[TRAIN_DATA_TRAIN_COUNT] = {0};
   int pacSensor = -1;
-  int ghost1Sensor = -1;
-  int ghost2Sensor = -1;
-  int ghost3Sensor = -1;
+  int ghostSensors[3] = {-1, -1, -1};
 
   Delay(clock_server, 30);
 
@@ -61,7 +59,7 @@ void predictTask()
     if (train_type == PAC_TRAIN)
     {
       int prev_sensor_id = pacSensor;
-      if (pacSensor == -1)
+      if (prev_sensor_id == -1)
       {
         prev_sensor_id = prev_sens;
       }
@@ -81,43 +79,6 @@ void predictTask()
       render_pacman(sensor_id);
       AteFood(pacman_server, sensor_id);
       pacSensor = sensor_id;
-
-      if (next_sensor_id != -1)
-      {
-        render_predict_next_sensor(train, next_sensor_id);
-      }
-      else
-      {
-        // render_command("bad next sensor id");
-        continue;
-      }
-
-      int train_index = get_train_index(train);
-      if (train_index == -1 || get_speed_index(train_speed) == -1)
-      {
-        // render_command("bad train index or speed index %d %d", train_index, train_speed);
-        continue;
-      }
-      int train_vel = train_data_vel(train, train_speed);
-
-      int curr_time = Time(clock_server);
-      int elapsed = curr_time - last_sensor_time[train_index];
-      last_sensor_time[train_index] = curr_time;
-
-      int t_err = elapsed - predicted_sensor_time[train_index];
-      int d_err = (t_err * train_vel) / 100;
-
-      // If too high, just don't render
-      if (t_err < 500)
-      {
-        render_predict_t_error(train, t_err);
-      }
-      if (d_err < 500)
-      {
-        render_predict_d_error(train, d_err);
-      }
-
-      predicted_sensor_time[train_index] = (dist_to_next / train_vel) * 100; // in ticks
     }
 
     // if ghost, ask if sensor has food on previous sensor
@@ -125,14 +86,11 @@ void predictTask()
     // render ghost on current sensor
     else if (train_type != NONE_TRAIN)
     {
-      // if (train_type == GHOST_TRAIN1) {
-
-      // }
-      int prev_sensor_id = ghost1Sensor;
-      // if (pacSensor == -1)
-      // {
-      //   prev_sensor_id = prev_sens;
-      // }
+      int prev_sensor_id = ghostSensors[train_type - 1];
+      if (prev_sensor_id == -1)
+      {
+        prev_sensor_id = prev_sens;
+      }
 
       if (prev_sensor_id != -1)
       {
@@ -147,6 +105,44 @@ void predictTask()
         }
       }
       render_ghost(sensor_id);
+      ghostSensors[train_type - 1] = sensor_id;
     }
+
+    if (next_sensor_id != -1)
+    {
+      render_predict_next_sensor(train, next_sensor_id);
+    }
+    else
+    {
+      // render_command("bad next sensor id");
+      continue;
+    }
+
+    int train_index = get_train_index(train);
+    if (train_index == -1 || get_speed_index(train_speed) == -1)
+    {
+      // render_command("bad train index or speed index %d %d", train_index, train_speed);
+      continue;
+    }
+    int train_vel = train_data_vel(train, train_speed);
+
+    int curr_time = Time(clock_server);
+    int elapsed = curr_time - last_sensor_time[train_index];
+    last_sensor_time[train_index] = curr_time;
+
+    int t_err = elapsed - predicted_sensor_time[train_index];
+    int d_err = (t_err * train_vel) / 100;
+
+    // If too high, just don't render
+    if (t_err < 500)
+    {
+      render_predict_t_error(train, t_err);
+    }
+    if (d_err < 500)
+    {
+      render_predict_d_error(train, d_err);
+    }
+
+    predicted_sensor_time[train_index] = (dist_to_next / train_vel) * 100; // in ticks
   }
 }

@@ -6,13 +6,13 @@
 
 #define PacTrainAddress "pactrain"
 
-typedef enum 
+typedef enum
 {
-  PAC_TRAIN = 1,
-  GHOST_TRAIN_1 = 2,
-  GHOST_TRAIN_2 = 3,
-  GHOST_TRAIN_3 = 4,
-  NONE_TRAIN = 5
+  PAC_TRAIN = 0,
+  GHOST_TRAIN_1 = 1,
+  GHOST_TRAIN_2 = 2,
+  GHOST_TRAIN_3 = 3,
+  NONE_TRAIN = 4,
 } PacTrainType;
 
 typedef enum
@@ -47,12 +47,10 @@ typedef struct
   PacTrainType train_identity;
 } PacTrainResponse;
 
-
 int StartGame(int tid, int pactrain, int ghost1, int ghost2, int ghost3);
 int EndGame(int tid);
 bool SensorHasFood(int tid, int sensor_id);
 PacTrainType WhoTrain(int tid, int train);
 int AteFood(int tid, int sensor_id);
-
 
 #endif // __PACTRAIN_INTERFACE_H__
