@@ -320,7 +320,8 @@ void PacTrainServer() {
         Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
         break;
       } case FOOD_QUERY: {
-        bool has_food = food_sensors[request.sensor_id] == 1;
+        int rev_sens = track[request.sensor_id].reverse - track;
+        bool has_food = food_sensors[request.sensor_id] == 1 || food_sensors[rev_sens] == 1;
         response = (PacTrainResponse) {
           .type = FOOD_QUERY,
           .has_food = has_food
