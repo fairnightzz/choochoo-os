@@ -2,6 +2,7 @@
 #include "user/ui/render.h"
 #include "user/zone-server/interface.h"
 #include "user/nameserver.h"
+#include "user/pactrain-server/interface.h"
 
 #define INF 2147483647
 #define NONE 2147483646
@@ -28,6 +29,10 @@ int do_edge_trace(int cur_node, int src_node, int iter_count, uint32_t *prev, tr
 
 int do_djikstra(track_node *track, int train, int source_node, int dest_node, bool allow_reversal, bool check_reserve, track_edge **edge_graph) {
   int reserve_server = WhoIs(ZoneAddress);
+  int pac_server = WhoIs(PacTrainAddress);
+
+  PacTrainType train_type = WhoTrain(pac_server, train);
+  int *dest_sensors = GetFoodSensors(pac_server);
   
   uint32_t dist[TRACK_MAX];
   uint32_t prev[TRACK_MAX];
@@ -57,19 +62,38 @@ int do_djikstra(track_node *track, int train, int source_node, int dest_node, bo
       return -1;
     }
     visited[cur_node] = true;
-    if (cur_node == dest_node) {
-      break;
-    }
-
-    int dest_rev = track[dest_node].reverse - track;
-    if (cur_node == dest_rev) {
-      dest_node = dest_rev;
-      break;
-    }
-    if (check_reserve) {
-      int cur_zone = track[cur_node].reverse->zone;
-      if (cur_zone != -1 && zone_is_reserved(reserve_server, train, cur_zone)) {
-        continue;
+    if (train_type == PAC_TRAIN) {
+      if (check_reserve) {
+        int dest_rev = track[cur_node].reverse - track;
+        if (dest_sensors[cur_node] == 1) {
+          dest_node = cur_node;
+          break;
+        }
+        if (dest_sensors[dest_rev] == 1) {
+          dest_node = dest_rev;
+          break;
+        }
+      } else {
+        if (dist[cur_node] > 0) {
+          dest_node = cur_node;
+          break;
+        }
+      }
+    } else {
+      if (cur_node == dest_node) {
+        break;
+      }
+      int dest_rev = track[dest_node].reverse - track;
+      if (cur_node == dest_rev) {
+        dest_node = dest_rev;
+        break;
+      }
+  
+      if (check_reserve) {
+        int cur_zone = track[cur_node].reverse->zone;
+        if (cur_zone != -1 && zone_is_reserved(reserve_server, train, cur_zone)) {
+          continue;
+        }
       }
     }
     if (track[cur_node].type == NODE_SENSOR || track[cur_node].type == NODE_MERGE)

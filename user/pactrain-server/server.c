@@ -268,11 +268,7 @@ void PacTrainServer()
           PacTrainServerHelper(&eaten, food_sensors, &score, helper_tids, route_trains, GHOST_TRAIN_2, 2, &ghost2idx);
         }
 */
-        if (index == 0)
-        {
-          render_pacman_command("[PTS INFO]: routing PACMAN train %d to %s", route_trains[index], new_dest);
-        }
-        else
+        if (index != 0)
         {
           render_pacman_command("[PTS INFO]: routing GHOST train %d to %s", route_trains[index], new_dest);
         }
@@ -328,6 +324,14 @@ void PacTrainServer()
         render_pacman_command("[PTS INFO]: GAME OVER!!!");
       Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
       break;
+    }
+    case FETCH_ALL_FOOD: {
+      response = (PacTrainResponse) {
+        .type = FETCH_ALL_FOOD,
+        .all_food = food_sensors
+      };
+      Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
+      break;  
     }
     case FETCH_NEW_FOOD:
     {

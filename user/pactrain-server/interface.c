@@ -117,3 +117,17 @@ int GetPacTrain(int tid) {
 
   return response.train; 
 }
+
+int *GetFoodSensors(int tid) {
+  PacTrainRequest request = (PacTrainRequest) {
+    .type = FETCH_ALL_FOOD
+  };
+  PacTrainResponse response;
+  int returnValue = Send(tid, (const char *)&request, sizeof(PacTrainRequest), (char *)&response, sizeof(PacTrainResponse));
+
+  if (returnValue < 0) {
+    LOG_ERROR("tid %d, deadlock check returned negative value");
+  }
+
+  return response.all_food; 
+}
