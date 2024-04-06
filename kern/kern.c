@@ -93,6 +93,15 @@ void handle_svc()
     enter_usermode(get_task(next_tid)->switch_frame);
     break;
   }
+  case (KILL):
+  {
+    // unblock tasks waiting for that task to exit
+    scheduler_unblock_event(EVENT_TASK_FINISHED, curr_task->switch_frame->x0);
+    scheduler_delete_task(curr_task->switch_frame->x0);
+    delete_task(curr_task->switch_frame->x0);
+    svc_yield(curr_task);
+    break;
+  }
   case (SEND):
   {
     // LOG_DEBUG("[SYSCALL - Send]");

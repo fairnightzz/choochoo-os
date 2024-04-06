@@ -55,6 +55,12 @@ AwaitEvent:
     svc 0x8
     ret
   
+.global Kill
+.type Kill, %function
+Kill:
+  svc 0x9
+  ret
+
 
 .global	reboot
 .type reboot, %function

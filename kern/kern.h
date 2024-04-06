@@ -14,7 +14,8 @@ typedef enum
     SEND = 5,
     RECEIVE = 6,
     REPLY = 7,
-    AWAIT_EVENT = 8
+    AWAIT_EVENT = 8,
+    KILL = 9
 } opcode;
 
 void kernel_init();

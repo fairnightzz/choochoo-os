@@ -8,6 +8,7 @@ extern int MyTid();
 extern int MyParentTid();
 extern void Yield();
 extern void Exit();
+extern void Kill(int tid);
 extern int Send(int tid, const char *msg, int msglen, char *reply, int replylen);
 extern int Receive(int *tid, char *msg, int msglen);
 extern int Reply(int tid, const char *reply, int replylen);
