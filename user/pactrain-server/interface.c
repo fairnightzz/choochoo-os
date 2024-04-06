@@ -75,10 +75,9 @@ int EndGame(int tid) {
   return returnValue;
 }
 
-int NotifyPacServerDeadlock(int tid, int train) {
+int NotifyPacServerDeadlock(int tid) {
   PacTrainRequest request = (PacTrainRequest) {
     .type = PAC_TRAIN_DEADLOCK,
-    .train = train
   };
   PacTrainResponse response;
   int returnValue = Send(tid, (const char *)&request, sizeof(PacTrainRequest), (char *)&response, sizeof(PacTrainResponse));

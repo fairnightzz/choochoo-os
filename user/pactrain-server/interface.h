@@ -58,7 +58,7 @@ int EndGame(int tid);
 bool SensorHasFood(int tid, int sensor_id);
 PacTrainType WhoTrain(int tid, int train);
 int AteFood(int tid, int sensor_id);
-int NotifyPacServerDeadlock(int tid, int train);
+int NotifyPacServerDeadlock(int tid);
 int FetchNewFoodDest(int tid);
 int GetPacTrain(int tid);
 int *GetFoodSensors(int tid);

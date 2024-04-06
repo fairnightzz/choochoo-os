@@ -375,7 +375,7 @@ deadlock_recompute:;
       }
     }
     if (edge_count == -1) {
-      for (int i = 0; i < 80; i++) {
+      for (int i = 3; i < 80; i++) {
         if (src != i) {
           edge_count = do_djikstra(track, train, src, i, allow_reversal, true, route_edges);
           if (edge_count != -1) {
@@ -385,7 +385,7 @@ deadlock_recompute:;
       }
     }
     if (edge_count == -1) {
-      render_pacman_command("GAME OVER!!!");
+      NotifyPacServerDeadlock(pacman_server);
     }
   } else {
     // render_command("doing djikstra reversal: %d", allow_reversal);

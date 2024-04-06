@@ -14,6 +14,7 @@
 
 char *FOODLIST[] = {"C13", "E7", "D7", "B5", "D3", "D5", "E15", "E3", "E1", "D1", "B15", "C1", "B13", "E9", "B3", "D15", "C9", "B1", "D13", "C5", "C15", "D11", "E11", "C7", "C3", "D10", 0};
 char *GHOST2LIST[] = {"D9", "B16", "B6", "D7", 0};
+char *RESET_POSITIONS[] = {"A9" , "A7", "A6", "A1", 0};
 
 void init_food(int *food_sensors)
 {
@@ -320,8 +321,24 @@ void PacTrainServer()
     {
       response = (PacTrainResponse){
           .type = PAC_TRAIN_DEADLOCK};
-      if (request.train == route_trains[0])
-        render_pacman_command("[PTS INFO]: GAME OVER!!!");
+      for (int i = 0; i < PACTRAIN_COUNT; i++) {
+        if (helper_tids[i] != -1) {
+          Kill(helper_tids[i]);
+        }
+        if (route_trains[i] != -1) {
+          int train = route_trains[i];
+          route_trains[i] = -1;
+          Path new_path = (Path){
+            .allow_reversal = true,
+            .dest = RESET_POSITIONS[i],
+            .offset = 0,
+            .speed = 14,
+            .train = train};
+          PlanPath(new_path);
+        }
+        helper_tids[i] = -1;
+      }
+      render_pacman_command("[PTS INFO]: GAME OVER!!");
       Reply(from_tid, (char *)&response, sizeof(PacTrainResponse));
       break;
     }
