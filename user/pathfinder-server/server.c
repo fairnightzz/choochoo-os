@@ -337,11 +337,8 @@ deadlock_recompute:;
 
   if (deadlock_counter > 2) {
     render_command("[PathFinderTask INFO]: Hard deadlock detected. Aborting path on train %d.", train);
-    NotifyPacServerDeadlock(pacman_server, train);
     Exit();
     return;
-  } else if (deadlock_counter > 0 && train_type == PAC_TRAIN) { // find another candy
-    dest = FetchNewFoodDest(pacman_server);
   }
 
   TrainSystemResponse resp = TrainSystemGetTrainPosition(trainsys_server, train);
@@ -364,15 +361,42 @@ deadlock_recompute:;
   }
 
   track_edge *route_edges[TRACK_MAX + 1];
-  // render_command("doing djikstra reversal: %d", allow_reversal);
-  int edge_count = do_djikstra(track, train, src, dest, allow_reversal, true, route_edges);
-  // render_command("edge count %d", edge_count);
-  if (edge_count == -1)
-  {
-    render_command("[PATHER] djikstra cannot find path, recompute a blocking path");
-    edge_count = do_djikstra(track, train, src, dest, allow_reversal, false, route_edges);
-  }
+  int *poss_dest_sensors = GetFoodSensors(pacman_server);
+  
+  int edge_count = -1;
 
+  if (train_type == PAC_TRAIN) {
+    for (int i = 0; i < 80; i++) {
+      if (src != i && poss_dest_sensors[i] == 1) {
+        edge_count = do_djikstra(track, train, src, i, allow_reversal, true, route_edges);
+        if (edge_count != -1) {
+          break;
+        }
+      }
+    }
+    if (edge_count == -1) {
+      for (int i = 0; i < 80; i++) {
+        if (src != i) {
+          edge_count = do_djikstra(track, train, src, i, allow_reversal, true, route_edges);
+          if (edge_count != -1) {
+            break;
+          }
+        }
+      }
+    }
+    if (edge_count == -1) {
+      render_pacman_command("GAME OVER!!!");
+    }
+  } else {
+    // render_command("doing djikstra reversal: %d", allow_reversal);
+    edge_count = do_djikstra(track, train, src, dest, allow_reversal, true, route_edges);
+    // render_command("edge count %d", edge_count);
+    if (edge_count == -1)
+    {
+      render_command("[PATHER] djikstra cannot find path, recompute a blocking path");
+      edge_count = do_djikstra(track, train, src, dest, allow_reversal, false, route_edges);
+    }
+  }
   render_train_destination(train, route_edges[edge_count - 1]->dest->num);
 
   // render_command("starting complex pathing :((()))");
