@@ -26,30 +26,6 @@ void idleTask()
   }
 }
 
-void putcTestTask(void)
-{
-  int clock_server = WhoIs(ClockAddress);
-  int io_server = WhoIs(MarklinIOAddress);
-  Putc(io_server, 192);
-  Putc(io_server, 26);
-  Putc(io_server, 77);
-  for (;;)
-  {
-    Putc(io_server, 133);
-    PRINT("DATA GOTTEN: %d", Getc(io_server));
-    PRINT("DATA GOTTEN: %d", Getc(io_server));
-    PRINT("DATA GOTTEN: %d", Getc(io_server));
-    PRINT("DATA GOTTEN: %d", Getc(io_server));
-    PRINT("DATA GOTTEN: %d", Getc(io_server));
-    PRINT("DATA GOTTEN: %d", Getc(io_server));
-    PRINT("DATA GOTTEN: %d", Getc(io_server));
-    PRINT("DATA GOTTEN: %d", Getc(io_server));
-    PRINT("DATA GOTTEN: %d", Getc(io_server));
-    PRINT("DATA GOTTEN: %d", Getc(io_server));
-    Delay(clock_server, 1000);
-  }
-}
-
 // From K4 onwards, this will create everything
 void initTask()
 {
@@ -68,7 +44,6 @@ void initTask()
   io_marklin_init(marklin_server);
   train_data_init('A');
   render_init();
-
 
   Create(2, &SensorServer);
   Create(2, &SwitchServer);
